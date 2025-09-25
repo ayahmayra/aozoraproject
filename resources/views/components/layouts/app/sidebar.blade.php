@@ -45,6 +45,7 @@
 
                     <flux:sidebar.group expandable heading="{{ __('Academic') }}" icon="academic-cap">
                         <flux:sidebar.item icon="book-open" :href="route('admin.subjects')" :current="request()->routeIs('admin.subjects*')" wire:navigate tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
+                        <flux:sidebar.item icon="user-plus" :href="route('enrollment.index')" :current="request()->routeIs('enrollment*')" wire:navigate tooltip="{{ __('Enrollments') }}">{{ __('Enrollments') }}</flux:sidebar.item>
                     </flux:sidebar.group>
 
                     <flux:sidebar.group expandable heading="{{ __('System') }}" icon="cog-6-tooth">

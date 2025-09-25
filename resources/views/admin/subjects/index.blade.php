@@ -53,6 +53,7 @@
                     <flux:table.column>Code</flux:table.column>
                     <flux:table.column>Description</flux:table.column>
                     <flux:table.column>Teachers</flux:table.column>
+                    <flux:table.column>Students</flux:table.column>
                     <flux:table.column>Created</flux:table.column>
                     <flux:table.column>Actions</flux:table.column>
                 </flux:table.columns>
@@ -82,6 +83,20 @@
                                     </div>
                                 @else
                                     <span class="text-gray-400 text-sm">No teachers assigned</span>
+                                @endif
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                @if($subject->students->count() > 0)
+                                    <div class="space-y-1">
+                                        @foreach($subject->students->take(2) as $student)
+                                            <flux:badge size="sm" variant="green">{{ $student->user->name }}</flux:badge>
+                                        @endforeach
+                                        @if($subject->students->count() > 2)
+                                            <flux:badge size="sm" variant="gray">+{{ $subject->students->count() - 2 }} more</flux:badge>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 text-sm">No students enrolled</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $subject->created_at->format('M d, Y') }}</flux:table.cell>

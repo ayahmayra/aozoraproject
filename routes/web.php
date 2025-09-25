@@ -28,12 +28,15 @@ Route::get('parent/dashboard', [\App\Http\Controllers\Parent\DashboardController
 Route::middleware(['auth', 'verified', 'role:parent', 'user.verified'])->prefix('parent')->name('parent.')->group(function () {
     Route::get('/profile', [\App\Http\Controllers\Parent\ProfileController::class, 'index'])->name('profile');
     
-    Route::get('/children', [\App\Http\Controllers\Parent\ChildrenController::class, 'index'])->name('children');
-    Route::get('/children/create', [\App\Http\Controllers\Parent\ChildrenController::class, 'create'])->name('children.create');
-    Route::post('/children', [\App\Http\Controllers\Parent\ChildrenController::class, 'store'])->name('children.store');
-    Route::get('/children/{student}/edit', [\App\Http\Controllers\Parent\ChildrenController::class, 'edit'])->name('children.edit');
-    Route::put('/children/{student}', [\App\Http\Controllers\Parent\ChildrenController::class, 'update'])->name('children.update');
-    Route::delete('/children/{student}', [\App\Http\Controllers\Parent\ChildrenController::class, 'destroy'])->name('children.destroy');
+    Route::get('/children/create', [\App\Http\Controllers\Parent\ChildController::class, 'create'])->name('children.create');
+    Route::post('/children', [\App\Http\Controllers\Parent\ChildController::class, 'store'])->name('children.store');
+    Route::get('/children/{student}/edit', [\App\Http\Controllers\Parent\ChildController::class, 'edit'])->name('children.edit');
+    Route::put('/children/{student}', [\App\Http\Controllers\Parent\ChildController::class, 'update'])->name('children.update');
+    Route::delete('/children/{student}', [\App\Http\Controllers\Parent\ChildController::class, 'destroy'])->name('children.destroy');
+    
+    // Parent student management routes
+    Route::get('/students/{student}/edit', [\App\Http\Controllers\Admin\StudentsController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'update'])->name('students.update');
     
     Route::get('/schedule', function () {
         return view('parent.schedule');
@@ -84,6 +87,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    // Enrollment Routes
+    Route::get('/enrollment', [\App\Http\Controllers\EnrollmentController::class, 'index'])->name('enrollment.index');
+    Route::get('/enrollment/{student}/create', [\App\Http\Controllers\EnrollmentController::class, 'create'])->name('enrollment.create');
+    Route::post('/enrollment/{student}', [\App\Http\Controllers\EnrollmentController::class, 'store'])->name('enrollment.store');
+    Route::get('/enrollment/{student}', [\App\Http\Controllers\EnrollmentController::class, 'show'])->name('enrollment.show');
+    Route::put('/enrollment/{student}/{subject}', [\App\Http\Controllers\EnrollmentController::class, 'update'])->name('enrollment.update');
+    Route::delete('/enrollment/{student}/{subject}', [\App\Http\Controllers\EnrollmentController::class, 'destroy'])->name('enrollment.destroy');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('password.edit');

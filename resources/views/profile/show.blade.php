@@ -201,6 +201,7 @@
                     </div>
                 </flux:card>
             @endif
+            
         </div>
 
         <!-- Sidebar -->
@@ -245,6 +246,26 @@
                     
                 </div>
             </flux:card>
+
+            <!-- Subjects Information for Students -->
+            @if($user->hasRole('student') && $user->studentProfile)
+                <flux:card>
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <flux:heading size="lg">Enrolled Subjects</flux:heading>
+                    </div>
+                    <div class="p-6">
+                        @if($user->studentProfile->subjects->count() > 0)
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($user->studentProfile->subjects as $subject)
+                                    <flux:badge size="sm" variant="blue">{{ $subject->name }}</flux:badge>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-gray-500 text-sm">No subjects enrolled yet</div>
+                        @endif
+                    </div>
+                </flux:card>
+            @endif
         </div>
     </div>
 </x-layouts.app>

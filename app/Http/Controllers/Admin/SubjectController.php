@@ -24,7 +24,7 @@ class SubjectController extends Controller
         }
 
 
-        $subjects = $query->with('teachers.user')->orderBy('name')->paginate(10);
+        $subjects = $query->with(['teachers.user', 'students.user'])->orderBy('name')->paginate(10);
 
         return view('admin.subjects.index', compact('subjects'));
     }

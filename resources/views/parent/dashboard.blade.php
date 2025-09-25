@@ -77,9 +77,103 @@
             </div>
         </div>
 
-        <!-- 2. QUICK ACTIONS & RECENT ACTIVITIES -->
+        <!-- 2. MY CHILDREN TABLE -->
+        <flux:card>
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <flux:heading size="lg">My Children ({{ $children->count() }})</flux:heading>
+                    <flux:button variant="primary" href="{{ route('parent.children.create') }}">
+                        <flux:icon.plus class="h-4 w-4 mr-2" />
+                        Add Child
+                    </flux:button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column>Student</flux:table.column>
+                        <flux:table.column>Student ID</flux:table.column>
+                        <flux:table.column>Date of Birth</flux:table.column>
+                        <flux:table.column>Subjects</flux:table.column>
+                        <flux:table.column>Actions</flux:table.column>
+                    </flux:table.columns>
+                    <flux:table.rows>
+                        @forelse($children as $child)
+                            <flux:table.row>
+                                <flux:table.cell>
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <flux:avatar name="{{ $child->user->name }}" />
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium">{{ $child->user->name }}</div>
+                                            <div class="text-sm text-gray-500">{{ $child->user->email }}</div>
+                                        </div>
+                                    </div>
+                                </flux:table.cell>
+                                <flux:table.cell>
+                                    @if($child->student_id)
+                                        <flux:badge variant="primary">{{ $child->student_id }}</flux:badge>
+                                    @else
+                                        <span class="text-gray-400">Not assigned</span>
+                                    @endif
+                                </flux:table.cell>
+                                <flux:table.cell>{{ $child->date_of_birth->format('M d, Y') }}</flux:table.cell>
+                                <flux:table.cell>
+                                    @if($child->subjects->count() > 0)
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($child->subjects->take(3) as $subject)
+                                                <flux:badge size="sm" variant="blue">{{ $subject->name }}</flux:badge>
+                                            @endforeach
+                                            @if($child->subjects->count() > 3)
+                                                <flux:badge size="sm" variant="gray">+{{ $child->subjects->count() - 3 }} more</flux:badge>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400 text-sm">No subjects enrolled</span>
+                                    @endif
+                                </flux:table.cell>
+                                <flux:table.cell>
+                                    <div class="flex space-x-2">
+                                        <flux:button variant="ghost" size="sm" href="{{ route('profile.show') }}?user={{ $child->user_id }}" title="View Profile">
+                                            <flux:icon.user class="h-4 w-4" />
+                                        </flux:button>
+                                        <flux:button variant="ghost" size="sm" href="{{ route('parent.students.edit', $child) }}" title="Edit Child">
+                                            <flux:icon.pencil class="h-4 w-4" />
+                                        </flux:button>
+                                        <form method="POST" action="{{ route('parent.children.destroy', $child) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this child?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <flux:button variant="ghost" size="sm" type="submit" title="Delete Child">
+                                                <flux:icon.trash class="h-4 w-4" />
+                                            </flux:button>
+                                        </form>
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="5" class="text-center py-8">
+                                    <div class="text-gray-500">
+                                        <flux:icon.academic-cap class="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                                        <p class="text-lg font-medium">No children registered yet</p>
+                                        <p class="text-sm mb-4">Add your first child to get started</p>
+                                        <flux:button variant="primary" href="{{ route('parent.children.create') }}">
+                                            <flux:icon.plus class="h-4 w-4 mr-2" />
+                                            Add Your First Child
+                                        </flux:button>
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforelse
+                    </flux:table.rows>
+                </flux:table>
+            </div>
+        </flux:card>
+
+        <!-- 3. QUICK ACTIONS & RECENT ACTIVITIES -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- 3. QUICK ACTIONS (Quick Actions) -->
+            <!-- 4. QUICK ACTIONS (Quick Actions) -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <flux:heading size="lg" class="text-gray-900 dark:text-white">⚡ Quick Actions</flux:heading>
@@ -106,19 +200,19 @@
                             </div>
                         </a>
 
-                        <a href="{{ route('parent.children') }}" 
+                        <a href="{{ route('parent.children.create') }}" 
                            class="group relative bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 hover:shadow-md transition-all duration-200">
                             <div class="flex items-center space-x-3">
                                 <div class="flex-shrink-0">
                                     <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800 transition-colors">
-                                        <flux:icon.academic-cap class="w-5 h-5 text-green-600 dark:text-green-400" />
+                                        <flux:icon.plus class="w-5 h-5 text-green-600 dark:text-green-400" />
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                                        My Children
+                                        Add Child
                                     </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">View children information</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Register a new child</p>
                                 </div>
                             </div>
                         </a>
@@ -160,7 +254,7 @@
                 </div>
             </div>
 
-            <!-- 4. AKTIVITAS TERBARU (Recent Activities) -->
+            <!-- 5. AKTIVITAS TERBARU (Recent Activities) -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <flux:heading size="lg" class="text-gray-900 dark:text-white">🕒 Recent Activities</flux:heading>
@@ -199,7 +293,7 @@
             </div>
         </div>
 
-        <!-- 5. INFORMASI ORGANISASI (Organization Info) -->
+        <!-- 6. INFORMASI ORGANISASI (Organization Info) -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <flux:heading size="lg" class="text-gray-900 dark:text-white">🏫 School Information</flux:heading>

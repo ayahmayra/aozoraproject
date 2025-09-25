@@ -18,11 +18,28 @@ class ProfileController extends Controller
         // Check if admin is viewing another user's profile
         if ($request->has('user') && $request->user()->hasRole('admin')) {
             $user = User::findOrFail($request->user);
+        } 
+        // Check if parent is viewing their child's profile
+        elseif ($request->has('user') && $request->user()->hasRole('parent')) {
+            $user = User::findOrFail($request->user);
+            // Verify that this user is actually a child of the current parent
+            $parent = $request->user();
+            $isChild = \App\Models\Student::where('user_id', $user->id)
+                                       ->where('parent_id', $parent->id)
+                                       ->exists();
+            if (!$isChild) {
+                abort(403, 'Unauthorized access to user profile.');
+            }
         } else {
             $user = $request->user();
         }
         
         $user->load(['teacherProfile', 'studentProfile', 'parentProfile']);
+        
+        // Load subjects for students
+        if ($user->hasRole('student') && $user->studentProfile) {
+            $user->studentProfile->load('subjects');
+        }
         
         return view('profile.show', compact('user'));
     }
@@ -35,11 +52,28 @@ class ProfileController extends Controller
         // Check if admin is viewing another user's profile
         if ($request->has('user') && $request->user()->hasRole('admin')) {
             $user = User::findOrFail($request->user);
+        } 
+        // Check if parent is viewing their child's profile
+        elseif ($request->has('user') && $request->user()->hasRole('parent')) {
+            $user = User::findOrFail($request->user);
+            // Verify that this user is actually a child of the current parent
+            $parent = $request->user();
+            $isChild = \App\Models\Student::where('user_id', $user->id)
+                                       ->where('parent_id', $parent->id)
+                                       ->exists();
+            if (!$isChild) {
+                abort(403, 'Unauthorized access to user profile.');
+            }
         } else {
             $user = $request->user();
         }
         
         $user->load(['teacherProfile', 'studentProfile', 'parentProfile']);
+        
+        // Load subjects for students
+        if ($user->hasRole('student') && $user->studentProfile) {
+            $user->studentProfile->load('subjects');
+        }
         
         return view('profile.edit', compact('user'));
     }
@@ -49,7 +83,24 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = $request->user();
+        // Determine which user to update
+        if ($request->has('user') && $request->user()->hasRole('admin')) {
+            $user = User::findOrFail($request->user);
+        } 
+        // Check if parent is updating their child's profile
+        elseif ($request->has('user') && $request->user()->hasRole('parent')) {
+            $user = User::findOrFail($request->user);
+            // Verify that this user is actually a child of the current parent
+            $parent = $request->user();
+            $isChild = \App\Models\Student::where('user_id', $user->id)
+                                       ->where('parent_id', $parent->id)
+                                       ->exists();
+            if (!$isChild) {
+                abort(403, 'Unauthorized access to user profile.');
+            }
+        } else {
+            $user = $request->user();
+        }
         
         $request->validate([
             'name' => 'required|string|max:255',
@@ -73,6 +124,11 @@ class ProfileController extends Controller
         // Update role-specific profile data
         $this->updateRoleSpecificProfile($user, $request);
 
+        // Redirect back to the profile with user parameter if it was provided
+        if ($request->has('user')) {
+            return redirect()->route('profile.show', ['user' => $user->id])->with('success', 'Profile updated successfully!');
+        }
+        
         return redirect()->route('profile.show')->with('success', 'Profile updated successfully!');
     }
 

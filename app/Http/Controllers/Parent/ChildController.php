@@ -8,19 +8,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class ChildrenController extends Controller
+class ChildController extends Controller
 {
-    public function index()
-    {
-        $parent = auth()->user();
-        $children = Student::where('parent_id', $parent->id)->get();
-        
-        return view('parent.children.index', compact('children'));
-    }
-
     public function create()
     {
-        return view('parent.children.create');
+        // Get parents list for the form (though parent will be auto-assigned)
+        $parents = \App\Models\User::whereHas('roles', function($q) {
+            $q->where('name', 'parent');
+        })->get();
+        
+        return view('admin.students.create', compact('parents'));
     }
 
     public function store(Request $request)
@@ -33,6 +30,9 @@ class ChildrenController extends Controller
             'gender' => 'required|in:male,female',
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:20',
+            'school_origin' => 'nullable|string|max:255',
+            'medical_notes' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Create user account for student
@@ -46,17 +46,20 @@ class ChildrenController extends Controller
         // Assign student role
         $user->assignRole('student');
 
-        // Create student profile
+        // Create student profile with parent_id from form (or current parent)
         $student = Student::create([
             'user_id' => $user->id,
-            'parent_id' => auth()->id(),
+            'parent_id' => $request->parent_id ?? auth()->id(),
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
             'address' => $request->address,
             'phone' => $request->phone,
+            'school_origin' => $request->school_origin,
+            'medical_notes' => $request->medical_notes,
+            'notes' => $request->notes,
         ]);
 
-        return redirect()->route('parent.children')->with('success', 'Student added successfully!');
+        return redirect()->route('parent.dashboard')->with('success', 'Child added successfully!');
     }
 
     public function edit(Student $student)
@@ -66,7 +69,7 @@ class ChildrenController extends Controller
             abort(403, 'Unauthorized access to student data.');
         }
 
-        return view('parent.children.edit', compact('student'));
+        return view('parent.child.edit', compact('student'));
     }
 
     public function update(Request $request, Student $student)
@@ -106,7 +109,7 @@ class ChildrenController extends Controller
             'phone' => $request->phone,
         ]);
 
-        return redirect()->route('parent.children')->with('success', 'Student updated successfully!');
+        return redirect()->route('parent.dashboard')->with('success', 'Student updated successfully!');
     }
 
     public function destroy(Student $student)
@@ -122,6 +125,6 @@ class ChildrenController extends Controller
         // Delete student profile
         $student->delete();
 
-        return redirect()->route('parent.children')->with('success', 'Student deleted successfully!');
+        return redirect()->route('parent.dashboard')->with('success', 'Student deleted successfully!');
     }
 }

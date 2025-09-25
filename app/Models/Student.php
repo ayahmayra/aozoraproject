@@ -40,4 +40,34 @@ class Student extends Model
     {
         return $this->belongsTo(User::class, 'parent_id');
     }
+
+    /**
+     * Get the subjects that the student is enrolled in.
+     */
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class)
+                    ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
+                    ->withTimestamps()
+                    ->withCasts([
+                        'enrolled_at' => 'date',
+                        'completed_at' => 'date',
+                    ]);
+    }
+
+    /**
+     * Get only enrolled subjects.
+     */
+    public function enrolledSubjects()
+    {
+        return $this->subjects()->wherePivot('status', 'enrolled');
+    }
+
+    /**
+     * Get completed subjects.
+     */
+    public function completedSubjects()
+    {
+        return $this->subjects()->wherePivot('status', 'completed');
+    }
 }

@@ -56,6 +56,9 @@ class StudentsController extends Controller
             'gender' => 'required|in:male,female',
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:20',
+            'school_origin' => 'nullable|string|max:255',
+            'medical_notes' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         // Create user account for student
@@ -78,6 +81,9 @@ class StudentsController extends Controller
             'gender' => $request->gender,
             'address' => $request->address,
             'phone' => $request->phone,
+            'school_origin' => $request->school_origin,
+            'medical_notes' => $request->medical_notes,
+            'notes' => $request->notes,
         ]);
 
         return redirect()->route('admin.students')->with('success', 'Student created successfully!');
@@ -85,6 +91,13 @@ class StudentsController extends Controller
 
     public function edit(Student $student)
     {
+        // Check if parent is trying to edit their child
+        if (auth()->user()->hasRole('parent')) {
+            if ($student->parent_id !== auth()->id()) {
+                abort(403, 'Unauthorized access to student data.');
+            }
+        }
+
         $parents = User::whereHas('roles', function($q) {
             $q->where('name', 'parent');
         })->get();
@@ -94,17 +107,43 @@ class StudentsController extends Controller
 
     public function update(Request $request, Student $student)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $student->user_id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'parent_id' => 'required|exists:users,id',
-            'student_id' => 'nullable|string|max:50|unique:students,student_id,' . $student->id,
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|in:male,female',
-            'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:20',
-        ]);
+        // Check if parent is trying to update their child
+        if (auth()->user()->hasRole('parent')) {
+            if ($student->parent_id !== auth()->id()) {
+                abort(403, 'Unauthorized access to student data.');
+            }
+        }
+
+        // Different validation rules for parents vs admins
+        if (auth()->user()->hasRole('parent')) {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $student->user_id,
+                'password' => 'nullable|string|min:8|confirmed',
+                'date_of_birth' => 'required|date',
+                'gender' => 'required|in:male,female',
+                'address' => 'nullable|string|max:500',
+                'phone' => 'nullable|string|max:20',
+                'school_origin' => 'nullable|string|max:255',
+                'medical_notes' => 'nullable|string|max:1000',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+        } else {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $student->user_id,
+                'password' => 'nullable|string|min:8|confirmed',
+                'parent_id' => 'required|exists:users,id',
+                'student_id' => 'nullable|string|max:50|unique:students,student_id,' . $student->id,
+                'date_of_birth' => 'required|date',
+                'gender' => 'required|in:male,female',
+                'address' => 'nullable|string|max:500',
+                'phone' => 'nullable|string|max:20',
+                'school_origin' => 'nullable|string|max:255',
+                'medical_notes' => 'nullable|string|max:1000',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+        }
 
         // Update user account
         $userData = [
@@ -118,17 +157,34 @@ class StudentsController extends Controller
 
         $student->user->update($userData);
 
-        // Update student profile
-        $student->update([
-            'parent_id' => $request->parent_id,
-            'student_id' => $request->student_id,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-            'address' => $request->address,
-            'phone' => $request->phone,
-        ]);
-
-        return redirect()->route('admin.students')->with('success', 'Student updated successfully!');
+        // Update student profile with different fields based on user role
+        if (auth()->user()->hasRole('parent')) {
+            $student->update([
+                'date_of_birth' => $request->date_of_birth,
+                'gender' => $request->gender,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'school_origin' => $request->school_origin,
+                'medical_notes' => $request->medical_notes,
+                'notes' => $request->notes,
+            ]);
+            
+            return redirect()->route('parent.dashboard')->with('success', 'Student updated successfully!');
+        } else {
+            $student->update([
+                'parent_id' => $request->parent_id,
+                'student_id' => $request->student_id,
+                'date_of_birth' => $request->date_of_birth,
+                'gender' => $request->gender,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'school_origin' => $request->school_origin,
+                'medical_notes' => $request->medical_notes,
+                'notes' => $request->notes,
+            ]);
+            
+            return redirect()->route('admin.students')->with('success', 'Student updated successfully!');
+        }
     }
 
     public function destroy(Student $student)

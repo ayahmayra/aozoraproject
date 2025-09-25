@@ -17,4 +17,28 @@ class Subject extends Model
     {
         return $this->belongsToMany(Teacher::class);
     }
+
+    // Many-to-many relationship with Student
+    public function students()
+    {
+        return $this->belongsToMany(Student::class)
+                    ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
+                    ->withTimestamps()
+                    ->withCasts([
+                        'enrolled_at' => 'date',
+                        'completed_at' => 'date',
+                    ]);
+    }
+
+    // Get only enrolled students
+    public function enrolledStudents()
+    {
+        return $this->students()->wherePivot('status', 'enrolled');
+    }
+
+    // Get completed students
+    public function completedStudents()
+    {
+        return $this->students()->wherePivot('status', 'completed');
+    }
 }

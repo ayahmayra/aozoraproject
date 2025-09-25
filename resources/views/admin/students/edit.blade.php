@@ -7,9 +7,9 @@
                         <flux:heading size="xl">Edit Student</flux:heading>
                         <flux:text class="mt-2">Update student information</flux:text>
                     </div>
-                    <flux:button variant="ghost" href="{{ route('admin.students') }}">
+                    <flux:button variant="ghost" href="{{ auth()->user()->hasRole('parent') ? route('parent.dashboard') : route('admin.students') }}">
                         <flux:icon.arrow-left class="h-4 w-4 mr-2" />
-                        Back to Students
+                        {{ auth()->user()->hasRole('parent') ? 'Back to Dashboard' : 'Back to Students' }}
                     </flux:button>
                 </div>
             </div>
@@ -64,23 +64,30 @@
                         <div class="mb-8">
                             <flux:heading size="md" class="mb-4">Student Information</flux:heading>
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                                <flux:field>
-                                    <flux:label>Parent</flux:label>
-                                    <flux:select name="parent_id" required>
-                                        <option value="">Select parent</option>
-                                        @foreach($parents as $parent)
-                                            <option value="{{ $parent->id }}" {{ old('parent_id', $student->parent_id) == $parent->id ? 'selected' : '' }}>
-                                                {{ $parent->name }} ({{ $parent->email }})
-                                            </option>
-                                        @endforeach
-                                    </flux:select>
-                                </flux:field>
-                                <flux:input
-                                    name="student_id"
-                                    label="Student ID"
-                                    placeholder="Enter student ID (optional)"
-                                    value="{{ old('student_id', $student->student_id) }}"
-                                />
+                                @if(!auth()->user()->hasRole('parent'))
+                                    <flux:field>
+                                        <flux:label>Parent</flux:label>
+                                        <flux:select name="parent_id" required>
+                                            <option value="">Select parent</option>
+                                            @foreach($parents as $parent)
+                                                <option value="{{ $parent->id }}" {{ old('parent_id', $student->parent_id) == $parent->id ? 'selected' : '' }}>
+                                                    {{ $parent->name }} ({{ $parent->email }})
+                                                </option>
+                                            @endforeach
+                                        </flux:select>
+                                    </flux:field>
+                                @else
+                                    <!-- Hidden field to maintain parent_id for parents -->
+                                    <input type="hidden" name="parent_id" value="{{ $student->parent_id }}">
+                                @endif
+                                @if(!auth()->user()->hasRole('parent'))
+                                    <flux:input
+                                        name="student_id"
+                                        label="Student ID"
+                                        placeholder="Enter student ID (optional)"
+                                        value="{{ old('student_id', $student->student_id) }}"
+                                    />
+                                @endif
                             </div>
 
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6">
@@ -115,11 +122,42 @@
                                     value="{{ old('address', $student->address) }}"
                                 />
                             </div>
+
+                            <div class="grid grid-cols-1 gap-6 mt-6">
+                                <flux:input
+                                    name="school_origin"
+                                    label="School Origin"
+                                    placeholder="Enter previous school"
+                                    value="{{ old('school_origin', $student->school_origin) }}"
+                                />
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 mt-6">
+                                <flux:field>
+                                    <flux:label>Medical Notes</flux:label>
+                                    <flux:textarea
+                                        name="medical_notes"
+                                        placeholder="Enter any medical information or allergies"
+                                        rows="3"
+                                    >{{ old('medical_notes', $student->medical_notes) }}</flux:textarea>
+                                </flux:field>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 mt-6">
+                                <flux:field>
+                                    <flux:label>Additional Notes</flux:label>
+                                    <flux:textarea
+                                        name="notes"
+                                        placeholder="Enter any additional notes about the student"
+                                        rows="3"
+                                    >{{ old('notes', $student->notes) }}</flux:textarea>
+                                </flux:field>
+                            </div>
                         </div>
 
                         <!-- Form Actions -->
                         <div class="flex justify-end space-x-4">
-                            <flux:button variant="ghost" href="{{ route('admin.students') }}">
+                            <flux:button variant="ghost" href="{{ auth()->user()->hasRole('parent') ? route('parent.dashboard') : route('admin.students') }}">
                                 Cancel
                             </flux:button>
                             <flux:button variant="primary" type="submit">
