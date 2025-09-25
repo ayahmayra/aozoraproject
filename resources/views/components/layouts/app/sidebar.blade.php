@@ -27,7 +27,7 @@
                     <flux:sidebar.item icon="home" :href="route('teacher.dashboard')" :current="request()->routeIs('teacher.dashboard')" wire:navigate tooltip="{{ __('Dashboard') }}">{{ __('Dashboard') }}</flux:sidebar.item>
                 @elseif(auth()->user()->hasRole('student'))
                     <flux:sidebar.item icon="home" :href="route('student.dashboard')" :current="request()->routeIs('student.dashboard')" wire:navigate tooltip="{{ __('Dashboard') }}">{{ __('Dashboard') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="user" :href="route('student.profile')" :current="request()->routeIs('student.profile*')" wire:navigate tooltip="{{ __('Profile') }}">{{ __('Profile') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="user" :href="route('profile.show')" :current="request()->routeIs('profile.show*')" wire:navigate tooltip="{{ __('Profile') }}">{{ __('Profile') }}</flux:sidebar.item>
                 @else
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate tooltip="{{ __('Dashboard') }}">{{ __('Dashboard') }}</flux:sidebar.item>
                 @endif

@@ -4,7 +4,7 @@
         <flux:card >
             <div class="flex items-center justify-between">
                 <div>
-                    <flux:heading size="xl" level="1" class="text-white">Welcome {{ auth()->user()->name }}!</flux:heading>
+                    <flux:heading size="xl" level="1" >Welcome {{ auth()->user()->name }}!</flux:heading>
                     <flux:text class="mb-6">School Management System Dashboard</flux:text>
                     <flux:text class="text-xs">{{ now()->format('l, d F Y') }}</flux:text>
                 </div>

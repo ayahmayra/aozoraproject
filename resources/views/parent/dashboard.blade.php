@@ -89,7 +89,7 @@
                         <flux:callout class="mb-4" variant="warning" icon="exclamation-triangle" heading="Your account is pending verification. Please wait for admin approval." />
                     @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <a href="{{ route('parent.profile') }}" 
+                        <a href="{{ route('profile.show') }}" 
                            class="group relative bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200">
                             <div class="flex items-center space-x-3">
                                 <div class="flex-shrink-0">

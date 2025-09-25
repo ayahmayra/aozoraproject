@@ -104,6 +104,9 @@
                                     <flux:table.cell>{{ $student->created_at->format('M d, Y') }}</flux:table.cell>
                                     <flux:table.cell>
                                         <div class="flex space-x-2">
+                                            <flux:button variant="ghost" size="sm" href="{{ route('profile.show') }}?user={{ $student->user_id }}" title="View Profile">
+                                                <flux:icon.eye class="h-4 w-4" />
+                                            </flux:button>
                                             <flux:button variant="ghost" size="sm" href="{{ route('admin.students.edit', $student) }}" title="Edit Student">
                                                 <flux:icon.pencil class="h-4 w-4" />
                                             </flux:button>

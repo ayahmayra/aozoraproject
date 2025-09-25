@@ -14,7 +14,7 @@
         <!-- Filters -->
         <flux:card>
             <div class="p-6">
-                <form method="GET" action="{{ route('admin.teachers') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <form method="GET" action="{{ route('admin.teachers') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
                         <flux:field>
                             <flux:label>Search Teachers</flux:label>
@@ -33,18 +33,6 @@
                                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </flux:select>
-                        </flux:field>
-                    </div>
-                    <div>
-                        <flux:field>
-                            <flux:label>Filter by Employment</flux:label>
-                            <flux:select name="employment_status">
-                                <option value="">All Employment</option>
-                                <option value="Full-time" {{ request('employment_status') == 'Full-time' ? 'selected' : '' }}>Full-time</option>
-                                <option value="Part-time" {{ request('employment_status') == 'Part-time' ? 'selected' : '' }}>Part-time</option>
-                                <option value="Contract" {{ request('employment_status') == 'Contract' ? 'selected' : '' }}>Contract</option>
-                                <option value="Intern" {{ request('employment_status') == 'Intern' ? 'selected' : '' }}>Intern</option>
                             </flux:select>
                         </flux:field>
                     </div>
@@ -79,7 +67,7 @@
                     <flux:table.column>Teacher</flux:table.column>
                     <flux:table.column>Education</flux:table.column>
                     <flux:table.column>Employee Number</flux:table.column>
-                    <flux:table.column>Employment Status</flux:table.column>
+                    <flux:table.column>Subjects</flux:table.column>
                     <flux:table.column>Created</flux:table.column>
                     <flux:table.column>Actions</flux:table.column>
                 </flux:table.columns>
@@ -115,15 +103,25 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
-                                @if($teacher->teacherProfile && $teacher->teacherProfile->employment_status)
-                                    <flux:badge variant="primary">{{ $teacher->teacherProfile->employment_status }}</flux:badge>
+                                @if($teacher->teacherProfile && $teacher->teacherProfile->subjects->count() > 0)
+                                    <div class="space-y-1">
+                                        @foreach($teacher->teacherProfile->subjects->take(2) as $subject)
+                                            <flux:badge size="sm" variant="blue">{{ $subject->name }}</flux:badge>
+                                        @endforeach
+                                        @if($teacher->teacherProfile->subjects->count() > 2)
+                                            <flux:badge size="sm" variant="gray">+{{ $teacher->teacherProfile->subjects->count() - 2 }} more</flux:badge>
+                                        @endif
+                                    </div>
                                 @else
-                                    <span class="text-gray-400">Not specified</span>
+                                    <span class="text-gray-400 text-sm">No subjects assigned</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $teacher->created_at->format('M d, Y') }}</flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex space-x-2">
+                                    <flux:button variant="ghost" size="sm" href="{{ route('profile.show') }}?user={{ $teacher->id }}" title="View Profile">
+                                        <flux:icon.eye class="h-4 w-4" />
+                                    </flux:button>
                                     <flux:button variant="ghost" size="sm" href="{{ route('admin.teachers.edit', $teacher) }}" title="Edit Teacher">
                                         <flux:icon.pencil class="h-4 w-4" />
                                     </flux:button>

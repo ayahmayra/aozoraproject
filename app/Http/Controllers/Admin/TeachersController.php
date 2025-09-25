@@ -12,7 +12,7 @@ class TeachersController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::role('teacher')->with('teacherProfile');
+        $query = User::role('teacher')->with(['teacherProfile', 'teacherProfile.subjects']);
         
         if ($request->filled('search')) {
             $search = $request->search;
@@ -31,11 +31,6 @@ class TeachersController extends Controller
             $query->where('status', $request->status);
         }
         
-        if ($request->filled('employment_status')) {
-            $query->whereHas('teacherProfile', function($q) use ($request) {
-                $q->where('employment_status', $request->employment_status);
-            });
-        }
         
         $teachers = $query->paginate(10);
         return view('admin.teachers.index', compact('teachers'));

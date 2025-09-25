@@ -35,4 +35,10 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Many-to-many relationship with Subject
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class);
+    }
 }
