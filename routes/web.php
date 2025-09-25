@@ -139,11 +139,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'update'])->name('students.update');
     Route::delete('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'destroy'])->name('students.destroy');
     
-    // Class Management
-    Route::get('/classes', function () {
-        return view('admin.classes.index');
-    })->name('classes');
-    
     // Subject Management
     Route::get('/subjects', function () {
         return view('admin.subjects.index');

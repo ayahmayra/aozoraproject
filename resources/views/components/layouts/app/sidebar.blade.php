@@ -44,7 +44,6 @@
                     </flux:sidebar.group>
 
                     <flux:sidebar.group expandable heading="{{ __('Academic') }}" icon="academic-cap">
-                        <flux:sidebar.item icon="building-office" :href="route('admin.classes')" :current="request()->routeIs('admin.classes*')" wire:navigate tooltip="{{ __('Classes') }}">{{ __('Classes') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="book-open" :href="route('admin.subjects')" :current="request()->routeIs('admin.subjects*')" wire:navigate tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
                     </flux:sidebar.group>
 
