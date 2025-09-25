@@ -14,7 +14,6 @@ class Teacher extends Model
         'gender',
         'phone',
         'address',
-        'subject_specialization',
         'education_level',
         'institution',
         'graduation_year',

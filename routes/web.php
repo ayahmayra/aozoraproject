@@ -117,9 +117,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     })->name('students');
     
     // Teacher Management
-    Route::get('/teachers', function () {
-        return view('admin.teachers.index');
-    })->name('teachers');
+    Route::get('/teachers', [\App\Http\Controllers\Admin\TeachersController::class, 'index'])->name('teachers');
+    Route::get('/teachers/create', [\App\Http\Controllers\Admin\TeachersController::class, 'create'])->name('teachers.create');
+    Route::post('/teachers', [\App\Http\Controllers\Admin\TeachersController::class, 'store'])->name('teachers.store');
+    Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\Admin\TeachersController::class, 'edit'])->name('teachers.edit');
+    Route::put('/teachers/{teacher}', [\App\Http\Controllers\Admin\TeachersController::class, 'update'])->name('teachers.update');
+    Route::delete('/teachers/{teacher}', [\App\Http\Controllers\Admin\TeachersController::class, 'destroy'])->name('teachers.destroy');
     
     // Parent Management
     Route::get('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'index'])->name('parents');

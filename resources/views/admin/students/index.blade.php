@@ -1,6 +1,6 @@
 <x-layouts.app :title="__('Student Management')">
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+   
+        {{-- <div class="max-w-7xl mx-auto sm:px-6 lg:px-8"> --}}
             <div class="mb-8">
                 <flux:heading size="xl" level="1">Student Management</flux:heading>
                 <flux:text class="mb-6 mt-2 text-base">Manage all students in the system</flux:text>
@@ -137,6 +137,6 @@
                     </div>
                 @endif
             </flux:card>
-        </div>
-    </div>
+        {{-- </div> --}}
+    
 </x-layouts.app>
