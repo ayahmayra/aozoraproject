@@ -119,6 +119,11 @@ class ChildController extends Controller
             abort(403, 'Unauthorized access to student data.');
         }
 
+        // Check if student can be deleted
+        if (!$student->user->canBeDeleted()) {
+            return redirect()->route('parent.dashboard')->with('error', 'Cannot delete student: Student has active enrollments.');
+        }
+
         // Delete user account
         $student->user->delete();
         

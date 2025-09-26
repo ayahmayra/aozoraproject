@@ -14,6 +14,15 @@
             </div>
         </flux:card>
 
+        <!-- Error Messages -->
+        @if (session()->has('error'))
+            <flux:callout class="mb-6" variant="danger" icon="x-mark" :heading="session('error')" />
+        @endif
+
+        @if (session()->has('success'))
+            <flux:callout class="mb-6" variant="success" icon="check-circle" :heading="session('success')" />
+        @endif
+
         <!-- 1. STATISTIK UTAMA (Key Metrics) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- My Children -->

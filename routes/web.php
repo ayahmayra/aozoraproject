@@ -35,8 +35,8 @@ Route::middleware(['auth', 'verified', 'role:parent', 'user.verified'])->prefix(
     Route::delete('/children/{student}', [\App\Http\Controllers\Parent\ChildController::class, 'destroy'])->name('children.destroy');
     
     // Parent student management routes
-    Route::get('/students/{student}/edit', [\App\Http\Controllers\Admin\StudentsController::class, 'edit'])->name('students.edit');
-    Route::put('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'update'])->name('students.update');
+    Route::get('/students/{student}/edit', [\App\Http\Controllers\Parent\StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{student}', [\App\Http\Controllers\Parent\StudentController::class, 'update'])->name('students.update');
     
     // Enrollment routes
     Route::get('/enrollment/{student}/create', [\App\Http\Controllers\Parent\EnrollmentController::class, 'create'])->name('enrollment.create');

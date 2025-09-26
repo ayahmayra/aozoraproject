@@ -94,14 +94,6 @@
                                                 <flux:button variant="ghost" size="sm" href="{{ route('admin.users.edit', $user) }}">
                                                     <flux:icon.pencil-square class="h-4 w-4" />
                                                 </flux:button>
-                                                
-                                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <flux:button variant="ghost" size="sm" type="submit">
-                                                        <flux:icon.trash class="h-4 w-4" />
-                                                    </flux:button>
-                                                </form>
                                             </div>
                                         </flux:table.cell>
                                     </flux:table.row>

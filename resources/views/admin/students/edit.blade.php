@@ -19,7 +19,7 @@
                     <flux:heading size="lg">Student Information</flux:heading>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('admin.students.update', $student) }}" method="POST" class="space-y-6">
+                    <form action="{{ auth()->user()->hasRole('parent') ? route('parent.students.update', $student) : route('admin.students.update', $student) }}" method="POST" class="space-y-6">
                         @csrf
                         @method('PUT')
 

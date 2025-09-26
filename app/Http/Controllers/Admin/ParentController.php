@@ -74,6 +74,11 @@ class ParentController extends Controller
             'emergency_contact_name' => 'nullable|string|max:100',
         ]);
 
+        // Check if status change is allowed
+        if (in_array($request->status, ['pending', 'inactive']) && !$parent->canChangeStatusToPendingOrInactive()) {
+            return redirect()->route('admin.parents')->with('error', 'Cannot change status: Parent has active students or enrollments.');
+        }
+
         $data = [
             'name' => $request->name,
             'email' => $request->email,
@@ -110,6 +115,15 @@ class ParentController extends Controller
 
     public function destroy(User $parent)
     {
+        // Check if parent can be deleted
+        if (!$parent->canBeDeleted()) {
+            $message = 'Cannot delete parent: ';
+            if ($parent->hasStudents()) {
+                $message .= 'Parent has students.';
+            }
+            return redirect()->route('admin.parents')->with('error', $message);
+        }
+
         $parent->delete();
         return redirect()->route('admin.parents')->with('success', 'Parent user deleted successfully!');
     }
@@ -122,6 +136,11 @@ class ParentController extends Controller
 
     public function deactivate(User $parent)
     {
+        // Check if parent can be deactivated
+        if (!$parent->canChangeStatusToPendingOrInactive()) {
+            return redirect()->route('admin.parents')->with('error', 'Cannot deactivate parent: Parent has active students or enrollments.');
+        }
+
         $parent->update(['status' => 'inactive']);
         return redirect()->route('admin.parents')->with('success', 'Parent user deactivated successfully!');
     }
