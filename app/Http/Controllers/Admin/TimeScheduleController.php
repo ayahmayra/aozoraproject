@@ -103,39 +103,29 @@ class TimeScheduleController extends Controller
         $events = [];
         $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
         
-        // Get current week dates
-        $currentWeek = now()->startOfWeek();
-        $weekDates = [];
-        for ($i = 0; $i < 7; $i++) {
-            $weekDates[] = $currentWeek->copy()->addDays($i);
-        }
-        
         foreach ($schedules as $schedule) {
             $colorIndex = abs(crc32($schedule->subject->name)) % count($colors);
             
-            // Find matching day in current week
-            foreach ($weekDates as $date) {
-                if ($date->format('l') === $schedule->day_of_week) {
-                    $events[] = [
-                        'id' => $schedule->id . '_' . $date->format('Y-m-d'),
-                        'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
-                        'start' => $date->format('Y-m-d') . 'T' . $schedule->start_time->format('H:i:s'),
-                        'end' => $date->format('Y-m-d') . 'T' . $schedule->end_time->format('H:i:s'),
-                        'backgroundColor' => $colors[$colorIndex],
-                        'borderColor' => $colors[$colorIndex],
-                        'textColor' => '#ffffff',
-                        'extendedProps' => [
-                            'subject' => $schedule->subject->name,
-                            'subjectCode' => $schedule->subject->code,
-                            'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
-                            'room' => $schedule->room,
-                            'notes' => $schedule->notes,
-                            'dayOfWeek' => $schedule->day_of_week,
-                            'originalId' => $schedule->id
-                        ]
-                    ];
-                }
-            }
+            // Create recurring events using FullCalendar's recurring pattern
+            $events[] = [
+                'id' => 'schedule_' . $schedule->id,
+                'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
+                'daysOfWeek' => [$this->getDayNumber($schedule->day_of_week)],
+                'startTime' => $schedule->start_time->format('H:i:s'),
+                'endTime' => $schedule->end_time->format('H:i:s'),
+                'backgroundColor' => $colors[$colorIndex],
+                'borderColor' => $colors[$colorIndex],
+                'textColor' => '#ffffff',
+                'extendedProps' => [
+                    'subject' => $schedule->subject->name,
+                    'subjectCode' => $schedule->subject->code,
+                    'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
+                    'room' => $schedule->room,
+                    'notes' => $schedule->notes,
+                    'dayOfWeek' => $schedule->day_of_week,
+                    'originalId' => $schedule->id
+                ]
+            ];
         }
 
         // Debug: Log events count and sample data
@@ -148,6 +138,7 @@ class TimeScheduleController extends Controller
         return view('admin.time-schedules.calendar-fullcalendar', compact('schedules', 'days', 'events'));
     }
 
+
     /**
      * API endpoint for calendar data
      */
@@ -155,45 +146,53 @@ class TimeScheduleController extends Controller
     {
         $schedules = TimeSchedule::with(['subject', 'teacher.user'])->get();
         
-        // Get current week dates
-        $currentWeek = now()->startOfWeek();
-        $weekDates = [];
-        for ($i = 0; $i < 7; $i++) {
-            $weekDates[] = $currentWeek->copy()->addDays($i);
-        }
-        
         $events = [];
         $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
         
         foreach ($schedules as $schedule) {
             $colorIndex = abs(crc32($schedule->subject->name)) % count($colors);
             
-            // Find matching day in current week
-            foreach ($weekDates as $date) {
-                if ($date->format('l') === $schedule->day_of_week) {
-                    $events[] = [
-                        'id' => $schedule->id . '_' . $date->format('Y-m-d'),
-                        'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
-                        'start' => $date->format('Y-m-d') . 'T' . $schedule->start_time->format('H:i:s'),
-                        'end' => $date->format('Y-m-d') . 'T' . $schedule->end_time->format('H:i:s'),
-                        'backgroundColor' => $colors[$colorIndex],
-                        'borderColor' => $colors[$colorIndex],
-                        'textColor' => '#ffffff',
-                        'extendedProps' => [
-                            'subject' => $schedule->subject->name,
-                            'subjectCode' => $schedule->subject->code,
-                            'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
-                            'room' => $schedule->room,
-                            'notes' => $schedule->notes,
-                            'dayOfWeek' => $schedule->day_of_week,
-                            'originalId' => $schedule->id
-                        ]
-                    ];
-                }
-            }
+            // Create recurring events using FullCalendar's recurring pattern
+            $events[] = [
+                'id' => 'schedule_' . $schedule->id,
+                'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
+                'daysOfWeek' => [$this->getDayNumber($schedule->day_of_week)],
+                'startTime' => $schedule->start_time->format('H:i:s'),
+                'endTime' => $schedule->end_time->format('H:i:s'),
+                'backgroundColor' => $colors[$colorIndex],
+                'borderColor' => $colors[$colorIndex],
+                'textColor' => '#ffffff',
+                'extendedProps' => [
+                    'subject' => $schedule->subject->name,
+                    'subjectCode' => $schedule->subject->code,
+                    'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
+                    'room' => $schedule->room,
+                    'notes' => $schedule->notes,
+                    'dayOfWeek' => $schedule->day_of_week,
+                    'originalId' => $schedule->id
+                ]
+            ];
         }
         
         return response()->json($events);
+    }
+
+    /**
+     * Convert day name to day number (0 = Sunday, 1 = Monday, etc.)
+     */
+    private function getDayNumber($dayName)
+    {
+        $days = [
+            'Sunday' => 0,
+            'Monday' => 1,
+            'Tuesday' => 2,
+            'Wednesday' => 3,
+            'Thursday' => 4,
+            'Friday' => 5,
+            'Saturday' => 6
+        ];
+        
+        return $days[$dayName] ?? 0;
     }
 
     /**
