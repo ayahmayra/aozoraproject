@@ -10,6 +10,10 @@
                     <flux:icon.table-cells class="h-4 w-4 mr-2" />
                     Table View
                 </flux:button>
+                <flux:button variant="ghost" onclick="printCalendar()">
+                    <flux:icon.printer class="h-4 w-4 mr-2" />
+                    Print Calendar
+                </flux:button>
                 <flux:button variant="primary" href="{{ route('admin.time-schedules.create') }}">
                     <flux:icon.plus class="h-4 w-4 mr-2" />
                     Add Schedule
@@ -64,6 +68,11 @@
             </form>
         </div>
     </flux:card>
+
+    <!-- Print Header (hidden by default) -->
+    <div class="print-header">
+        Weekly Schedule Calendar
+    </div>
 
     <!-- FullCalendar Container -->
     <flux:card>
@@ -203,7 +212,7 @@
                 height: 'auto',
                 aspectRatio: 1.8,
                 slotMinTime: '06:00:00',
-                slotMaxTime: '22:00:00',
+                slotMaxTime: '24:00:00',
                 slotDuration: '00:30:00',
                 slotLabelInterval: '01:00:00',
                 slotLabelFormat: {
@@ -254,6 +263,12 @@
                     calendar.today();
                 });
             }
+            
+            // Print function
+            window.printCalendar = function() {
+                // Trigger print - only calendar container will be printed
+                window.print();
+            };
         });
     </script>
     
@@ -403,6 +418,137 @@
         .fc-button:hover {
             background-color: #2563eb !important;
             border-color: #2563eb !important;
+        }
+        
+        /* Print Styles */
+        @media print {
+            * {
+                visibility: hidden !important;
+            }
+            
+            .print-header,
+            #calendar,
+            #calendar * {
+                visibility: visible !important;
+            }
+            
+            .print-header {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                text-align: center !important;
+                font-size: 20px !important;
+                font-weight: bold !important;
+                margin-bottom: 10px !important;
+                padding: 8px 0 !important;
+                border-bottom: 2px solid #000 !important;
+                background: white !important;
+                color: black !important;
+            }
+            
+            #calendar {
+                position: absolute !important;
+                left: 0 !important;
+                top: 40px !important;
+                width: 100% !important;
+                height: calc(100vh - 60px) !important;
+                max-height: calc(100vh - 60px) !important;
+                background: white !important;
+                border: 2px solid #000 !important;
+                border-radius: 0 !important;
+                padding: 10px !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                overflow: hidden !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            @page {
+                margin: 0.5in !important;
+                size: A4 landscape !important;
+            }
+            
+            .fc-event {
+                background-color: #f0f0f0 !important;
+                color: black !important;
+                border: 1px solid #000 !important;
+                font-size: 9px !important;
+                padding: 1px 2px !important;
+                font-weight: bold !important;
+            }
+            
+            .fc-event-title {
+                font-size: 9px !important;
+                font-weight: bold !important;
+                color: black !important;
+            }
+            
+            .fc-col-header-cell {
+                background-color: #f8f8f8 !important;
+                color: black !important;
+                border: 1px solid #000 !important;
+                font-weight: bold !important;
+            }
+            
+            .fc-timegrid-axis {
+                background-color: #f8f8f8 !important;
+                color: black !important;
+                border: 1px solid #000 !important;
+            }
+            
+            .fc-scrollgrid {
+                border: 1px solid #000 !important;
+            }
+            
+            .fc-timegrid-slot {
+                border: 1px solid #ccc !important;
+            }
+            
+            /* Force single page for F4 */
+            .fc-view-harness {
+                height: auto !important;
+                max-height: calc(100vh - 80px) !important;
+            }
+            
+            .fc-scrollgrid {
+                height: auto !important;
+                max-height: calc(100vh - 80px) !important;
+            }
+            
+            .fc-timegrid-body {
+                height: auto !important;
+                max-height: calc(100vh - 100px) !important;
+            }
+            
+            .fc-timegrid-slot {
+                height: 20px !important;
+                min-height: 20px !important;
+            }
+            
+            .fc-event {
+                font-size: 8px !important;
+                padding: 1px 2px !important;
+                line-height: 1.1 !important;
+            }
+            
+            .fc-event-title {
+                font-size: 8px !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* Page setup */
+            @page {
+                margin: 0.3in !important;
+                size: F4 landscape !important;
+            }
+            
         }
     </style>
 </x-layouts.app>
