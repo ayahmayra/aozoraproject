@@ -41,6 +41,16 @@ class ProfileController extends Controller
             $user->studentProfile->load(['subjects', 'parent']);
         }
         
+        // Load children for parents
+        if ($user->hasRole('parent') && $user->parentProfile) {
+            $user->parentProfile->load('children');
+        }
+        
+        // Load subjects for teachers
+        if ($user->hasRole('teacher') && $user->teacherProfile) {
+            $user->teacherProfile->load('subjects');
+        }
+        
         return view('profile.show', compact('user', 'request'));
     }
 
@@ -73,6 +83,16 @@ class ProfileController extends Controller
         // Load subjects and parent for students
         if ($user->hasRole('student') && $user->studentProfile) {
             $user->studentProfile->load(['subjects', 'parent']);
+        }
+        
+        // Load children for parents
+        if ($user->hasRole('parent') && $user->parentProfile) {
+            $user->parentProfile->load('children');
+        }
+        
+        // Load subjects for teachers
+        if ($user->hasRole('teacher') && $user->teacherProfile) {
+            $user->teacherProfile->load('subjects');
         }
         
         return view('profile.edit', compact('user', 'request'));

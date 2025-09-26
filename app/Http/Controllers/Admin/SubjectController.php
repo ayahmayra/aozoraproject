@@ -29,6 +29,19 @@ class SubjectController extends Controller
         return view('admin.subjects.index', compact('subjects'));
     }
 
+    public function show(Subject $subject)
+    {
+        $subject->load([
+            'teachers.user',
+            'students.user',
+            'students' => function($query) {
+                $query->wherePivot('enrollment_status', 'active');
+            }
+        ]);
+
+        return view('admin.subjects.show', compact('subject'));
+    }
+
     public function create()
     {
         return view('admin.subjects.create');

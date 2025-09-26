@@ -86,22 +86,23 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>
-                                @if($subject->students->count() > 0)
-                                    <div class="space-y-1">
-                                        @foreach($subject->students->take(2) as $student)
-                                            <flux:badge size="sm" variant="green">{{ $student->user->name }}</flux:badge>
-                                        @endforeach
-                                        @if($subject->students->count() > 2)
-                                            <flux:badge size="sm" variant="gray">+{{ $subject->students->count() - 2 }} more</flux:badge>
-                                        @endif
+                                @php
+                                    $activeStudentsCount = $subject->students()->wherePivot('enrollment_status', 'active')->count();
+                                @endphp
+                                @if($activeStudentsCount > 0)
+                                    <div class="flex items-center">
+                                        <flux:badge size="sm" color="green">{{ $activeStudentsCount }} active</flux:badge>
                                     </div>
                                 @else
-                                    <span class="text-gray-400 text-sm">No students enrolled</span>
+                                    <span class="text-gray-400 text-sm">No active students</span>
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $subject->created_at->format('M d, Y') }}</flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex space-x-2">
+                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.show', $subject) }}" title="View Subject">
+                                        <flux:icon.eye class="h-4 w-4" />
+                                    </flux:button>
                                     <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.edit', $subject) }}" title="Edit Subject">
                                         <flux:icon.pencil class="h-4 w-4" />
                                     </flux:button>

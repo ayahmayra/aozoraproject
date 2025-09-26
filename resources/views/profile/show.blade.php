@@ -178,17 +178,57 @@
                             <div class="p-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Employee ID</flux:text>
-                                        <flux:text class="text-lg">{{ $user->teacherProfile->employee_id ?? 'Not assigned' }}</flux:text>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Employee Number</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->employee_number ?? 'Not assigned' }}</flux:text>
                                     </div>
                                     <div>
                                         <flux:text class="text-sm font-medium text-gray-500 mb-1">Phone</flux:text>
                                         <flux:text class="text-lg">{{ $user->teacherProfile->phone ?? 'Not provided' }}</flux:text>
                                     </div>
-                                    @if($user->teacherProfile->address)
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Date of Birth</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->date_of_birth ? $user->teacherProfile->date_of_birth->format('F j, Y') : 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Gender</flux:text>
+                                        <flux:text class="text-lg">{{ ucfirst($user->teacherProfile->gender ?? 'Not specified') }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Education Level</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->education_level ?? 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Institution</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->institution ?? 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Graduation Year</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->graduation_year ?? 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Hire Date</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->hire_date ? $user->teacherProfile->hire_date->format('F j, Y') : 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Employment Status</flux:text>
+                                        <flux:badge variant="{{ $user->teacherProfile->employment_status === 'active' ? 'green' : 'red' }}" size="sm">
+                                            {{ ucfirst($user->teacherProfile->employment_status ?? 'Active') }}
+                                        </flux:badge>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Address</flux:text>
+                                        <flux:text class="text-lg">{{ $user->teacherProfile->address ?? 'Not provided' }}</flux:text>
+                                    </div>
+                                    @if($user->teacherProfile->certifications)
                                         <div class="md:col-span-2">
-                                            <flux:text class="text-sm font-medium text-gray-500 mb-1">Address</flux:text>
-                                            <flux:text class="text-lg">{{ $user->teacherProfile->address }}</flux:text>
+                                            <flux:text class="text-sm font-medium text-gray-500 mb-1">Certifications</flux:text>
+                                            <flux:text class="text-lg">{{ $user->teacherProfile->certifications }}</flux:text>
+                                        </div>
+                                    @endif
+                                    @if($user->teacherProfile->notes)
+                                        <div class="md:col-span-2">
+                                            <flux:text class="text-sm font-medium text-gray-500 mb-1">Additional Notes</flux:text>
+                                            <flux:text class="text-lg">{{ $user->teacherProfile->notes }}</flux:text>
                                         </div>
                                     @endif
                                     @if($user->teacherProfile->subjects && $user->teacherProfile->subjects && $user->teacherProfile->subjects->count() > 0)
@@ -224,10 +264,38 @@
                                         <flux:text class="text-sm font-medium text-gray-500 mb-1">Children Count</flux:text>
                                         <flux:text class="text-lg">{{ $user->parentProfile->children ? $user->parentProfile->children->count() : 0 }} children</flux:text>
                                     </div>
-                                    @if($user->parentProfile->address)
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Date of Birth</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->date_of_birth ? $user->parentProfile->date_of_birth->format('F j, Y') : 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Gender</flux:text>
+                                        <flux:text class="text-lg">{{ ucfirst($user->parentProfile->gender ?? 'Not specified') }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Occupation</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->occupation ?? 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Workplace</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->workplace ?? 'Not specified' }}</flux:text>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Address</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->address ?? 'Not provided' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Emergency Contact Name</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->emergency_contact_name ?? 'Not provided' }}</flux:text>
+                                    </div>
+                                    <div>
+                                        <flux:text class="text-sm font-medium text-gray-500 mb-1">Emergency Contact Phone</flux:text>
+                                        <flux:text class="text-lg">{{ $user->parentProfile->emergency_contact_phone ?? 'Not provided' }}</flux:text>
+                                    </div>
+                                    @if($user->parentProfile->notes)
                                         <div class="md:col-span-2">
-                                            <flux:text class="text-sm font-medium text-gray-500 mb-1">Address</flux:text>
-                                            <flux:text class="text-lg">{{ $user->parentProfile->address }}</flux:text>
+                                            <flux:text class="text-sm font-medium text-gray-500 mb-1">Additional Notes</flux:text>
+                                            <flux:text class="text-lg">{{ $user->parentProfile->notes }}</flux:text>
                                         </div>
                                     @endif
                                 </div>
@@ -296,12 +364,18 @@
                                 @if($user->studentProfile->subjects && $user->studentProfile->subjects->count() > 0)
                                     <div class="space-y-3">
                                         @foreach($user->studentProfile->subjects as $subject)
-                                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center justify-between p-3 rounded-lg">
                                                 <div>
                                                     <flux:text class="font-medium">{{ $subject->name }}</flux:text>
                                                     <flux:text class="text-sm text-gray-500">{{ $subject->code }}</flux:text>
                                                 </div>
-                                                <flux:badge variant="green" size="sm">Enrolled</flux:badge>
+                                                @php
+                                                    $enrollmentStatus = $subject->pivot->enrollment_status ?? 'pending';
+                                                    $badgeColor = $enrollmentStatus === 'active' ? 'green' : ($enrollmentStatus === 'pending' ? 'amber' : 'red');
+                                                @endphp
+                                                <flux:badge color="{{ $badgeColor }}" size="sm">
+                                                    {{ ucfirst($enrollmentStatus) }}
+                                                </flux:badge>
                                             </div>
                                         @endforeach
                                     </div>
@@ -309,6 +383,38 @@
                                     <div class="text-center py-6">
                                         <flux:icon.document-text class="w-12 h-12 text-gray-300 mx-auto mb-3" />
                                         <flux:text class="text-gray-500">No subjects enrolled yet</flux:text>
+                                    </div>
+                                @endif
+                            </div>
+                        </flux:card>
+                    @endif
+
+                    <!-- Teaching Subjects (for Teachers) -->
+                    @if($user->hasRole('teacher') && $user->teacherProfile && $user->teacherProfile->subjects)
+                        <flux:card>
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <flux:heading size="lg" class="flex items-center">
+                                    <flux:icon.document-text class="w-5 h-5 mr-2 text-purple-600" />
+                                    Subjects
+                                </flux:heading>
+                            </div>
+                            <div class="p-6">
+                                @if($user->teacherProfile->subjects && $user->teacherProfile->subjects->count() > 0)
+                                    <div class="space-y-3">
+                                        @foreach($user->teacherProfile->subjects as $subject)
+                                            <div class="flex items-center justify-between p-3 rounded-lg">
+                                                <div>
+                                                    <flux:text class="font-medium">{{ $subject->name }}</flux:text>
+                                                    <flux:text class="text-sm text-gray-500">{{ $subject->code }}</flux:text>
+                                                </div>
+                                                {{-- <flux:badge variant="blue" size="sm">Teaching</flux:badge> --}}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-6">
+                                        <flux:icon.document-text class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                        <flux:text class="text-gray-500">No subjects assigned yet</flux:text>
                                     </div>
                                 @endif
                             </div>

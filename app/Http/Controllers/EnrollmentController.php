@@ -12,10 +12,36 @@ class EnrollmentController extends Controller
     /**
      * Display enrollment management page
      */
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with(['user', 'subjects'])->get();
-        $subjects = Subject::with('students')->get();
+        $query = Student::with(['user', 'subjects', 'parent'])
+            ->whereHas('subjects');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by enrollment status
+        if ($request->filled('status')) {
+            $query->whereHas('subjects', function($q) use ($request) {
+                $q->where('enrollment_status', $request->status);
+            });
+        }
+
+        // Filter by subject
+        if ($request->filled('subject_id')) {
+            $query->whereHas('subjects', function($q) use ($request) {
+                $q->where('subject_id', $request->subject_id);
+            });
+        }
+
+        $students = $query->get();
+        $subjects = Subject::all();
         
         return view('enrollment.index', compact('students', 'subjects'));
     }
@@ -66,27 +92,55 @@ class EnrollmentController extends Controller
     }
 
     /**
+     * Show the form for editing enrollment
+     */
+    public function edit(Student $student, Subject $subject)
+    {
+        // Load student with user and subjects relationship
+        $student->load(['user', 'subjects']);
+        
+        // Get the specific subject with pivot data
+        $enrollment = $student->subjects()->where('subject_id', $subject->id)->first();
+        
+        if (!$enrollment) {
+            return redirect()->route('enrollment.index')
+                ->with('error', 'Enrollment not found.');
+        }
+        
+        return view('enrollment.edit', compact('student', 'subject', 'enrollment'));
+    }
+
+    /**
      * Update enrollment status
      */
     public function update(Request $request, Student $student, Subject $subject)
     {
         $request->validate([
-            'status' => 'required|in:enrolled,completed,dropped',
+            'status' => 'required|in:pending,active,cancelled',
+            'payment_method' => 'nullable|in:monthly,semester,yearly',
+            'payment_amount' => 'nullable|numeric|min:0',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $updateData = [
-            'status' => $request->status,
+            'enrollment_status' => $request->status,
+            'payment_method' => $request->payment_method,
+            'payment_amount' => $request->payment_amount,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
             'notes' => $request->notes,
         ];
 
-        if ($request->status === 'completed') {
-            $updateData['completed_at'] = now();
-        }
+        // Remove null values
+        $updateData = array_filter($updateData, function($value) {
+            return $value !== null && $value !== '';
+        });
 
         $student->subjects()->updateExistingPivot($subject->id, $updateData);
 
-        return redirect()->route('enrollment.show', $student)->with('success', 'Enrollment updated successfully!');
+        return redirect()->route('enrollment.index')->with('success', 'Enrollment updated successfully!');
     }
 
     /**

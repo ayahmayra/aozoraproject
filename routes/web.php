@@ -38,6 +38,13 @@ Route::middleware(['auth', 'verified', 'role:parent', 'user.verified'])->prefix(
     Route::get('/students/{student}/edit', [\App\Http\Controllers\Admin\StudentsController::class, 'edit'])->name('students.edit');
     Route::put('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'update'])->name('students.update');
     
+    // Enrollment routes
+    Route::get('/enrollment/{student}/create', [\App\Http\Controllers\Parent\EnrollmentController::class, 'create'])->name('enrollment.create');
+    Route::post('/enrollment/{student}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'store'])->name('enrollment.store');
+    Route::get('/enrollment/{student}/{subject}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'show'])->name('enrollment.show');
+    Route::put('/enrollment/{student}/{subject}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'update'])->name('enrollment.update');
+    Route::delete('/enrollment/{student}/{subject}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'destroy'])->name('enrollment.destroy');
+    
     Route::get('/schedule', function () {
         return view('parent.schedule');
     })->name('schedule');
@@ -93,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/enrollment/{student}/create', [\App\Http\Controllers\EnrollmentController::class, 'create'])->name('enrollment.create');
     Route::post('/enrollment/{student}', [\App\Http\Controllers\EnrollmentController::class, 'store'])->name('enrollment.store');
     Route::get('/enrollment/{student}', [\App\Http\Controllers\EnrollmentController::class, 'show'])->name('enrollment.show');
+    Route::get('/enrollment/{student}/{subject}/edit', [\App\Http\Controllers\EnrollmentController::class, 'edit'])->name('enrollment.edit');
     Route::put('/enrollment/{student}/{subject}', [\App\Http\Controllers\EnrollmentController::class, 'update'])->name('enrollment.update');
     Route::delete('/enrollment/{student}/{subject}', [\App\Http\Controllers\EnrollmentController::class, 'destroy'])->name('enrollment.destroy');
 
@@ -160,6 +168,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Subject Management
     Route::get('/subjects', [\App\Http\Controllers\Admin\SubjectController::class, 'index'])->name('subjects');
+    Route::get('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'show'])->name('subjects.show');
     Route::get('/subjects/create', [\App\Http\Controllers\Admin\SubjectController::class, 'create'])->name('subjects.create');
     Route::post('/subjects', [\App\Http\Controllers\Admin\SubjectController::class, 'store'])->name('subjects.store');
     Route::get('/subjects/{subject}/edit', [\App\Http\Controllers\Admin\SubjectController::class, 'edit'])->name('subjects.edit');
@@ -175,6 +184,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/organization', [\App\Http\Controllers\Admin\OrganizationController::class, 'index'])->name('organization');
         Route::get('/organization/edit', [\App\Http\Controllers\Admin\OrganizationController::class, 'edit'])->name('organization.edit');
         Route::put('/organization/update', [\App\Http\Controllers\Admin\OrganizationController::class, 'update'])->name('organization.update');
+    
+    // Document Numbering Configuration
+    Route::resource('document-numbering', \App\Http\Controllers\Admin\DocumentNumberingConfigController::class)->parameters(['document-numbering' => 'documentNumberingConfig']);
+    Route::post('/document-numbering/{documentNumberingConfig}/toggle-status', [\App\Http\Controllers\Admin\DocumentNumberingConfigController::class, 'toggleStatus'])->name('document-numbering.toggle-status');
+    Route::post('/document-numbering/{documentNumberingConfig}/reset-number', [\App\Http\Controllers\Admin\DocumentNumberingConfigController::class, 'resetNumber'])->name('document-numbering.reset-number');
 });
 
 require __DIR__.'/auth.php';

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ParentUser extends Model
 {
@@ -32,5 +33,13 @@ class ParentUser extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the children that belong to the parent.
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Student::class, 'parent_id', 'user_id');
     }
 }

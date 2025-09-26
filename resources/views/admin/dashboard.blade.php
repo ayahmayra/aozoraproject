@@ -15,6 +15,48 @@
             </div>
         </flux:card>
 
+        <!-- Pending Enrollments Alert -->
+        @php
+            $pendingEnrollmentsCount = \App\Models\Student::whereHas('subjects', function($query) {
+                $query->where('enrollment_status', 'pending');
+            })->count();
+        @endphp
+        
+        @if($pendingEnrollmentsCount > 0)
+            <flux:callout variant="warning" icon="exclamation-circle" class="mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <flux:heading size="md" class="mb-1">Pending Enrollments</flux:heading>
+                        <flux:text class="text-sm">There are {{ $pendingEnrollmentsCount }} enrollment(s) waiting for your verification.</flux:text>
+                    </div>
+                    <flux:button variant="primary" href="{{ route('enrollment.index') }}" class="ml-4">
+                        <flux:icon.eye class="h-4 w-4 mr-2" />
+                        Review Enrollments
+                    </flux:button>
+                </div>
+            </flux:callout>
+        @endif
+
+        <!-- Pending Parents Alert -->
+        @php
+            $pendingParentsCount = \App\Models\User::role('parent')->where('status', 'pending')->count();
+        @endphp
+        
+        @if($pendingParentsCount > 0)
+            <flux:callout variant="warning" icon="exclamation-circle" class="mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <flux:heading size="md" class="mb-1">Pending Parent Verifications</flux:heading>
+                        <flux:text class="text-sm">There are {{ $pendingParentsCount }} parent(s) waiting for account verification.</flux:text>
+                    </div>
+                    <flux:button variant="primary" href="{{ route('admin.parents') }}" class="ml-4">
+                        <flux:icon.eye class="h-4 w-4 mr-2" />
+                        Review Parents
+                    </flux:button>
+                </div>
+            </flux:callout>
+        @endif
+
         <!-- 1. STATISTIK UTAMA (Key Metrics) -->
         <div>
             
@@ -41,8 +83,8 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Students</p>
-                            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ \App\Models\User::role('student')->where('status', 'active')->count() }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Active students</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ \App\Models\Student::whereHas('subjects', function($query) { $query->where('enrollment_status', 'active'); })->count() }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Students enrolled in subjects</p>
                         </div>
                     </div>
                 </div>
@@ -86,11 +128,7 @@
                     <flux:heading size="lg" class="text-gray-900 dark:text-white">⚡ Quick Actions</flux:heading>
                 </div>
                 <div class="p-6">
-                    @if($pendingParentsCount > 0)
-                        <a href="{{ route('admin.parents') }}" class="block">
-                            <flux:callout class="mb-4" variant="danger" icon="exclamation-triangle" heading="There are {{ $pendingParentsCount }} parent(s) that need verification." />
-                        </a>
-                    @endif
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <a href="{{ route('admin.users') }}" 
                            class="group relative bg-white dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200">

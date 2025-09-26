@@ -57,8 +57,8 @@
                                                 <flux:button 
                                                     variant="ghost" 
                                                     size="sm" 
-                                                    href="{{ route('enrollment.update', [$student, $subject]) }}"
-                                                    title="Update Status"
+                                                    href="{{ route('enrollment.edit', [$student, $subject]) }}"
+                                                    title="Edit Enrollment"
                                                 >
                                                     <flux:icon.pencil class="h-4 w-4" />
                                                 </flux:button>
@@ -73,37 +73,126 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3 text-sm">
-                                        <div>
-                                            <flux:text class="text-xs font-medium text-gray-500">Enrolled Date</flux:text>
-                                            <flux:text class="text-sm">
-                                                @if($subject->pivot->enrolled_at)
-                                                    @if(is_string($subject->pivot->enrolled_at))
-                                                        {{ \Carbon\Carbon::parse($subject->pivot->enrolled_at)->format('M d, Y') }}
-                                                    @else
-                                                        {{ $subject->pivot->enrolled_at->format('M d, Y') }}
-                                                    @endif
-                                                @else
-                                                    N/A
-                                                @endif
-                                            </flux:text>
-                                        </div>
-                                        @if($subject->pivot->completed_at)
+                                    <!-- Enrollment Details -->
+                                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mt-4">
+                                        <flux:heading size="sm" class="mb-3">Enrollment Details</flux:heading>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                                            <!-- Basic Info -->
                                             <div>
-                                                <flux:text class="text-xs font-medium text-gray-500">Completed Date</flux:text>
+                                                <flux:text class="text-xs font-medium text-gray-500">Enrollment Number</flux:text>
+                                                <flux:text class="text-sm font-mono">{{ $subject->pivot->enrollment_number ?? 'Not assigned' }}</flux:text>
+                                            </div>
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Enrollment Status</flux:text>
+                                                <flux:badge size="sm" color="{{ $subject->pivot->enrollment_status === 'active' ? 'green' : ($subject->pivot->enrollment_status === 'pending' ? 'amber' : 'red') }}">
+                                                    {{ ucfirst($subject->pivot->enrollment_status ?? 'pending') }}
+                                                </flux:badge>
+                                            </div>
+                                            
+                                            <!-- Dates -->
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Enrollment Date</flux:text>
                                                 <flux:text class="text-sm">
-                                                    @if(is_string($subject->pivot->completed_at))
-                                                        {{ \Carbon\Carbon::parse($subject->pivot->completed_at)->format('M d, Y') }}
+                                                    @if($subject->pivot->enrollment_date)
+                                                        @if(is_string($subject->pivot->enrollment_date))
+                                                            {{ \Carbon\Carbon::parse($subject->pivot->enrollment_date)->format('M d, Y') }}
+                                                        @else
+                                                            {{ $subject->pivot->enrollment_date->format('M d, Y') }}
+                                                        @endif
                                                     @else
-                                                        {{ $subject->pivot->completed_at->format('M d, Y') }}
+                                                        N/A
                                                     @endif
                                                 </flux:text>
                                             </div>
-                                        @endif
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Start Date</flux:text>
+                                                <flux:text class="text-sm">
+                                                    @if($subject->pivot->start_date)
+                                                        @if(is_string($subject->pivot->start_date))
+                                                            {{ \Carbon\Carbon::parse($subject->pivot->start_date)->format('M d, Y') }}
+                                                        @else
+                                                            {{ $subject->pivot->start_date->format('M d, Y') }}
+                                                        @endif
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </flux:text>
+                                            </div>
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">End Date</flux:text>
+                                                <flux:text class="text-sm">
+                                                    @if($subject->pivot->end_date)
+                                                        @if(is_string($subject->pivot->end_date))
+                                                            {{ \Carbon\Carbon::parse($subject->pivot->end_date)->format('M d, Y') }}
+                                                        @else
+                                                            {{ $subject->pivot->end_date->format('M d, Y') }}
+                                                        @endif
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </flux:text>
+                                            </div>
+                                            
+                                            <!-- Payment Info -->
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Payment Method</flux:text>
+                                                <flux:text class="text-sm">{{ ucfirst($subject->pivot->payment_method ?? 'Not set') }}</flux:text>
+                                            </div>
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Payment Amount</flux:text>
+                                                <flux:text class="text-sm">
+                                                    @if($subject->pivot->payment_amount)
+                                                        Rp.{{ number_format($subject->pivot->payment_amount, 2) }}
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </flux:text>
+                                            </div>
+                                            <div>
+                                                <flux:text class="text-xs font-medium text-gray-500">Parent ID</flux:text>
+                                                <flux:text class="text-sm">{{ $subject->pivot->parent_id ?? 'N/A' }}</flux:text>
+                                            </div>
+                                            
+                                            <!-- Legacy Fields -->
+                                            @if($subject->pivot->enrolled_at)
+                                                <div>
+                                                    <flux:text class="text-xs font-medium text-gray-500">Legacy Enrolled Date</flux:text>
+                                                    <flux:text class="text-sm">
+                                                        @if(is_string($subject->pivot->enrolled_at))
+                                                            {{ \Carbon\Carbon::parse($subject->pivot->enrolled_at)->format('M d, Y') }}
+                                                        @else
+                                                            {{ $subject->pivot->enrolled_at->format('M d, Y') }}
+                                                        @endif
+                                                    </flux:text>
+                                                </div>
+                                            @endif
+                                            @if($subject->pivot->completed_at)
+                                                <div>
+                                                    <flux:text class="text-xs font-medium text-gray-500">Legacy Completed Date</flux:text>
+                                                    <flux:text class="text-sm">
+                                                        @if(is_string($subject->pivot->completed_at))
+                                                            {{ \Carbon\Carbon::parse($subject->pivot->completed_at)->format('M d, Y') }}
+                                                        @else
+                                                            {{ $subject->pivot->completed_at->format('M d, Y') }}
+                                                        @endif
+                                                    </flux:text>
+                                                </div>
+                                            @endif
+                                            @if($subject->pivot->status)
+                                                <div>
+                                                    <flux:text class="text-xs font-medium text-gray-500">Legacy Status</flux:text>
+                                                    <flux:badge size="sm" color="{{ $subject->pivot->status === 'enrolled' ? 'blue' : ($subject->pivot->status === 'completed' ? 'green' : 'red') }}">
+                                                        {{ ucfirst($subject->pivot->status) }}
+                                                    </flux:badge>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        
+                                        <!-- Notes -->
                                         @if($subject->pivot->notes)
-                                            <div class="md:col-span-3">
+                                            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                                 <flux:text class="text-xs font-medium text-gray-500">Notes</flux:text>
-                                                <flux:text class="text-sm">{{ $subject->pivot->notes }}</flux:text>
+                                                <flux:text class="text-sm mt-1">{{ $subject->pivot->notes }}</flux:text>
                                             </div>
                                         @endif
                                     </div>

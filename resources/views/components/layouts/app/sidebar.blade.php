@@ -51,6 +51,7 @@
                     <flux:sidebar.group expandable heading="{{ __('System') }}" icon="cog-6-tooth">
                         <flux:sidebar.item icon="building-office-2" :href="route('admin.organization')" :current="request()->routeIs('admin.organization*')" wire:navigate tooltip="{{ __('Organization') }}">{{ __('Organization') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="shield-check" :href="route('admin.roles')" :current="request()->routeIs('admin.roles*')" wire:navigate tooltip="{{ __('Roles') }}">{{ __('Roles') }}</flux:sidebar.item>
+                        <flux:sidebar.item icon="document-text" :href="route('admin.document-numbering.index')" :current="request()->routeIs('admin.document-numbering*')" wire:navigate tooltip="{{ __('Document Numbering') }}">{{ __('Document Numbering') }}</flux:sidebar.item>
                     </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>

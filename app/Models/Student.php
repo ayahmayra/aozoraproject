@@ -47,11 +47,19 @@ class Student extends Model
     public function subjects()
     {
         return $this->belongsToMany(Subject::class)
-                    ->withPivot(['status', 'enrolled_at', 'completed_at', 'notes'])
+                    ->withPivot([
+                        'status', 'enrolled_at', 'completed_at', 'notes',
+                        'enrollment_date', 'start_date', 'end_date',
+                        'payment_method', 'payment_amount',
+                        'enrollment_status', 'parent_id', 'enrollment_number'
+                    ])
                     ->withTimestamps()
                     ->withCasts([
                         'enrolled_at' => 'date',
                         'completed_at' => 'date',
+                        'enrollment_date' => 'date',
+                        'start_date' => 'date',
+                        'end_date' => 'date',
                     ]);
     }
 

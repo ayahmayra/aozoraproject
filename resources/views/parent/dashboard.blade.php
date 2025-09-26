@@ -121,16 +121,48 @@
                                 <flux:table.cell>{{ $child->date_of_birth->format('M d, Y') }}</flux:table.cell>
                                 <flux:table.cell>
                                     @if($child->subjects->count() > 0)
-                                        <div class="flex flex-wrap gap-1">
+                                        <div class="space-y-1">
                                             @foreach($child->subjects->take(3) as $subject)
-                                                <flux:badge size="sm" variant="blue">{{ $subject->name }}</flux:badge>
+                                                @php
+                                                    $enrollmentStatus = $subject->pivot->enrollment_status ?? 'pending';
+                                                    $badgeColor = $enrollmentStatus === 'active' ? 'green' : ($enrollmentStatus === 'pending' ? 'amber' : 'red');
+                                                    $enrollmentNumber = $subject->pivot->enrollment_number ?? 'N/A';
+                                                    $statusText = $enrollmentStatus === 'active' ? $subject->name : $subject->name . ' (Waiting for verification)';
+                                                @endphp
+                                                <div class="flex items-center">
+                                                    <flux:badge size="sm" color="{{ $badgeColor }}" class="flex items-center gap-1">
+                                                        <span class="font-mono text-xs">{{ $enrollmentNumber }}</span> - {{ $statusText }}
+                                                        @if($enrollmentStatus === 'pending')
+                                                            <form method="POST" action="{{ route('parent.enrollment.destroy', [$child, $subject]) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this enrollment?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="ml-1 hover:bg-red-500 hover:text-white rounded-full p-0.5 transition-colors" title="Cancel Enrollment">
+                                                                    <flux:icon.x-mark class="h-3 w-3" />
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </flux:badge>
+                                                </div>
                                             @endforeach
                                             @if($child->subjects->count() > 3)
-                                                <flux:badge size="sm" variant="gray">+{{ $child->subjects->count() - 3 }} more</flux:badge>
+                                                <div>
+                                                    <flux:badge size="sm" color="zinc">+{{ $child->subjects->count() - 3 }} more</flux:badge>
+                                                </div>
                                             @endif
                                         </div>
+                                       
+                                        <flux:button class="mt-2" variant="primary" size="xs" href="{{ route('parent.enrollment.create', $child) }}" title="Enroll in Subject">
+                                                <flux:icon.plus class="h-3 w-3 mr-1" />
+                                                Enroll
+                                            </flux:button>
                                     @else
-                                        <span class="text-gray-400 text-sm">No subjects enrolled</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-gray-400 text-sm">No subjects enrolled</span>
+                                            <flux:button variant="primary" size="xs" href="{{ route('parent.enrollment.create', $child) }}" title="Enroll in Subject">
+                                                <flux:icon.plus class="h-3 w-3 mr-1" />
+                                                Enroll
+                                            </flux:button>
+                                        </div>
                                     @endif
                                 </flux:table.cell>
                                 <flux:table.cell>
