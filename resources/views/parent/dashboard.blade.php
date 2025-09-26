@@ -131,8 +131,10 @@
                                                 @endphp
                                                 <div class="flex items-center">
                                                     <flux:badge size="sm" color="{{ $badgeColor }}" class="flex items-center gap-1">
-                                                        <span class="font-mono text-xs">{{ $enrollmentNumber }}</span> - {{ $statusText }}
-                                                        @if($enrollmentStatus === 'pending')
+                                                        @if($enrollmentStatus === 'active')
+                                                            {{ $subject->name }}
+                                                        @else
+                                                            <span class="font-mono text-xs">{{ $enrollmentNumber }}</span> - {{ $statusText }}
                                                             <form method="POST" action="{{ route('parent.enrollment.destroy', [$child, $subject]) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this enrollment?')">
                                                                 @csrf
                                                                 @method('DELETE')
