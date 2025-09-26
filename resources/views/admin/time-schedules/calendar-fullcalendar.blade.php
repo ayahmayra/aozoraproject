@@ -6,18 +6,22 @@
                 <flux:text class="mb-6 mt-2 text-base"></flux:text>
             </div>
             <div class="flex space-x-3">
-                <flux:button variant="ghost" href="{{ route('admin.time-schedules.index') }}">
-                    <flux:icon.table-cells class="h-4 w-4 mr-2" />
-                    Table View
-                </flux:button>
+                @if(auth()->user()->hasRole('admin'))
+                    <flux:button variant="ghost" href="{{ route('admin.time-schedules.index') }}">
+                        <flux:icon.table-cells class="h-4 w-4 mr-2" />
+                        Table View
+                    </flux:button>
+                @endif
                 <flux:button variant="ghost" onclick="printCalendar()">
                     <flux:icon.printer class="h-4 w-4 mr-2" />
                     Print Calendar
                 </flux:button>
-                <flux:button variant="primary" href="{{ route('admin.time-schedules.create') }}">
-                    <flux:icon.plus class="h-4 w-4 mr-2" />
-                    Add Schedule
-                </flux:button>
+                @if(auth()->user()->hasRole('admin'))
+                    <flux:button variant="primary" href="{{ route('admin.time-schedules.create') }}">
+                        <flux:icon.plus class="h-4 w-4 mr-2" />
+                        Add Schedule
+                    </flux:button>
+                @endif
             </div>
         </div>
     </div>

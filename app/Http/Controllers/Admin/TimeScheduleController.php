@@ -65,12 +65,12 @@ class TimeScheduleController extends Controller
         $user = auth()->user();
         if ($user->hasRole('parent')) {
             // For parent: show schedules of subjects that their children are enrolled in
-            if ($user->parent && $user->parent->students) {
-                $childrenIds = $user->parent->students->pluck('id');
+            if ($user->parentProfile) {
+                $childrenIds = $user->parentProfile->children->pluck('id');
                 if ($childrenIds->isNotEmpty()) {
                     $query->whereHas('subject.students', function($q) use ($childrenIds) {
-                        $q->whereIn('student_id', $childrenIds)
-                          ->where('enrollment_status', 'active');
+                        $q->whereIn('student_subject.student_id', $childrenIds)
+                          ->where('student_subject.enrollment_status', 'active');
                     });
                 } else {
                     // If parent has no children, show no schedules
@@ -82,10 +82,10 @@ class TimeScheduleController extends Controller
             }
         } elseif ($user->hasRole('student')) {
             // For student: show schedules of subjects they are enrolled in
-            if ($user->student) {
+            if ($user->studentProfile) {
                 $query->whereHas('subject.students', function($q) use ($user) {
-                    $q->where('student_id', $user->student->id)
-                      ->where('enrollment_status', 'active');
+                    $q->where('student_subject.student_id', $user->studentProfile->id)
+                      ->where('student_subject.enrollment_status', 'active');
                 });
             } else {
                 // If student relationship doesn't exist, show no schedules
@@ -112,6 +112,7 @@ class TimeScheduleController extends Controller
 
         // Get all schedules
         $allSchedules = $query->get();
+        \Log::info('Total schedules found: ' . $allSchedules->count());
 
         // Define day order for proper sorting
         $dayOrder = [
@@ -183,12 +184,12 @@ class TimeScheduleController extends Controller
         $user = auth()->user();
         if ($user->hasRole('parent')) {
             // For parent: show schedules of subjects that their children are enrolled in
-            if ($user->parent && $user->parent->students) {
-                $childrenIds = $user->parent->students->pluck('id');
+            if ($user->parentProfile) {
+                $childrenIds = $user->parentProfile->children->pluck('id');
                 if ($childrenIds->isNotEmpty()) {
                     $query->whereHas('subject.students', function($q) use ($childrenIds) {
-                        $q->whereIn('student_id', $childrenIds)
-                          ->where('enrollment_status', 'active');
+                        $q->whereIn('student_subject.student_id', $childrenIds)
+                          ->where('student_subject.enrollment_status', 'active');
                     });
                 } else {
                     // If parent has no children, show no schedules
@@ -200,10 +201,10 @@ class TimeScheduleController extends Controller
             }
         } elseif ($user->hasRole('student')) {
             // For student: show schedules of subjects they are enrolled in
-            if ($user->student) {
+            if ($user->studentProfile) {
                 $query->whereHas('subject.students', function($q) use ($user) {
-                    $q->where('student_id', $user->student->id)
-                      ->where('enrollment_status', 'active');
+                    $q->where('student_subject.student_id', $user->studentProfile->id)
+                      ->where('student_subject.enrollment_status', 'active');
                 });
             } else {
                 // If student relationship doesn't exist, show no schedules
