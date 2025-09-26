@@ -127,4 +127,94 @@ class User extends Authenticatable
     {
         return $this->hasMany(Student::class, 'parent_id');
     }
+
+    /**
+     * Check if parent has active students
+     */
+    public function hasActiveStudents(): bool
+    {
+        if (!$this->parentProfile) {
+            return false;
+        }
+        
+        return $this->parentProfile->children()
+            ->whereHas('user', function($query) {
+                $query->where('status', 'active');
+            })
+            ->exists();
+    }
+
+    /**
+     * Check if parent has any students (regardless of status)
+     */
+    public function hasStudents(): bool
+    {
+        if (!$this->parentProfile) {
+            return false;
+        }
+        
+        return $this->parentProfile->children()->exists();
+    }
+
+    /**
+     * Check if student has active enrollments
+     */
+    public function hasActiveEnrollments(): bool
+    {
+        if (!$this->studentProfile) {
+            return false;
+        }
+        
+        return $this->studentProfile->subjects()
+            ->wherePivot('enrollment_status', 'active')
+            ->exists();
+    }
+
+    /**
+     * Check if teacher is assigned to subjects
+     */
+    public function isAssignedToSubjects(): bool
+    {
+        if (!$this->teacherProfile) {
+            return false;
+        }
+        
+        return $this->teacherProfile->subjects()->exists();
+    }
+
+    /**
+     * Check if user can be deleted
+     */
+    public function canBeDeleted(): bool
+    {
+        // Check if user has students (for parents) - any students, not just active ones
+        if ($this->hasRole('parent') && $this->hasStudents()) {
+            return false;
+        }
+        
+        // Check if user has active enrollments (for students)
+        if ($this->hasRole('student') && $this->hasActiveEnrollments()) {
+            return false;
+        }
+        
+        // Check if teacher is assigned to subjects
+        if ($this->hasRole('teacher') && $this->isAssignedToSubjects()) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Check if user status can be changed to pending/inactive
+     */
+    public function canChangeStatusToPendingOrInactive(): bool
+    {
+        // Parent with active students cannot be deactivated
+        if ($this->hasRole('parent') && $this->hasActiveStudents()) {
+            return false;
+        }
+        
+        return true;
+    }
 }

@@ -49,4 +49,22 @@ class Subject extends Model
     {
         return $this->students()->wherePivot('status', 'completed');
     }
+
+    /**
+     * Check if subject has active enrollments
+     */
+    public function hasActiveEnrollments(): bool
+    {
+        return $this->students()
+            ->wherePivot('enrollment_status', 'active')
+            ->exists();
+    }
+
+    /**
+     * Check if subject can be deleted
+     */
+    public function canBeDeleted(): bool
+    {
+        return !$this->hasActiveEnrollments();
+    }
 }

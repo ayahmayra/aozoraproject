@@ -189,6 +189,11 @@ class StudentsController extends Controller
 
     public function destroy(Student $student)
     {
+        // Check if student can be deleted
+        if (!$student->user->canBeDeleted()) {
+            return redirect()->route('admin.students')->with('error', 'Cannot delete student: Student has active enrollments.');
+        }
+
         // Delete user account
         $student->user->delete();
         

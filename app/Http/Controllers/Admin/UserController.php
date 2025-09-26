@@ -72,6 +72,11 @@ class UserController extends Controller
             'status' => 'required|in:active,pending,inactive',
         ]);
 
+        // Check if status change is allowed
+        if (in_array($request->status, ['pending', 'inactive']) && !$user->canChangeStatusToPendingOrInactive()) {
+            return redirect()->route('admin.users')->with('error', 'Cannot change status: User has active students or enrollments.');
+        }
+
         $data = [
             'name' => $request->name,
             'email' => $request->email,
@@ -97,6 +102,19 @@ class UserController extends Controller
             return redirect()->route('admin.users')->with('error', 'Cannot delete the last admin user.');
         }
 
+        // Check if user can be deleted
+        if (!$user->canBeDeleted()) {
+            $message = 'Cannot delete user: ';
+            if ($user->hasRole('parent') && $user->hasStudents()) {
+                $message .= 'Parent has students.';
+            } elseif ($user->hasRole('student') && $user->hasActiveEnrollments()) {
+                $message .= 'Student has active enrollments.';
+            } elseif ($user->hasRole('teacher') && $user->isAssignedToSubjects()) {
+                $message .= 'Teacher is assigned to subjects.';
+            }
+            return redirect()->route('admin.users')->with('error', $message);
+        }
+
         $user->delete();
 
         return redirect()->route('admin.users')->with('success', 'User deleted successfully!');
@@ -110,6 +128,11 @@ class UserController extends Controller
 
     public function deactivate(User $user)
     {
+        // Check if user can be deactivated
+        if (!$user->canChangeStatusToPendingOrInactive()) {
+            return redirect()->route('admin.users')->with('error', 'Cannot deactivate user: User has active students or enrollments.');
+        }
+
         $user->update(['status' => 'inactive']);
         return redirect()->route('admin.users')->with('success', 'User deactivated successfully!');
     }

@@ -94,6 +94,11 @@ class SubjectController extends Controller
 
     public function destroy(Subject $subject)
     {
+        // Check if subject can be deleted
+        if (!$subject->canBeDeleted()) {
+            return redirect()->route('admin.subjects')->with('error', 'Cannot delete subject: Subject has active enrollments.');
+        }
+
         $subject->delete();
 
         return redirect()->route('admin.subjects')->with('success', 'Subject deleted successfully!');
