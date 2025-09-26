@@ -56,6 +56,13 @@
                         <flux:sidebar.item icon="document-text" :href="route('admin.document-numbering.index')" :current="request()->routeIs('admin.document-numbering*')" wire:navigate tooltip="{{ __('Document Numbering') }}">{{ __('Document Numbering') }}</flux:sidebar.item>
                     </flux:sidebar.group>
                 @endif
+
+                @if(auth()->user()->hasRole(['teacher', 'parent', 'student']))
+                    <flux:sidebar.group expandable heading="{{ __('Academic') }}" icon="academic-cap">
+                        <flux:sidebar.item icon="book-open" :href="route('academic.subjects')" :current="request()->routeIs('academic.subjects*')" tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
+                        <flux:sidebar.item icon="calendar" :href="route('academic.schedule-calendar')" :current="request()->routeIs('academic.schedule-calendar')" tooltip="{{ __('Schedule Calendar') }}">{{ __('Schedule Calendar') }}</flux:sidebar.item>
+                    </flux:sidebar.group>
+                @endif
             </flux:sidebar.nav>
 
             <flux:sidebar.spacer />

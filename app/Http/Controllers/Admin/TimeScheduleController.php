@@ -61,6 +61,39 @@ class TimeScheduleController extends Controller
     {
         $query = TimeSchedule::with(['subject', 'teacher.user']);
 
+        // Filter by user role
+        $user = auth()->user();
+        if ($user->hasRole('parent')) {
+            // For parent: show schedules of subjects that their children are enrolled in
+            if ($user->parent && $user->parent->students) {
+                $childrenIds = $user->parent->students->pluck('id');
+                if ($childrenIds->isNotEmpty()) {
+                    $query->whereHas('subject.students', function($q) use ($childrenIds) {
+                        $q->whereIn('student_id', $childrenIds)
+                          ->where('enrollment_status', 'active');
+                    });
+                } else {
+                    // If parent has no children, show no schedules
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                // If parent relationship doesn't exist, show no schedules
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($user->hasRole('student')) {
+            // For student: show schedules of subjects they are enrolled in
+            if ($user->student) {
+                $query->whereHas('subject.students', function($q) use ($user) {
+                    $q->where('student_id', $user->student->id)
+                      ->where('enrollment_status', 'active');
+                });
+            } else {
+                // If student relationship doesn't exist, show no schedules
+                $query->whereRaw('1 = 0');
+            }
+        }
+        // For admin and teacher: show all schedules (no additional filter)
+
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
@@ -144,7 +177,42 @@ class TimeScheduleController extends Controller
      */
     public function apiData()
     {
-        $schedules = TimeSchedule::with(['subject', 'teacher.user'])->get();
+        $query = TimeSchedule::with(['subject', 'teacher.user']);
+        
+        // Filter by user role
+        $user = auth()->user();
+        if ($user->hasRole('parent')) {
+            // For parent: show schedules of subjects that their children are enrolled in
+            if ($user->parent && $user->parent->students) {
+                $childrenIds = $user->parent->students->pluck('id');
+                if ($childrenIds->isNotEmpty()) {
+                    $query->whereHas('subject.students', function($q) use ($childrenIds) {
+                        $q->whereIn('student_id', $childrenIds)
+                          ->where('enrollment_status', 'active');
+                    });
+                } else {
+                    // If parent has no children, show no schedules
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                // If parent relationship doesn't exist, show no schedules
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($user->hasRole('student')) {
+            // For student: show schedules of subjects they are enrolled in
+            if ($user->student) {
+                $query->whereHas('subject.students', function($q) use ($user) {
+                    $q->where('student_id', $user->student->id)
+                      ->where('enrollment_status', 'active');
+                });
+            } else {
+                // If student relationship doesn't exist, show no schedules
+                $query->whereRaw('1 = 0');
+            }
+        }
+        // For admin and teacher: show all schedules (no additional filter)
+        
+        $schedules = $query->get();
         
         $events = [];
         $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];

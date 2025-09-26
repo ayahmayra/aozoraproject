@@ -198,4 +198,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/document-numbering/{documentNumberingConfig}/reset-number', [\App\Http\Controllers\Admin\DocumentNumberingConfigController::class, 'resetNumber'])->name('document-numbering.reset-number');
 });
 
+// Academic Routes - Accessible by Teacher, Parent, and Student
+Route::middleware(['auth', 'role:teacher,parent,student'])->prefix('academic')->name('academic.')->group(function () {
+    // Subjects (read-only for non-admin users)
+    Route::get('/subjects', [\App\Http\Controllers\Admin\SubjectController::class, 'index'])->name('subjects');
+    Route::get('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'show'])->name('subjects.show');
+    
+    // Schedule Calendar (read-only for non-admin users)
+    Route::get('/schedule-calendar', [\App\Http\Controllers\Admin\TimeScheduleController::class, 'calendarFullCalendar'])->name('schedule-calendar');
+});
+
 require __DIR__.'/auth.php';

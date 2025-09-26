@@ -40,10 +40,12 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <flux:heading size="lg">Subjects ({{ $subjects->total() }})</flux:heading>
-                <flux:button variant="primary" href="{{ route('admin.subjects.create') }}">
-                    <flux:icon.plus class="h-4 w-4 mr-2" />
-                    Add Subject
-                </flux:button>
+                @if(auth()->user()->hasRole('admin'))
+                    <flux:button variant="primary" href="{{ route('admin.subjects.create') }}">
+                        <flux:icon.plus class="h-4 w-4 mr-2" />
+                        Add Subject
+                    </flux:button>
+                @endif
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -55,7 +57,9 @@
                     <flux:table.column>Teachers</flux:table.column>
                     <flux:table.column>Students</flux:table.column>
                     <flux:table.column>Created</flux:table.column>
-                    <flux:table.column>Actions</flux:table.column>
+                    @if(auth()->user()->hasRole(['admin', 'teacher']))
+                        <flux:table.column>Actions</flux:table.column>
+                    @endif
                 </flux:table.columns>
                 <flux:table.rows>
                     @forelse($subjects as $subject)
@@ -98,27 +102,35 @@
                                 @endif
                             </flux:table.cell>
                             <flux:table.cell>{{ $subject->created_at->format('M d, Y') }}</flux:table.cell>
-                            <flux:table.cell>
-                                <div class="flex space-x-2">
-                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.show', $subject) }}" title="View Subject">
+                            @if(auth()->user()->hasRole('admin'))
+                                <flux:table.cell>
+                                    <div class="flex space-x-2">
+                                        <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.show', $subject) }}" title="View Subject">
+                                            <flux:icon.eye class="h-4 w-4" />
+                                        </flux:button>
+                                        <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.edit', $subject) }}" title="Edit Subject">
+                                            <flux:icon.pencil class="h-4 w-4" />
+                                        </flux:button>
+                                        <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this subject?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <flux:button variant="ghost" size="sm" type="submit" title="Delete Subject">
+                                                <flux:icon.trash class="h-4 w-4" />
+                                            </flux:button>
+                                        </form>
+                                    </div>
+                                </flux:table.cell>
+                            @elseif(auth()->user()->hasRole('teacher'))
+                                <flux:table.cell>
+                                    <flux:button variant="ghost" size="sm" href="{{ route('academic.subjects.show', $subject) }}" title="View Subject">
                                         <flux:icon.eye class="h-4 w-4" />
                                     </flux:button>
-                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.edit', $subject) }}" title="Edit Subject">
-                                        <flux:icon.pencil class="h-4 w-4" />
-                                    </flux:button>
-                                    <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this subject?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <flux:button variant="ghost" size="sm" type="submit" title="Delete Subject">
-                                            <flux:icon.trash class="h-4 w-4" />
-                                        </flux:button>
-                                    </form>
-                                </div>
-                            </flux:table.cell>
+                                </flux:table.cell>
+                            @endif
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="6" class="text-center py-8">
+                            <flux:table.cell colspan="{{ auth()->user()->hasRole(['admin', 'teacher']) ? '7' : '6' }}" class="text-center py-8">
                                 <div class="text-gray-500">
                                     <flux:icon.academic-cap class="h-12 w-12 mx-auto mb-4 text-gray-300" />
                                     <p class="text-lg font-medium">No subjects found</p>
