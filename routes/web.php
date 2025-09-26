@@ -175,6 +175,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'update'])->name('subjects.update');
     Route::delete('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'destroy'])->name('subjects.destroy');
     
+    // Time Schedule Management
+    Route::resource('time-schedules', \App\Http\Controllers\Admin\TimeScheduleController::class)->parameters(['time-schedules' => 'timeSchedule']);
+    
     // Roles Management
     Route::get('/roles', function () {
         return view('admin.roles.index');
