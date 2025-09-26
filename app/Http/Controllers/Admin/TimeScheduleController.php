@@ -53,6 +53,149 @@ class TimeScheduleController extends Controller
         return view('admin.time-schedules.index', compact('schedules', 'days'));
     }
 
+
+    /**
+     * Display time schedules in FullCalendar view.
+     */
+    public function calendarFullCalendar(Request $request)
+    {
+        $query = TimeSchedule::with(['subject', 'teacher.user']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('subject', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
+            })->orWhereHas('teacher.user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhere('room', 'like', "%{$search}%");
+        }
+
+        // Filter by day
+        if ($request->filled('day')) {
+            $query->where('day_of_week', $request->day);
+        }
+
+        // Get all schedules
+        $allSchedules = $query->get();
+
+        // Define day order for proper sorting
+        $dayOrder = [
+            'Monday' => 1,
+            'Tuesday' => 2,
+            'Wednesday' => 3,
+            'Thursday' => 4,
+            'Friday' => 5,
+            'Saturday' => 6,
+            'Sunday' => 7
+        ];
+
+        // Sort schedules
+        $schedules = $allSchedules->sortBy(function($schedule) use ($dayOrder) {
+            return $dayOrder[$schedule->day_of_week] * 10000 + strtotime($schedule->start_time);
+        })->values();
+
+        // Get days for filter
+        $days = TimeSchedule::getDayOptions();
+
+        // Prepare events data for FullCalendar - Following official documentation
+        $events = [];
+        $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
+        
+        // Get current week dates
+        $currentWeek = now()->startOfWeek();
+        $weekDates = [];
+        for ($i = 0; $i < 7; $i++) {
+            $weekDates[] = $currentWeek->copy()->addDays($i);
+        }
+        
+        foreach ($schedules as $schedule) {
+            $colorIndex = abs(crc32($schedule->subject->name)) % count($colors);
+            
+            // Find matching day in current week
+            foreach ($weekDates as $date) {
+                if ($date->format('l') === $schedule->day_of_week) {
+                    $events[] = [
+                        'id' => $schedule->id . '_' . $date->format('Y-m-d'),
+                        'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
+                        'start' => $date->format('Y-m-d') . 'T' . $schedule->start_time->format('H:i:s'),
+                        'end' => $date->format('Y-m-d') . 'T' . $schedule->end_time->format('H:i:s'),
+                        'backgroundColor' => $colors[$colorIndex],
+                        'borderColor' => $colors[$colorIndex],
+                        'textColor' => '#ffffff',
+                        'extendedProps' => [
+                            'subject' => $schedule->subject->name,
+                            'subjectCode' => $schedule->subject->code,
+                            'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
+                            'room' => $schedule->room,
+                            'notes' => $schedule->notes,
+                            'dayOfWeek' => $schedule->day_of_week,
+                            'originalId' => $schedule->id
+                        ]
+                    ];
+                }
+            }
+        }
+
+        // Debug: Log events count and sample data
+        \Log::info('FullCalendar Events Count: ' . count($events));
+        \Log::info('Schedules Count: ' . $schedules->count());
+        if (count($events) > 0) {
+            \Log::info('Sample Event: ' . json_encode($events[0]));
+        }
+        
+        return view('admin.time-schedules.calendar-fullcalendar', compact('schedules', 'days', 'events'));
+    }
+
+    /**
+     * API endpoint for calendar data
+     */
+    public function apiData()
+    {
+        $schedules = TimeSchedule::with(['subject', 'teacher.user'])->get();
+        
+        // Get current week dates
+        $currentWeek = now()->startOfWeek();
+        $weekDates = [];
+        for ($i = 0; $i < 7; $i++) {
+            $weekDates[] = $currentWeek->copy()->addDays($i);
+        }
+        
+        $events = [];
+        $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
+        
+        foreach ($schedules as $schedule) {
+            $colorIndex = abs(crc32($schedule->subject->name)) % count($colors);
+            
+            // Find matching day in current week
+            foreach ($weekDates as $date) {
+                if ($date->format('l') === $schedule->day_of_week) {
+                    $events[] = [
+                        'id' => $schedule->id . '_' . $date->format('Y-m-d'),
+                        'title' => $schedule->subject->name . ' - ' . ($schedule->teacher ? $schedule->teacher->user->name : 'No Teacher'),
+                        'start' => $date->format('Y-m-d') . 'T' . $schedule->start_time->format('H:i:s'),
+                        'end' => $date->format('Y-m-d') . 'T' . $schedule->end_time->format('H:i:s'),
+                        'backgroundColor' => $colors[$colorIndex],
+                        'borderColor' => $colors[$colorIndex],
+                        'textColor' => '#ffffff',
+                        'extendedProps' => [
+                            'subject' => $schedule->subject->name,
+                            'subjectCode' => $schedule->subject->code,
+                            'teacher' => $schedule->teacher ? $schedule->teacher->user->name : 'No Teacher',
+                            'room' => $schedule->room,
+                            'notes' => $schedule->notes,
+                            'dayOfWeek' => $schedule->day_of_week,
+                            'originalId' => $schedule->id
+                        ]
+                    ];
+                }
+            }
+        }
+        
+        return response()->json($events);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

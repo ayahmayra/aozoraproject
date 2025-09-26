@@ -177,6 +177,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Time Schedule Management
     Route::resource('time-schedules', \App\Http\Controllers\Admin\TimeScheduleController::class)->parameters(['time-schedules' => 'timeSchedule']);
+    Route::get('/time-schedules-calendar-fullcalendar', [\App\Http\Controllers\Admin\TimeScheduleController::class, 'calendarFullCalendar'])->name('time-schedules.calendar-fullcalendar');
+    
+    // API for calendar data
+    Route::get('/api/time-schedules', [\App\Http\Controllers\Admin\TimeScheduleController::class, 'apiData'])->name('api.time-schedules');
     
     // Roles Management
     Route::get('/roles', function () {

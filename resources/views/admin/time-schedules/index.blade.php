@@ -57,10 +57,16 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <flux:heading size="lg">Time Schedules ({{ $schedules->count() }})</flux:heading>
-                <flux:button variant="primary" href="{{ route('admin.time-schedules.create') }}">
-                    <flux:icon.plus class="h-4 w-4 mr-2" />
-                    Add Schedule
-                </flux:button>
+                <div class="flex space-x-3">
+                    <flux:button variant="ghost" href="{{ route('admin.time-schedules.calendar-fullcalendar') }}">
+                        <flux:icon.calendar-days class="h-4 w-4 mr-2" />
+                        FullCalendar
+                    </flux:button>
+                    <flux:button variant="primary" href="{{ route('admin.time-schedules.create') }}">
+                        <flux:icon.plus class="h-4 w-4 mr-2" />
+                        Add Schedule
+                    </flux:button>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto">
