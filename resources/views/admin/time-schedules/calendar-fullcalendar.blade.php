@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 <flux:heading size="xl" level="1">Time Schedules Calendar</flux:heading>
-                <flux:text class="mb-6 mt-2 text-base">Professional calendar view with FullCalendar.js</flux:text>
+                <flux:text class="mb-6 mt-2 text-base"></flux:text>
             </div>
             <div class="flex space-x-3">
                 <flux:button variant="ghost" href="{{ route('admin.time-schedules.index') }}">
@@ -84,8 +84,8 @@
             </div>
         </div>
         <div class="p-6">
-            <div id="calendar" style="min-height: 400px; width: 100%; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
-                <div style="padding: 20px; text-align: center; color: #666;">
+            <div id="calendar" style="min-height: 400px; width: 100%; background: transparent; border: 1px solid var(--flux-colors-gray-200); border-radius: 8px;">
+                <div style="padding: 20px; text-align: center; color: var(--flux-colors-gray-500);">
                     Loading calendar...
                 </div>
             </div>
@@ -98,11 +98,11 @@
             <div class="p-6">
                 <div class="flex items-center">
                     <div class="p-3 bg-blue-100 rounded-lg">
-                        <flux:icon.calendar class="h-6 w-6 text-blue-600" />
+                        <flux:icon.calendar class="h-6 w-6 " />
                     </div>
                     <div class="ml-4">
-                        <flux:text class="text-sm font-medium text-gray-500">Total Schedules</flux:text>
-                        <flux:text class="text-2xl font-bold text-gray-900">{{ $schedules->count() }}</flux:text>
+                        <flux:text class="text-sm font-medium ">Total Schedules</flux:text>
+                        <flux:text class="text-2xl font-bold ">{{ $schedules->count() }}</flux:text>
                     </div>
                 </div>
             </div>
@@ -115,8 +115,8 @@
                         <flux:icon.book-open class="h-6 w-6 text-green-600" />
                     </div>
                     <div class="ml-4">
-                        <flux:text class="text-sm font-medium text-gray-500">Unique Subjects</flux:text>
-                        <flux:text class="text-2xl font-bold text-gray-900">{{ $schedules->pluck('subject_id')->unique()->count() }}</flux:text>
+                        <flux:text class="text-sm font-medium ">Unique Subjects</flux:text>
+                        <flux:text class="text-2xl font-boldtext-gray-900">{{ $schedules->pluck('subject_id')->unique()->count() }}</flux:text>
                     </div>
                 </div>
             </div>
@@ -129,8 +129,8 @@
                         <flux:icon.user-group class="h-6 w-6 text-purple-600" />
                     </div>
                     <div class="ml-4">
-                        <flux:text class="text-sm font-medium text-gray-500">Teachers Involved</flux:text>
-                        <flux:text class="text-2xl font-bold text-gray-900">{{ $schedules->pluck('teacher_id')->filter()->unique()->count() }}</flux:text>
+                        <flux:text class="text-sm font-medium ">Teachers Involved</flux:text>
+                        <flux:text class="text-2xl font-bold ">{{ $schedules->pluck('teacher_id')->filter()->unique()->count() }}</flux:text>
                     </div>
                 </div>
             </div>
@@ -261,8 +261,8 @@
         #calendar {
             min-height: 400px !important;
             width: 100% !important;
-            background: white !important;
-            border: 1px solid #e5e7eb !important;
+            background: transparent !important;
+            border: 1px solid var(--flux-colors-gray-200) !important;
             border-radius: 8px !important;
         }
         
@@ -303,8 +303,38 @@
         }
         
         .fc-col-header-cell {
-            background-color: #f8fafc !important;
+            background-color: transparent !important;
             font-weight: 600 !important;
+            color: inherit !important;
+        }
+        
+        .fc-timegrid-axis {
+            background-color: transparent !important;
+            color: inherit !important;
+        }
+        
+        .fc-scrollgrid {
+            border-color: var(--flux-colors-gray-200) !important;
+        }
+        
+        .fc-timegrid-slot {
+            border-color: var(--flux-colors-gray-100) !important;
+        }
+        
+        /* Remove background from header elements */
+        .fc-col-header-cell {
+            background-color: transparent !important;
+            color: inherit !important;
+        }
+        
+        .fc-timegrid-axis {
+            background-color: transparent !important;
+            color: inherit !important;
+        }
+        
+        /* Remove background from th with role="presentation" */
+        th[role="presentation"] {
+            background-color: transparent !important;
         }
         
         /* Special styling for short duration events */
@@ -324,8 +354,29 @@
             min-height: 1.5rem !important;
         }
         
-        .fc-timegrid-axis {
-            background-color: #f8fafc !important;
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .fc-col-header-cell {
+                background-color: transparent !important;
+                color: inherit !important;
+            }
+            
+            .fc-timegrid-axis {
+                background-color: transparent !important;
+                color: inherit !important;
+            }
+            
+            th[role="presentation"] {
+                background-color: transparent !important;
+            }
+            
+            .fc-scrollgrid {
+                border-color: var(--flux-colors-gray-700) !important;
+            }
+            
+            .fc-timegrid-slot {
+                border-color: var(--flux-colors-gray-700) !important;
+            }
         }
         
         .fc-scrollgrid {
