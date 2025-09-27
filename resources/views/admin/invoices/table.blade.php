@@ -21,7 +21,7 @@
                         <div class="flex items-center space-x-4">
                             <flux:field>
                                 <flux:label>Tahun</flux:label>
-                                <flux:select onchange="changeFilter()">
+                                <flux:select name="year" onchange="changeFilter()">
                                     @for($i = date('Y') - 2; $i <= date('Y') + 2; $i++)
                                         <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
                                     @endfor
@@ -224,20 +224,43 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure DOM is loaded before any manipulation
+            console.log('Invoice table page loaded');
+        });
+
+        // Prevent Livewire conflicts
+        document.addEventListener('livewire:init', function() {
+            console.log('Livewire initialized');
+        });
+
         function changeFilter() {
-            const year = document.querySelector('select[onchange="changeFilter()"]').value;
-            const subject = document.getElementById('subjectFilter').value;
-            
-            const url = new URL(window.location);
-            url.searchParams.set('year', year);
-            
-            if (subject) {
-                url.searchParams.set('subject', subject);
-            } else {
-                url.searchParams.delete('subject');
+            try {
+                // Use more specific selectors to avoid conflicts
+                const yearSelect = document.querySelector('select[name="year"]');
+                const subjectSelect = document.getElementById('subjectFilter');
+                
+                if (!yearSelect || !subjectSelect) {
+                    console.error('Filter elements not found', { yearSelect, subjectSelect });
+                    return;
+                }
+                
+                const year = yearSelect.value;
+                const subject = subjectSelect.value;
+                
+                const url = new URL(window.location);
+                url.searchParams.set('year', year);
+                
+                if (subject) {
+                    url.searchParams.set('subject', subject);
+                } else {
+                    url.searchParams.delete('subject');
+                }
+                
+                window.location.href = url.toString();
+            } catch (error) {
+                console.error('Error in changeFilter:', error);
             }
-            
-            window.location.href = url.toString();
         }
     </script>
 </x-layouts.app>
