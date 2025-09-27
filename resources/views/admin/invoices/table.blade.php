@@ -38,10 +38,7 @@
                                     @endforeach
                                 </flux:select>
                             </flux:field>
-                            <flux:button variant="primary" href="{{ route('admin.invoices.table.export', ['year' => $year, 'subject' => $subjectFilter]) }}">
-                                <flux:icon.arrow-down-tray class="h-4 w-4 mr-2" />
-                                Export Excel
-                            </flux:button>
+                            
                         </div>
                     </div>
                 </div>
@@ -50,88 +47,91 @@
             <!-- Invoice Table -->
             <flux:card>
                 <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium ">Nama Student</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium ">Subject</th>
+                    <div class="flex justify-end mb-6">
+                        <flux:button size="xs"  variant="primary" href="{{ route('admin.invoices.table.export', ['year' => $year, 'subject' => $subjectFilter]) }}">
+                            <flux:icon.arrow-down-tray class="h-4 w-4 mr-2" />
+                            Export Excel
+                        </flux:button>
+                    </div>
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>Nama Student</flux:table.column>
+                            <flux:table.column>Subject</flux:table.column>
+                            @foreach($months as $monthNum => $monthName)
+                                <flux:table.column>{{ $monthName }}</flux:table.column>
+                            @endforeach
+                        </flux:table.columns>
+
+                        <flux:table.rows>
+                            @forelse($groupedInvoices as $key => $invoices)
+                                @php
+                                    $parts = explode('|', $key);
+                                    $studentName = $parts[0];
+                                    $subjectName = $parts[1];
+                                @endphp
+                                <flux:table.row>
+                                    <flux:table.cell variant="strong">{{ $studentName }}</flux:table.cell>
+                                    <flux:table.cell>{{ $subjectName }}</flux:table.cell>
                                     @foreach($months as $monthNum => $monthName)
-                                        <th class="px-3 py-3 text-center text-xs font-medium ">{{ $monthName }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody class="">
-                                @forelse($groupedInvoices as $key => $invoices)
-                                    @php
-                                        $parts = explode('|', $key);
-                                        $studentName = $parts[0];
-                                        $subjectName = $parts[1];
-                                    @endphp
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ">
-                                            {{ $studentName }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm ">
-                                            {{ $subjectName }}
-                                        </td>
-                                        @foreach($months as $monthNum => $monthName)
-                                            @php
-                                                $monthInvoice = $invoices->first(function($invoice) use ($monthNum) {
-                                                    return $invoice->billing_period_start->month == $monthNum;
-                                                });
-                                            @endphp
-                                            <td class="px-3 py-4 whitespace-nowrap text-center">
-                                                @if($monthInvoice)
-                                                    @if($monthInvoice->payment_status === 'verified')
-                                                        <flux:badge size="sm" color="green">{{ number_format($monthInvoice->paid_amount, 0, ',', '.') }}</flux:badge>
-                                                    @elseif($monthInvoice->payment_status === 'paid')
-                                                        <flux:badge size="sm" color="yellow">Paid</flux:badge>
-                                                    @elseif($monthInvoice->payment_status === 'overdue')
-                                                        <flux:badge size="sm" color="red">Overdue</flux:badge>
-                                                    @elseif($monthInvoice->payment_status === 'pending')
-                                                        <flux:badge size="sm" color="red">Pending</flux:badge>
-                                                    @else
-                                                        <flux:badge size="sm" color="gray">Cancelled</flux:badge>
-                                                    @endif
+                                        @php
+                                            $monthInvoice = $invoices->first(function($invoice) use ($monthNum) {
+                                                return $invoice->billing_period_start->month == $monthNum;
+                                            });
+                                        @endphp
+                                        <flux:table.cell>
+                                            @if($monthInvoice)
+                                                @if($monthInvoice->payment_status === 'verified')
+                                                    <flux:badge size="sm" color="green" inset="top bottom">{{ number_format($monthInvoice->paid_amount, 0, ',', '.') }}</flux:badge>
+                                                @elseif($monthInvoice->payment_status === 'paid')
+                                                    <flux:badge size="sm" color="yellow" inset="top bottom">Paid</flux:badge>
+                                                @elseif($monthInvoice->payment_status === 'overdue')
+                                                    <flux:badge size="sm" color="red" inset="top bottom">Overdue</flux:badge>
+                                                @elseif($monthInvoice->payment_status === 'pending')
+                                                    <flux:badge size="sm" color="red" inset="top bottom">Pending</flux:badge>
                                                 @else
-                                                    <span class="">-</span>
+                                                    <flux:badge size="sm" color="gray" inset="top bottom">Cancelled</flux:badge>
                                                 @endif
-                                            </td>
-                                        @endforeach
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ count($months) + 2 }}" class="px-6 py-12 text-center text-gray-500">
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="{{ count($months) + 2 }}">
+                                        <div class="text-center py-12">
                                             <flux:icon.table-cells class="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                                            <div>Tidak ada data invoice untuk tahun {{ $year }}</div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                                
-                                <!-- Total Row -->
-                                <tr class="bg-gray-50 font-semibold">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" colspan="2">
+                                            <div class="text-gray-500">Tidak ada data invoice untuk tahun {{ $year }}</div>
+                                        </div>
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @endforelse
+                            
+                            <!-- Total Row -->
+                            @if($groupedInvoices->count() > 0)
+                                <flux:table.row>
+                                    <flux:table.cell variant="strong" colspan="2">
                                         <div class="flex items-center">
-                                            <flux:icon.calculator class="h-5 w-5 mr-2 text-gray-600" />
+                                            <flux:icon.calculator class="h-5 w-5 mr-2" />
                                             Total Terverifikasi
                                         </div>
-                                    </td>
+                                    </flux:table.cell>
                                     @foreach($months as $monthNum => $monthName)
-                                        <td class="px-3 py-4 whitespace-nowrap text-center">
+                                        <flux:table.cell>
                                             @if($monthlyTotals[$monthNum] > 0)
-                                                <flux:badge size="sm" color="green">
+                                                <flux:badge size="sm" color="green" inset="top bottom">
                                                     Rp {{ number_format($monthlyTotals[$monthNum], 0, ',', '.') }}
                                                 </flux:badge>
                                             @else
-                                                <span class="text-gray-400 text-xs">-</span>
+                                                <span class="text-gray-400">-</span>
                                             @endif
-                                        </td>
+                                        </flux:table.cell>
                                     @endforeach
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                </flux:table.row>
+                            @endif
+                        </flux:table.rows>
+                    </flux:table>
                 </div>
             </flux:card>
 
