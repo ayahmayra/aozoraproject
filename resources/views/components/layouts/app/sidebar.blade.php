@@ -49,6 +49,7 @@
                         <flux:sidebar.item icon="clock" :href="route('admin.time-schedules.index')" :current="request()->routeIs('admin.time-schedules*')" wire:navigate tooltip="{{ __('Time Schedules') }}">{{ __('Time Schedules') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="calendar" :href="route('admin.time-schedules.calendar-fullcalendar')" :current="request()->routeIs('admin.time-schedules.calendar-fullcalendar')" tooltip="{{ __('Schedule Calendar') }}">{{ __('Schedule Calendar') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="document-text" :href="route('admin.invoices')" :current="request()->routeIs('admin.invoices*')" wire:navigate tooltip="{{ __('Invoices') }}">{{ __('Invoices') }}</flux:sidebar.item>
+                        <flux:sidebar.item icon="table-cells" :href="route('admin.invoices.table')" :current="request()->routeIs('admin.invoices.table*')" tooltip="{{ __('Invoice Table') }}">{{ __('Invoice Table') }}</flux:sidebar.item>
                     </flux:sidebar.group>
 
                     <flux:sidebar.group expandable heading="{{ __('System') }}" icon="cog-6-tooth">

@@ -19,6 +19,14 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Display the invoice table page.
+     */
+    public function table()
+    {
+        return view('admin.invoices.table');
+    }
+
+    /**
      * Display a listing of invoices.
      */
     public function index(Request $request)
@@ -207,9 +215,9 @@ class InvoiceController extends Controller
      */
     public function cancelPayment(Invoice $invoice)
     {
-        // Check if invoice is actually paid
-        if ($invoice->payment_status !== 'paid') {
-            return redirect()->route('admin.invoices')->with('error', 'Invoice is not marked as paid.');
+        // Check if invoice is actually paid or verified
+        if (!in_array($invoice->payment_status, ['paid', 'verified'])) {
+            return redirect()->route('admin.invoices')->with('error', 'Invoice is not marked as paid or verified.');
         }
 
         // Use database transaction to ensure data consistency
@@ -226,6 +234,24 @@ class InvoiceController extends Controller
         });
 
         return redirect()->route('admin.invoices')->with('success', "Payment for invoice {$invoice->invoice_number} has been cancelled successfully.");
+    }
+
+    /**
+     * Verify payment for an invoice.
+     */
+    public function verifyPayment(Invoice $invoice)
+    {
+        // Check if invoice is actually paid
+        if ($invoice->payment_status !== 'paid') {
+            return redirect()->route('admin.invoices')->with('error', 'Invoice is not marked as paid.');
+        }
+
+        // Update invoice status to verified
+        $invoice->update([
+            'payment_status' => 'verified',
+        ]);
+
+        return redirect()->route('admin.invoices')->with('success', "Payment for invoice {$invoice->invoice_number} has been verified successfully.");
     }
 
     /**

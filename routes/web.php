@@ -199,10 +199,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Invoice Management
     Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices');
+    Route::get('/invoices/table', [\App\Http\Controllers\Admin\InvoiceController::class, 'table'])->name('invoices.table');
     Route::get('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generateForm'])->name('invoices.generate');
     Route::post('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generate'])->name('invoices.generate.store');
     Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
     Route::put('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\Admin\InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::put('/invoices/{invoice}/verify-payment', [\App\Http\Controllers\Admin\InvoiceController::class, 'verifyPayment'])->name('invoices.verify-payment');
     Route::put('/invoices/{invoice}/cancel-payment', [\App\Http\Controllers\Admin\InvoiceController::class, 'cancelPayment'])->name('invoices.cancel-payment');
     Route::delete('/invoices/delete-non-active', [\App\Http\Controllers\Admin\InvoiceController::class, 'deleteNonActive'])->name('invoices.delete-non-active');
     Route::get('/invoices-statistics', [\App\Http\Controllers\Admin\InvoiceController::class, 'statistics'])->name('invoices.statistics');

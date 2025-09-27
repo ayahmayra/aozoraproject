@@ -288,12 +288,14 @@
                                     @endif
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    @if($invoice->payment_status === 'paid')
-                                        <flux:badge color="green">Paid</flux:badge>
+                                    @if($invoice->payment_status === 'verified')
+                                        <flux:badge color="green">Verified</flux:badge>
+                                    @elseif($invoice->payment_status === 'paid')
+                                        <flux:badge color="yellow">Paid</flux:badge>
                                     @elseif($invoice->payment_status === 'overdue')
                                         <flux:badge color="red">Overdue</flux:badge>
                                     @elseif($invoice->payment_status === 'pending')
-                                        <flux:badge color="yellow">Pending</flux:badge>
+                                        <flux:badge color="red">Pending</flux:badge>
                                     @else
                                         <flux:badge color="gray">Cancelled</flux:badge>
                                     @endif
@@ -314,6 +316,13 @@
                                                 <flux:icon.check class="h-4 w-4" />
                                             </flux:button>
                                         @elseif($invoice->payment_status === 'paid')
+                                            <flux:button variant="ghost" size="sm" onclick="verifyPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
+                                                <flux:icon.shield-check class="h-4 w-4" />
+                                            </flux:button>
+                                            <flux:button variant="ghost" size="sm" onclick="cancelPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
+                                                <flux:icon.x-mark class="h-4 w-4" />
+                                            </flux:button>
+                                        @elseif($invoice->payment_status === 'verified')
                                             <flux:button variant="ghost" size="sm" onclick="cancelPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
                                                 <flux:icon.x-mark class="h-4 w-4" />
                                             </flux:button>
@@ -387,6 +396,50 @@
                     <div class="flex justify-end space-x-3 mt-6">
                         <flux:button variant="outline" type="button" onclick="closeMarkPaidModal()">Cancel</flux:button>
                         <flux:button variant="primary" type="submit">Mark as Paid</flux:button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Payment Modal -->
+    <div id="verifyPaymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center mb-4">
+                    <flux:icon.shield-check class="h-8 w-8 text-green-500 mr-3" />
+                    <h3 class="text-lg font-medium">Verify Payment</h3>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">
+                        Are you sure you want to verify the payment for invoice <strong id="verifyInvoiceNumber"></strong>?
+                    </p>
+                    
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <flux:icon.information-circle class="h-5 w-5 text-green-500 mt-0.5 mr-2" />
+                            <div class="text-sm text-green-700">
+                                <p class="font-medium">This action will:</p>
+                                <ul class="mt-1 list-disc list-inside">
+                                    <li>Change invoice status from "Paid" to "Verified"</li>
+                                    <li>Confirm that the payment has been verified</li>
+                                    <li>Mark the invoice as fully processed</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="verifyPaymentForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="flex justify-end space-x-3">
+                        <flux:button variant="outline" type="button" onclick="closeVerifyPaymentModal()">Cancel</flux:button>
+                        <flux:button variant="primary" type="submit">
+                            <flux:icon.shield-check class="h-4 w-4 mr-2" />
+                            Verify Payment
+                        </flux:button>
                     </div>
                 </form>
             </div>
@@ -500,6 +553,20 @@
             document.getElementById('markPaidModal').classList.add('hidden');
         }
 
+        function verifyPayment(invoiceId, invoiceNumber) {
+            const form = document.getElementById('verifyPaymentForm');
+            form.action = `/admin/invoices/${invoiceId}/verify-payment`;
+            
+            // Set the invoice number in the modal
+            document.getElementById('verifyInvoiceNumber').textContent = invoiceNumber;
+            
+            document.getElementById('verifyPaymentModal').classList.remove('hidden');
+        }
+
+        function closeVerifyPaymentModal() {
+            document.getElementById('verifyPaymentModal').classList.add('hidden');
+        }
+
         function cancelPayment(invoiceId, invoiceNumber) {
             const form = document.getElementById('cancelPaymentForm');
             form.action = `/admin/invoices/${invoiceId}/cancel-payment`;
@@ -525,11 +592,16 @@
         // Close modals when clicking outside
         document.addEventListener('click', function(event) {
             const markPaidModal = document.getElementById('markPaidModal');
+            const verifyPaymentModal = document.getElementById('verifyPaymentModal');
             const cancelPaymentModal = document.getElementById('cancelPaymentModal');
             const deleteModal = document.getElementById('deleteNonActiveModal');
             
             if (event.target === markPaidModal) {
                 closeMarkPaidModal();
+            }
+            
+            if (event.target === verifyPaymentModal) {
+                closeVerifyPaymentModal();
             }
             
             if (event.target === cancelPaymentModal) {

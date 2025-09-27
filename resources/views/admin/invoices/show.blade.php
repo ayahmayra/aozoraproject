@@ -16,6 +16,11 @@
                         <flux:icon.check class="h-4 w-4 mr-2" />
                         Mark as Paid
                     </flux:button>
+                @elseif($invoice->payment_status === 'paid')
+                    <flux:button variant="primary" onclick="verifyPayment()">
+                        <flux:icon.shield-check class="h-4 w-4 mr-2" />
+                        Verify Payment
+                    </flux:button>
                 @endif
             </div>
         </div>
@@ -68,12 +73,14 @@
                                 <flux:field>
                                     <flux:label>Payment Status</flux:label>
                                     <div>
-                                        @if($invoice->payment_status === 'paid')
-                                            <flux:badge color="green">Paid</flux:badge>
+                                        @if($invoice->payment_status === 'verified')
+                                            <flux:badge color="green">Verified</flux:badge>
+                                        @elseif($invoice->payment_status === 'paid')
+                                            <flux:badge color="yellow">Paid</flux:badge>
                                         @elseif($invoice->payment_status === 'overdue')
                                             <flux:badge color="red">Overdue</flux:badge>
                                         @elseif($invoice->payment_status === 'pending')
-                                            <flux:badge color="yellow">Pending</flux:badge>
+                                            <flux:badge color="red">Pending</flux:badge>
                                         @else
                                             <flux:badge color="gray">Cancelled</flux:badge>
                                         @endif
@@ -250,6 +257,11 @@
                                     <flux:icon.check class="h-4 w-4 mr-2" />
                                     Mark as Paid
                                 </flux:button>
+                            @elseif($invoice->payment_status === 'paid')
+                                <flux:button variant="primary" class="w-full" onclick="verifyPayment()">
+                                    <flux:icon.shield-check class="h-4 w-4 mr-2" />
+                                    Verify Payment
+                                </flux:button>
                             @endif
                             
                             <flux:button variant="outline" class="w-full" href="{{ route('admin.invoices') }}">
@@ -324,6 +336,29 @@
 
         function closeMarkPaidModal() {
             document.getElementById('markPaidModal').classList.add('hidden');
+        }
+
+        function verifyPayment() {
+            if (confirm('Are you sure you want to verify the payment for this invoice?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route("admin.invoices.verify-payment", $invoice) }}';
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'PUT';
+                
+                form.appendChild(csrfToken);
+                form.appendChild(methodField);
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
 
         function printInvoice() {
