@@ -42,13 +42,16 @@ class GenerateMonthlyInvoices extends Command
         $this->info("Updated {$overdueCount} overdue invoices");
         
         if (count($monthlyInvoices) > 0) {
+            // Load relationships for display
+            $invoicesWithRelations = collect($monthlyInvoices)->load(['student.user', 'subject']);
+            
             $this->table(
                 ['Invoice Number', 'Student', 'Subject', 'Amount', 'Due Date'],
-                collect($monthlyInvoices)->map(function ($invoice) {
+                $invoicesWithRelations->map(function ($invoice) {
                     return [
                         $invoice->invoice_number,
-                        $invoice->student->name,
-                        $invoice->subject->name,
+                        $invoice->student->user->name ?? 'Unknown',
+                        $invoice->subject->name ?? 'Unknown',
                         'Rp ' . number_format($invoice->total_amount, 0, ',', '.'),
                         $invoice->due_date->format('Y-m-d'),
                     ];

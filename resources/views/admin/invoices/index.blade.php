@@ -11,6 +11,10 @@
                     <flux:icon.plus class="h-4 w-4 mr-2" />
                     Generate Invoices
                 </flux:button>
+                <flux:button variant="danger" onclick="showDeleteModal()">
+                    <flux:icon.trash class="h-4 w-4 mr-2" />
+                    Delete Non-Active
+                </flux:button>
                 <flux:button variant="outline" href="{{ route('admin.invoices.statistics') }}">
                     <flux:icon.chart-bar class="h-4 w-4 mr-2" />
                     Statistics
@@ -27,67 +31,220 @@
             <flux:callout class="mb-6" variant="danger" icon="x-mark" :heading="session('error')" />
         @endif
 
+        @if (session()->has('info'))
+            <flux:callout class="mb-6" variant="info" icon="information-circle" :heading="session('info')" />
+        @endif
+
         <!-- Filters -->
         <flux:card>
             <div class="p-6">
-                <form method="GET" action="{{ route('admin.invoices') }}" class="grid grid-cols-1 gap-4 lg:grid-cols-5">
-                    <div>
-                        <flux:field>
-                            <flux:label>Search</flux:label>
-                            <flux:input 
-                                name="search" 
-                                placeholder="Invoice number, student, subject..." 
-                                value="{{ request('search') }}"
-                            />
-                        </flux:field>
+                <form method="GET" action="{{ route('admin.invoices') }}" class="space-y-4">
+                    <!-- First Row: Search and Status Filters -->
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+                        <div>
+                            <flux:field>
+                                <flux:label>Search</flux:label>
+                                <flux:input 
+                                    name="search" 
+                                    placeholder="Invoice number, student, subject..." 
+                                    value="{{ request('search') }}"
+                                />
+                            </flux:field>
+                        </div>
+                        <div>
+                            <flux:field>
+                                <flux:label>Payment Status</flux:label>
+                                <flux:select name="payment_status">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                    <option value="overdue" {{ request('payment_status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
+                                    <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                </flux:select>
+                            </flux:field>
+                        </div>
+                        <div>
+                            <flux:field>
+                                <flux:label>Payment Method</flux:label>
+                                <flux:select name="payment_method">
+                                    <option value="">All Methods</option>
+                                    <option value="monthly" {{ request('payment_method') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                    <option value="semester" {{ request('payment_method') == 'semester' ? 'selected' : '' }}>Semester</option>
+                                    <option value="yearly" {{ request('payment_method') == 'yearly' ? 'selected' : '' }}>Yearly</option>
+                                </flux:select>
+                            </flux:field>
+                        </div>
+                        <div>
+                            <flux:field>
+                                <flux:label>Billing Period</flux:label>
+                                <div class="flex space-x-2">
+                                    <flux:select name="filter_month" class="flex-1">
+                                        <option value="">All Months</option>
+                                        @php
+                                            $currentMonth = now()->month;
+                                            $selectedMonth = request('filter_month', $currentMonth);
+                                        @endphp
+                                        <option value="1" {{ $selectedMonth == '1' ? 'selected' : '' }}>January</option>
+                                        <option value="2" {{ $selectedMonth == '2' ? 'selected' : '' }}>February</option>
+                                        <option value="3" {{ $selectedMonth == '3' ? 'selected' : '' }}>March</option>
+                                        <option value="4" {{ $selectedMonth == '4' ? 'selected' : '' }}>April</option>
+                                        <option value="5" {{ $selectedMonth == '5' ? 'selected' : '' }}>May</option>
+                                        <option value="6" {{ $selectedMonth == '6' ? 'selected' : '' }}>June</option>
+                                        <option value="7" {{ $selectedMonth == '7' ? 'selected' : '' }}>July</option>
+                                        <option value="8" {{ $selectedMonth == '8' ? 'selected' : '' }}>August</option>
+                                        <option value="9" {{ $selectedMonth == '9' ? 'selected' : '' }}>September</option>
+                                        <option value="10" {{ $selectedMonth == '10' ? 'selected' : '' }}>October</option>
+                                        <option value="11" {{ $selectedMonth == '11' ? 'selected' : '' }}>November</option>
+                                        <option value="12" {{ $selectedMonth == '12' ? 'selected' : '' }}>December</option>
+                                    </flux:select>
+                                    <flux:select name="filter_year" class="flex-1">
+                                        <option value="">All Years</option>
+                                        @php
+                                            $currentYear = now()->year;
+                                            $selectedYear = request('filter_year', $currentYear);
+                                        @endphp
+                                        @for($year = now()->year; $year >= 2020; $year--)
+                                            <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                        @endfor
+                                    </flux:select>
+                                </div>
+                                <flux:description>Filter by billing period (not invoice date)</flux:description>
+                            </flux:field>
+                        </div>
                     </div>
-                    <div>
-                        <flux:field>
-                            <flux:label>Payment Status</flux:label>
-                            <flux:select name="payment_status">
-                                <option value="">All Status</option>
-                                <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                                <option value="overdue" {{ request('payment_status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
-                                <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            </flux:select>
-                        </flux:field>
-                    </div>
-                    <div>
-                        <flux:field>
-                            <flux:label>Payment Method</flux:label>
-                            <flux:select name="payment_method">
-                                <option value="">All Methods</option>
-                                <option value="monthly" {{ request('payment_method') == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                <option value="semester" {{ request('payment_method') == 'semester' ? 'selected' : '' }}>Semester</option>
-                                <option value="yearly" {{ request('payment_method') == 'yearly' ? 'selected' : '' }}>Yearly</option>
-                            </flux:select>
-                        </flux:field>
-                    </div>
-                    <div>
-                        <flux:field>
-                            <flux:label>Date From</flux:label>
-                            <flux:input 
-                                name="date_from" 
-                                type="date"
-                                value="{{ request('date_from') }}"
-                            />
-                        </flux:field>
-                    </div>
-                    <div class="flex items-end">
-                        <flux:button variant="outline" type="submit" class="w-full">
-                            <flux:icon.magnifying-glass class="h-4 w-4 mr-2" />
-                            Filter
-                        </flux:button>
+                    
+                    <!-- Second Row: Date Range and Filter Button -->
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+                        <div>
+                            <flux:field>
+                                <flux:label>Date From</flux:label>
+                                <flux:input 
+                                    name="date_from" 
+                                    type="date"
+                                    value="{{ request('date_from') }}"
+                                />
+                            </flux:field>
+                        </div>
+                        <div>
+                            <flux:field>
+                                <flux:label>Date To</flux:label>
+                                <flux:input 
+                                    name="date_to" 
+                                    type="date"
+                                    value="{{ request('date_to') }}"
+                                />
+                            </flux:field>
+                        </div>
+                        <div class="flex items-end">
+                            <flux:button variant="outline" type="submit" class="w-full">
+                                <flux:icon.magnifying-glass class="h-4 w-4 mr-2" />
+                                Filter
+                            </flux:button>
+                        </div>
+                        <div class="flex items-end">
+                            <flux:button variant="ghost" type="button" onclick="clearFilters()" class="w-full">
+                                <flux:icon.x-mark class="h-4 w-4 mr-2" />
+                                Clear Filters
+                            </flux:button>
+                        </div>
                     </div>
                 </form>
             </div>
         </flux:card>
 
+        <!-- Active Filters Display -->
+        @php
+            $hasFilters = request()->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to']) || 
+                         (request('filter_month') || request('filter_year')) ||
+                         (!request()->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to', 'filter_month', 'filter_year']));
+        @endphp
+        @if($hasFilters)
+            <flux:card>
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <flux:icon.funnel class="h-4 w-4 text-gray-500" />
+                            <span class="text-sm font-medium text-gray-700">Active Filters:</span>
+                        </div>
+                        <flux:button variant="ghost" size="sm" onclick="clearFilters()">
+                            <flux:icon.x-mark class="h-3 w-3 mr-1" />
+                            Clear All
+                        </flux:button>
+                    </div>
+                    
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        @if(request('search'))
+                            <flux:badge color="blue" size="sm">
+                                Search: {{ request('search') }}
+                                <button onclick="removeFilter('search')" class="ml-1 hover:text-red-500">×</button>
+                            </flux:badge>
+                        @endif
+                        
+                        @if(request('payment_status'))
+                            <flux:badge color="green" size="sm">
+                                Status: {{ ucfirst(request('payment_status')) }}
+                                <button onclick="removeFilter('payment_status')" class="ml-1 hover:text-red-500">×</button>
+                            </flux:badge>
+                        @endif
+                        
+                        @if(request('payment_method'))
+                            <flux:badge color="purple" size="sm">
+                                Method: {{ ucfirst(request('payment_method')) }}
+                                <button onclick="removeFilter('payment_method')" class="ml-1 hover:text-red-500">×</button>
+                            </flux:badge>
+                        @endif
+                        
+                        @php
+                            $displayMonth = request('filter_month') ?: now()->month;
+                            $displayYear = request('filter_year') ?: now()->year;
+                            $isDefaultFilter = !request()->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to', 'filter_month', 'filter_year']);
+                        @endphp
+                        @if($displayMonth && $displayYear)
+                            <flux:badge color="orange" size="sm">
+                                Billing Period: {{ \DateTime::createFromFormat('!m', $displayMonth)->format('F') }} {{ $displayYear }}
+                                @if(!$isDefaultFilter)
+                                    <button onclick="removeFilter('filter_month'); removeFilter('filter_year')" class="ml-1 hover:text-red-500">×</button>
+                                @endif
+                            </flux:badge>
+                        @endif
+                        
+                        @if(request('date_from'))
+                            <flux:badge color="cyan" size="sm">
+                                From: {{ \Carbon\Carbon::parse(request('date_from'))->format('M d, Y') }}
+                                <button onclick="removeFilter('date_from')" class="ml-1 hover:text-red-500">×</button>
+                            </flux:badge>
+                        @endif
+                        
+                        @if(request('date_to'))
+                            <flux:badge color="cyan" size="sm">
+                                To: {{ \Carbon\Carbon::parse(request('date_to'))->format('M d, Y') }}
+                                <button onclick="removeFilter('date_to')" class="ml-1 hover:text-red-500">×</button>
+                            </flux:badge>
+                        @endif
+                    </div>
+                </div>
+            </flux:card>
+        @endif
+
         <!-- Invoices Table -->
         <flux:card>
             <div class="px-6 py-4 border-b border-gray-200">
-                <flux:heading size="lg">Invoices ({{ $invoices->total() }})</flux:heading>
+                <div class="flex items-center justify-between">
+                    <flux:heading size="lg">Invoices ({{ $invoices->total() }})</flux:heading>
+                    @php
+                        $hasActiveFilters = request()->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to', 'filter_month', 'filter_year']);
+                        $isDefaultView = !$hasActiveFilters;
+                    @endphp
+                    @if($hasActiveFilters)
+                        <div class="text-sm text-gray-500">
+                            Filtered results
+                        </div>
+                    @else
+                        <div class="text-sm text-blue-600">
+                            Showing current month ({{ now()->format('F Y') }})
+                        </div>
+                    @endif
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <flux:table>
@@ -110,10 +267,10 @@
                                 </flux:table.cell>
                                 <flux:table.cell>
                                     <div class="flex items-center">
-                                        <flux:avatar name="{{ $invoice->student->name }}" size="sm" class="mr-2" />
+                                        <flux:avatar name="{{ $invoice->student->user->name }}" size="sm" class="mr-2" />
                                         <div>
-                                            <div class="text-sm font-medium">{{ $invoice->student->name }}</div>
-                                            <div class="text-xs text-gray-500">{{ $invoice->student->email }}</div>
+                                            <div class="text-sm font-medium">{{ $invoice->student->user->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $invoice->student->user->email }}</div>
                                         </div>
                                     </div>
                                 </flux:table.cell>
@@ -232,6 +389,51 @@
         </div>
     </div>
 
+    <!-- Delete Non-Active Invoices Modal -->
+    <div id="deleteNonActiveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center mb-4">
+                    <flux:icon.exclamation-triangle class="h-8 w-8 text-red-500 mr-3" />
+                    <h3 class="text-lg font-medium">Delete Non-Active Invoices</h3>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">
+                        This action will permanently delete all invoices that are not marked as "paid" (active). 
+                        This includes pending, overdue, and cancelled invoices.
+                    </p>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <flux:icon.information-circle class="h-5 w-5 text-red-500 mt-0.5 mr-2" />
+                            <div class="text-sm text-red-700">
+                                <p class="font-medium">Warning:</p>
+                                <ul class="mt-1 list-disc list-inside">
+                                    <li>This action cannot be undone</li>
+                                    <li>All payment history will be lost</li>
+                                    <li>Only paid invoices will be preserved</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <flux:button variant="outline" type="button" onclick="closeDeleteModal()">Cancel</flux:button>
+                    <form method="POST" action="{{ route('admin.invoices.delete-non-active') }}" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <flux:button variant="danger" type="submit">
+                            <flux:icon.trash class="h-4 w-4 mr-2" />
+                            Delete All Non-Active
+                        </flux:button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function markPaid(invoiceId) {
             const form = document.getElementById('markPaidForm');
@@ -241,6 +443,42 @@
 
         function closeMarkPaidModal() {
             document.getElementById('markPaidModal').classList.add('hidden');
+        }
+
+        function showDeleteModal() {
+            document.getElementById('deleteNonActiveModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteNonActiveModal').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const markPaidModal = document.getElementById('markPaidModal');
+            const deleteModal = document.getElementById('deleteNonActiveModal');
+            
+            if (event.target === markPaidModal) {
+                closeMarkPaidModal();
+            }
+            
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
+        function clearFilters() {
+            // Reset all form inputs
+            document.querySelector('form').reset();
+            
+            // Redirect to clean URL
+            window.location.href = '{{ route("admin.invoices") }}';
+        }
+
+        function removeFilter(filterName) {
+            const url = new URL(window.location);
+            url.searchParams.delete(filterName);
+            window.location.href = url.toString();
         }
     </script>
 </x-layouts.app>

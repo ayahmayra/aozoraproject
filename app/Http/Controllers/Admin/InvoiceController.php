@@ -22,14 +22,14 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Invoice::with(['student', 'subject', 'enrollment']);
+        $query = Invoice::with(['student.user', 'subject', 'enrollment']);
 
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
-                  ->orWhereHas('student', function($q) use ($search) {
+                  ->orWhereHas('student.user', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                   })
@@ -56,6 +56,23 @@ class InvoiceController extends Controller
 
         if ($request->filled('date_to')) {
             $query->where('invoice_date', '<=', $request->date_to);
+        }
+
+        // Filter by billing period (month and year)
+        // If no billing period filter is set, default to current month
+        if ($request->filled('filter_month') && $request->filled('filter_year')) {
+            $month = $request->filter_month;
+            $year = $request->filter_year;
+        } elseif (!$request->hasAny(['filter_month', 'filter_year']) && !$request->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to'])) {
+            // Default to current month if no filters are applied
+            $month = now()->month;
+            $year = now()->year;
+        }
+        
+        if (isset($month) && isset($year)) {
+            // Filter by billing period start date
+            $query->whereMonth('billing_period_start', $month)
+                  ->whereYear('billing_period_start', $year);
         }
 
         $invoices = $query->orderBy('invoice_date', 'desc')->paginate(15);
@@ -153,6 +170,24 @@ class InvoiceController extends Controller
         ]);
 
         return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice marked as paid successfully.');
+    }
+
+    /**
+     * Delete all non-active invoices.
+     */
+    public function deleteNonActive()
+    {
+        // Get count of non-active invoices before deletion
+        $nonActiveCount = Invoice::where('payment_status', '!=', 'paid')->count();
+        
+        if ($nonActiveCount === 0) {
+            return redirect()->route('admin.invoices')->with('info', 'No non-active invoices found to delete.');
+        }
+        
+        // Delete all invoices that are not paid (active)
+        $deletedCount = Invoice::where('payment_status', '!=', 'paid')->delete();
+        
+        return redirect()->route('admin.invoices')->with('success', "Successfully deleted {$deletedCount} non-active invoices.");
     }
 
     /**

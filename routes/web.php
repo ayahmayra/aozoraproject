@@ -203,6 +203,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generate'])->name('invoices.generate.store');
     Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
     Route::put('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\Admin\InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::delete('/invoices/delete-non-active', [\App\Http\Controllers\Admin\InvoiceController::class, 'deleteNonActive'])->name('invoices.delete-non-active');
     Route::get('/invoices-statistics', [\App\Http\Controllers\Admin\InvoiceController::class, 'statistics'])->name('invoices.statistics');
 });
 
