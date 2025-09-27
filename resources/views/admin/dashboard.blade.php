@@ -285,5 +285,94 @@
                 </div>
             </div>
         </div>
+
+        <!-- Payment Statistics -->
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Payment Statistics -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+
+                <flux:heading class="flex items-center gap-2">
+                    Statistik Pembayaran Terverifikasi 
+                    <flux:icon name="banknotes" class="ml-auto text-zinc-400" variant="micro" />
+                </flux:heading>
+                <flux:text class="mt-2">Ringkasan pembayaran yang sudah terverifikasi untuk periode yang dipilih.</flux:text>
+                
+                <div class="mt-4 space-y-3">
+                    <!-- Current Month -->
+                    <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-blue-600 dark:text-blue-400">Bulan {{ $months[$currentMonth] }} {{ $currentYear }}</div>
+                            <div class="text-lg font-bold text-blue-800 dark:text-blue-200">Rp {{ number_format($currentMonthTotal, 0, ',', '.') }}</div>
+                        </div>
+                        <flux:icon.calendar class="h-6 w-6 text-blue-500" />
+                    </div>
+                    
+                    <!-- Current Year -->
+                    <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-green-600 dark:text-green-400">Tahun {{ $currentYear }}</div>
+                            <div class="text-lg font-bold text-green-800 dark:text-green-200">Rp {{ number_format($currentYearTotal, 0, ',', '.') }}</div>
+                        </div>
+                        <flux:icon.chart-bar class="h-6 w-6 text-green-500" />
+                    </div>
+                    
+                    <!-- Overall Total -->
+                    <div class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-purple-600 dark:text-purple-400">Total Keseluruhan</div>
+                            <div class="text-lg font-bold text-purple-800 dark:text-purple-200">Rp {{ number_format($overallTotal, 0, ',', '.') }}</div>
+                        </div>
+                        <flux:icon.banknotes class="h-6 w-6 text-purple-500" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Status Statistics -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+                <flux:heading class="flex items-center gap-2">
+                    Status Invoice Tahun {{ $currentYear }}
+                    <flux:icon name="chart-bar" class="ml-auto text-zinc-400" variant="micro" />
+                </flux:heading>
+                <flux:text class="mt-2">Distribusi status invoice untuk tahun {{ $currentYear }}.</flux:text>
+                
+                <div class="mt-4 space-y-3">
+                    <!-- Total Invoices -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-600 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Invoice</div>
+                            <div class="text-lg font-bold text-gray-800 dark:text-gray-200">{{ number_format($totalInvoices) }}</div>
+                        </div>
+                        <flux:icon.document-text class="h-6 w-6 text-gray-500" />
+                    </div>
+                    
+                    <!-- Verified Invoices -->
+                    <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-green-600 dark:text-green-400">Terverifikasi</div>
+                            <div class="text-lg font-bold text-green-800 dark:text-green-200">{{ number_format($verifiedInvoices) }}</div>
+                        </div>
+                        <flux:icon.shield-check class="h-6 w-6 text-green-500" />
+                    </div>
+                    
+                    <!-- Paid Invoices -->
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-yellow-600 dark:text-yellow-400">Sudah Dibayar</div>
+                            <div class="text-lg font-bold text-yellow-800 dark:text-yellow-200">{{ number_format($paidInvoices) }}</div>
+                        </div>
+                        <flux:icon.check-circle class="h-6 w-6 text-yellow-500" />
+                    </div>
+                    
+                    <!-- Pending Invoices -->
+                    <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div>
+                            <div class="text-sm font-medium text-red-600 dark:text-red-400">Menunggu Pembayaran</div>
+                            <div class="text-lg font-bold text-red-800 dark:text-red-200">{{ number_format($pendingInvoices) }}</div>
+                        </div>
+                        <flux:icon.clock class="h-6 w-6 text-red-500" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-layouts.app>
