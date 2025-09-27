@@ -200,6 +200,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Invoice Management
     Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices');
     Route::get('/invoices/table', [\App\Http\Controllers\Admin\InvoiceController::class, 'table'])->name('invoices.table');
+    Route::get('/invoices/table/export', [\App\Http\Controllers\Admin\InvoiceController::class, 'exportTable'])->name('invoices.table.export');
     Route::get('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generateForm'])->name('invoices.generate');
     Route::post('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generate'])->name('invoices.generate.store');
     Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\StudentSubject;
 use App\Services\InvoiceGenerationService;
+use App\Exports\InvoiceTableExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InvoiceController extends Controller
 {
@@ -21,9 +23,140 @@ class InvoiceController extends Controller
     /**
      * Display the invoice table page.
      */
-    public function table()
+    public function table(Request $request)
     {
-        return view('admin.invoices.table');
+        $year = $request->get('year', date('Y'));
+        $subjectFilter = $request->get('subject');
+        
+        // Get all invoices for the selected year
+        $query = Invoice::with(['student.user', 'subject'])
+            ->whereYear('billing_period_start', $year);
+            
+        // Apply subject filter if provided
+        if ($subjectFilter) {
+            $query->whereHas('subject', function ($q) use ($subjectFilter) {
+                $q->where('id', $subjectFilter);
+            });
+        }
+        
+        $invoices = $query->get();
+        
+        // Group invoices by student and subject, then sort by subject name
+        $groupedInvoices = $invoices->groupBy(function ($invoice) {
+            return $invoice->student->user->name . '|' . $invoice->subject->name;
+        })->sortBy(function ($group, $key) {
+            // Sort by subject name (second part after |)
+            return explode('|', $key)[1];
+        });
+        
+        // Get all months
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        // Calculate statistics
+        $currentMonth = date('n'); // Current month (1-12)
+        $currentYear = date('Y');
+        
+        // Total verified payments for current month
+        $currentMonthTotal = Invoice::where('payment_status', 'verified')
+            ->whereYear('billing_period_start', $currentYear)
+            ->whereMonth('billing_period_start', $currentMonth)
+            ->sum('paid_amount');
+        
+        // Total verified payments for current year
+        $currentYearTotal = Invoice::where('payment_status', 'verified')
+            ->whereYear('billing_period_start', $currentYear)
+            ->sum('paid_amount');
+        
+        // Overall total verified payments (all time)
+        $overallTotal = Invoice::where('payment_status', 'verified')
+            ->sum('paid_amount');
+        
+        // Additional statistics
+        $totalInvoices = $invoices->count();
+        $verifiedInvoices = $invoices->where('payment_status', 'verified')->count();
+        $pendingInvoices = $invoices->where('payment_status', 'pending')->count();
+        $paidInvoices = $invoices->where('payment_status', 'paid')->count();
+        
+        // Calculate monthly totals for verified payments
+        $monthlyTotals = [];
+        foreach ($months as $monthNum => $monthName) {
+            $monthlyTotals[$monthNum] = $invoices
+                ->where('payment_status', 'verified')
+                ->filter(function ($invoice) use ($monthNum) {
+                    return $invoice->billing_period_start->month == $monthNum;
+                })
+                ->sum('paid_amount');
+        }
+        
+        // Get all subjects for filter dropdown
+        $subjects = \App\Models\Subject::orderBy('name')->get();
+        
+        return view('admin.invoices.table', compact(
+            'groupedInvoices', 'months', 'year', 'subjectFilter',
+            'currentMonthTotal', 'currentYearTotal', 'overallTotal',
+            'totalInvoices', 'verifiedInvoices', 'pendingInvoices', 'paidInvoices',
+            'currentMonth', 'currentYear', 'monthlyTotals', 'subjects'
+        ));
+    }
+
+    /**
+     * Export invoice table to Excel.
+     */
+    public function exportTable(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+        $subjectFilter = $request->get('subject');
+        
+        // Get all invoices for the selected year
+        $query = Invoice::with(['student.user', 'subject'])
+            ->whereYear('billing_period_start', $year);
+            
+        // Apply subject filter if provided
+        if ($subjectFilter) {
+            $query->whereHas('subject', function ($q) use ($subjectFilter) {
+                $q->where('id', $subjectFilter);
+            });
+        }
+        
+        $invoices = $query->get();
+        
+        // Group invoices by student and subject, then sort by subject name
+        $groupedInvoices = $invoices->groupBy(function ($invoice) {
+            return $invoice->student->user->name . '|' . $invoice->subject->name;
+        })->sortBy(function ($group, $key) {
+            // Sort by subject name (second part after |)
+            return explode('|', $key)[1];
+        });
+        
+        // Get all months
+        $months = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        // Calculate monthly totals for verified payments
+        $monthlyTotals = [];
+        foreach ($months as $monthNum => $monthName) {
+            $monthlyTotals[$monthNum] = $invoices
+                ->where('payment_status', 'verified')
+                ->filter(function ($invoice) use ($monthNum) {
+                    return $invoice->billing_period_start->month == $monthNum;
+                })
+                ->sum('paid_amount');
+        }
+        
+        $subjectName = $subjectFilter ? '_' . \App\Models\Subject::find($subjectFilter)->name : '';
+        $fileName = "Invoice_Table_{$year}{$subjectName}_" . date('Y-m-d_H-i-s') . '.xlsx';
+        
+        return Excel::download(
+            new InvoiceTableExport($year, $groupedInvoices, $months, $monthlyTotals),
+            $fileName
+        );
     }
 
     /**
