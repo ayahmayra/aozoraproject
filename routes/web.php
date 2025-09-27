@@ -196,6 +196,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('document-numbering', \App\Http\Controllers\Admin\DocumentNumberingConfigController::class)->parameters(['document-numbering' => 'documentNumberingConfig']);
     Route::post('/document-numbering/{documentNumberingConfig}/toggle-status', [\App\Http\Controllers\Admin\DocumentNumberingConfigController::class, 'toggleStatus'])->name('document-numbering.toggle-status');
     Route::post('/document-numbering/{documentNumberingConfig}/reset-number', [\App\Http\Controllers\Admin\DocumentNumberingConfigController::class, 'resetNumber'])->name('document-numbering.reset-number');
+    
+    // Invoice Management
+    Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices');
+    Route::get('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generateForm'])->name('invoices.generate');
+    Route::post('/invoices/generate', [\App\Http\Controllers\Admin\InvoiceController::class, 'generate'])->name('invoices.generate.store');
+    Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::put('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\Admin\InvoiceController::class, 'markPaid'])->name('invoices.mark-paid');
+    Route::get('/invoices-statistics', [\App\Http\Controllers\Admin\InvoiceController::class, 'statistics'])->name('invoices.statistics');
 });
 
 // Academic Routes - Accessible by Teacher, Parent, and Student
