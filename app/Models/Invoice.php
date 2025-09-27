@@ -171,26 +171,4 @@ class Invoice extends Model
         return $query->where('subject_id', $subjectId);
     }
 
-    /**
-     * Generate invoice number.
-     */
-    public static function generateInvoiceNumber(): string
-    {
-        $year = now()->year;
-        $month = now()->format('m');
-        $prefix = "INV{$year}{$month}";
-        
-        $lastInvoice = static::where('invoice_number', 'like', "{$prefix}%")
-                            ->orderBy('invoice_number', 'desc')
-                            ->first();
-        
-        if ($lastInvoice) {
-            $lastNumber = (int) substr($lastInvoice->invoice_number, -4);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-        
-        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
-    }
 }

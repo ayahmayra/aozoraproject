@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\StudentSubject;
 use App\Services\InvoiceGenerationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -98,15 +99,25 @@ class InvoiceController extends Controller
     public function generate(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'start_month' => 'required|integer|min:1|max:12',
+            'end_month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2020|max:2030',
             'payment_method' => 'nullable|in:monthly,semester,yearly',
+            'generation_mode' => 'required|in:monthly,semester,yearly',
             'enrollment_ids' => 'nullable|array',
             'enrollment_ids.*' => 'exists:student_subject,id',
         ]);
 
-        $date = $request->date;
+        $startMonth = (int)$request->start_month;
+        $endMonth = (int)$request->end_month;
+        $year = (int)$request->year;
         $paymentMethod = $request->payment_method;
+        $generationMode = $request->generation_mode;
         $enrollmentIds = $request->enrollment_ids;
+
+        // Calculate actual period dates
+        $periodStart = \Carbon\Carbon::createFromDate($year, $startMonth, 1)->startOfMonth();
+        $periodEnd = \Carbon\Carbon::createFromDate($year, $endMonth, 1)->endOfMonth();
 
         $generatedCount = 0;
 
@@ -115,17 +126,36 @@ class InvoiceController extends Controller
             foreach ($enrollmentIds as $enrollmentId) {
                 $enrollment = StudentSubject::with(['student', 'subject'])->find($enrollmentId);
                 if ($enrollment && $enrollment->isActive()) {
-                    $invoices = $this->invoiceService->generateInvoicesForEnrollment($enrollment);
+                    $invoices = $this->invoiceService->generateInvoicesForMonthRange(
+                        $enrollment, 
+                        $startMonth,
+                        $endMonth,
+                        $year,
+                        $generationMode,
+                        $paymentMethod
+                    );
                     $generatedCount += count($invoices);
                 }
             }
         } else {
             // Generate for all active enrollments
-            $invoices = $this->invoiceService->generateInvoicesForDate($date, $paymentMethod);
+            $invoices = $this->invoiceService->generateInvoicesForMonthRangeAll(
+                $startMonth,
+                $endMonth,
+                $year,
+                $generationMode,
+                $paymentMethod
+            );
             $generatedCount = count($invoices);
         }
 
-        return redirect()->route('admin.invoices')->with('success', "Successfully generated {$generatedCount} invoices.");
+        $startMonthName = \DateTime::createFromFormat('!m', $startMonth)->format('F');
+        $endMonthName = \DateTime::createFromFormat('!m', $endMonth)->format('F');
+        $periodText = $startMonth === $endMonth ? 
+            "{$startMonthName} {$year}" : 
+            "{$startMonthName} - {$endMonthName} {$year}";
+            
+        return redirect()->route('admin.invoices')->with('success', "Successfully generated {$generatedCount} invoices for period {$periodText}.");
     }
 
     /**
@@ -170,6 +200,32 @@ class InvoiceController extends Controller
         ]);
 
         return redirect()->route('admin.invoices.show', $invoice)->with('success', 'Invoice marked as paid successfully.');
+    }
+
+    /**
+     * Cancel payment for an invoice.
+     */
+    public function cancelPayment(Invoice $invoice)
+    {
+        // Check if invoice is actually paid
+        if ($invoice->payment_status !== 'paid') {
+            return redirect()->route('admin.invoices')->with('error', 'Invoice is not marked as paid.');
+        }
+
+        // Use database transaction to ensure data consistency
+        DB::transaction(function () use ($invoice) {
+            // Delete all payment records for this invoice
+            $invoice->payments()->delete();
+            
+            // Reset invoice payment status and amounts
+            $invoice->update([
+                'payment_status' => 'pending',
+                'paid_amount' => 0,
+                'paid_at' => null,
+            ]);
+        });
+
+        return redirect()->route('admin.invoices')->with('success', "Payment for invoice {$invoice->invoice_number} has been cancelled successfully.");
     }
 
     /**

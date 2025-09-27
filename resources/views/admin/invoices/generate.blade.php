@@ -30,18 +30,61 @@
                     @csrf
                     
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        <!-- Date Selection -->
+                        <!-- Period Selection -->
                         <flux:field>
-                            <flux:label>Generation Date</flux:label>
-                            <flux:input 
-                                name="date" 
-                                type="date" 
-                                value="{{ now()->format('Y-m-d') }}"
-                                required 
-                            />
-                            <flux:description>Date to generate invoices for</flux:description>
+                            <flux:label>Start Month</flux:label>
+                            <flux:select name="start_month" required>
+                                <option value="">Select start month</option>
+                                @for($i = 1; $i <= 12; $i++)
+                                    <option value="{{ $i }}" {{ old('start_month', now()->month) == $i ? 'selected' : '' }}>
+                                        {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
+                                    </option>
+                                @endfor
+                            </flux:select>
+                            <flux:description>Starting month for billing period</flux:description>
                         </flux:field>
 
+                        <flux:field>
+                            <flux:label>End Month</flux:label>
+                            <flux:select name="end_month" required>
+                                <option value="">Select end month</option>
+                                @for($i = 1; $i <= 12; $i++)
+                                    <option value="{{ $i }}" {{ old('end_month', now()->month) == $i ? 'selected' : '' }}>
+                                        {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
+                                    </option>
+                                @endfor
+                            </flux:select>
+                            <flux:description>Ending month for billing period</flux:description>
+                        </flux:field>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <!-- Year Selection -->
+                        <flux:field>
+                            <flux:label>Year</flux:label>
+                            <flux:select name="year" required>
+                                @for($year = now()->year - 1; $year <= now()->year + 2; $year++)
+                                    <option value="{{ $year }}" {{ old('year', now()->year) == $year ? 'selected' : '' }}>
+                                        {{ $year }}
+                                    </option>
+                                @endfor
+                            </flux:select>
+                            <flux:description>Year for billing period</flux:description>
+                        </flux:field>
+
+                        <!-- Generation Mode -->
+                        <flux:field>
+                            <flux:label>Generation Mode</flux:label>
+                            <flux:select name="generation_mode">
+                                <option value="monthly">Generate monthly invoices</option>
+                                <option value="semester">Generate semester invoices</option>
+                                <option value="yearly">Generate yearly invoices</option>
+                            </flux:select>
+                            <flux:description>How to generate invoices within the period</flux:description>
+                        </flux:field>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         <!-- Payment Method Filter -->
                         <flux:field>
                             <flux:label>Payment Method</flux:label>
@@ -52,6 +95,15 @@
                                 <option value="yearly">Yearly</option>
                             </flux:select>
                             <flux:description>Filter by payment method (optional)</flux:description>
+                        </flux:field>
+
+                        <!-- Preview -->
+                        <flux:field>
+                            <flux:label>Period Preview</flux:label>
+                            <div id="period-preview" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                Select start and end months to see preview
+                            </div>
+                            <flux:description>Preview of selected billing period</flux:description>
                         </flux:field>
                     </div>
 
@@ -110,10 +162,10 @@
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <div class="space-y-3">
                         <div class="flex items-start space-x-3">
-                            <flux:icon.information-circle class="h-5 w-5 text-blue-500 mt-0.5" />
+                            <flux:icon.user class="h-5 w-5 text-blue-500 mt-0.5" />
                             <div>
-                                <div class="text-sm font-medium">Automatic Generation</div>
-                                <div class="text-xs text-gray-600">Invoices are automatically generated monthly on the 1st day of each month.</div>
+                                <div class="text-sm font-medium">Manual Generation</div>
+                                <div class="text-xs text-gray-600">Invoices are generated manually by admin with custom period selection.</div>
                             </div>
                         </div>
                         
@@ -138,8 +190,8 @@
                         <div class="flex items-start space-x-3">
                             <flux:icon.clock class="h-5 w-5 text-orange-500 mt-0.5" />
                             <div>
-                                <div class="text-sm font-medium">Overdue Check</div>
-                                <div class="text-xs text-gray-600">System checks for overdue invoices daily at 6 AM.</div>
+                                <div class="text-sm font-medium">Flexible Periods</div>
+                                <div class="text-xs text-gray-600">Generate invoices for any custom period range.</div>
                             </div>
                         </div>
                     </div>
@@ -149,11 +201,11 @@
     </div>
 
     <script>
-        // Select all checkbox functionality
         document.addEventListener('DOMContentLoaded', function() {
             const selectAllBtn = document.getElementById('selectAll');
             const enrollmentCheckboxes = document.querySelectorAll('input[name="enrollment_ids[]"]');
             
+            // Select all checkbox functionality
             if (selectAllBtn) {
                 selectAllBtn.addEventListener('click', function() {
                     const isChecked = this.checked;
@@ -162,6 +214,61 @@
                     });
                 });
             }
+
+            // Period preview functionality
+            const startMonthSelect = document.querySelector('select[name="start_month"]');
+            const endMonthSelect = document.querySelector('select[name="end_month"]');
+            const yearSelect = document.querySelector('select[name="year"]');
+            const previewDiv = document.getElementById('period-preview');
+
+            function updatePreview() {
+                const startMonth = parseInt(startMonthSelect.value);
+                const endMonth = parseInt(endMonthSelect.value);
+                const year = yearSelect.value;
+
+                if (startMonth && endMonth && year) {
+                    const monthNames = [
+                        'January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'
+                    ];
+
+                    let previewText = '';
+                    if (startMonth === endMonth) {
+                        previewText = `${monthNames[startMonth - 1]} ${year}`;
+                    } else {
+                        const months = [];
+                        if (startMonth <= endMonth) {
+                            // Same year
+                            for (let i = startMonth; i <= endMonth; i++) {
+                                months.push(monthNames[i - 1]);
+                            }
+                        } else {
+                            // Cross year (e.g., Nov to Feb)
+                            for (let i = startMonth; i <= 12; i++) {
+                                months.push(monthNames[i - 1]);
+                            }
+                            for (let i = 1; i <= endMonth; i++) {
+                                months.push(monthNames[i - 1]);
+                            }
+                        }
+                        previewText = `${months.join(', ')} ${year}`;
+                    }
+
+                    previewDiv.innerHTML = `<strong>Billing Period:</strong> ${previewText}`;
+                    previewDiv.className = 'p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-200';
+                } else {
+                    previewDiv.innerHTML = 'Select start and end months to see preview';
+                    previewDiv.className = 'p-3 bg-gray-50 rounded-lg text-sm text-gray-600';
+                }
+            }
+
+            // Add event listeners
+            startMonthSelect.addEventListener('change', updatePreview);
+            endMonthSelect.addEventListener('change', updatePreview);
+            yearSelect.addEventListener('change', updatePreview);
+
+            // Initial preview update
+            updatePreview();
         });
     </script>
 </x-layouts.app>

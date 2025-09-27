@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             AdminUserSeeder::class,
             OrganizationSeeder::class,
+            InvoiceNumberingSeeder::class,
             TestDataSeeder::class,
         ]);
         

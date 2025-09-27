@@ -310,8 +310,12 @@
                                             <flux:icon.eye class="h-4 w-4" />
                                         </flux:button>
                                         @if($invoice->payment_status === 'pending')
-                                            <flux:button variant="ghost" size="sm" onclick="markPaid({{ $invoice->id }})">
+                                            <flux:button variant="ghost" size="sm" onclick="markPaid({{ $invoice->id }}, {{ $invoice->total_amount }})">
                                                 <flux:icon.check class="h-4 w-4" />
+                                            </flux:button>
+                                        @elseif($invoice->payment_status === 'paid')
+                                            <flux:button variant="ghost" size="sm" onclick="cancelPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
+                                                <flux:icon.x-mark class="h-4 w-4" />
                                             </flux:button>
                                         @endif
                                     </div>
@@ -389,6 +393,50 @@
         </div>
     </div>
 
+    <!-- Cancel Payment Modal -->
+    <div id="cancelPaymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center mb-4">
+                    <flux:icon.exclamation-triangle class="h-8 w-8 text-orange-500 mr-3" />
+                    <h3 class="text-lg font-medium">Cancel Payment</h3>
+                </div>
+                
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">
+                        Are you sure you want to cancel the payment for invoice <strong id="cancelInvoiceNumber"></strong>?
+                    </p>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <flux:icon.information-circle class="h-5 w-5 text-orange-500 mt-0.5 mr-2" />
+                            <div class="text-sm text-orange-700">
+                                <p class="font-medium">This action will:</p>
+                                <ul class="mt-1 list-disc list-inside">
+                                    <li>Change invoice status from "Paid" to "Pending"</li>
+                                    <li>Remove all payment records for this invoice</li>
+                                    <li>Reset payment amounts to zero</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="cancelPaymentForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="flex justify-end space-x-3">
+                        <flux:button variant="outline" type="button" onclick="closeCancelPaymentModal()">Cancel</flux:button>
+                        <flux:button variant="danger" type="submit">
+                            <flux:icon.x-mark class="h-4 w-4 mr-2" />
+                            Cancel Payment
+                        </flux:button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Non-Active Invoices Modal -->
     <div id="deleteNonActiveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
         <div class="flex items-center justify-center min-h-screen p-4">
@@ -435,14 +483,35 @@
     </div>
 
     <script>
-        function markPaid(invoiceId) {
+        function markPaid(invoiceId, totalAmount) {
             const form = document.getElementById('markPaidForm');
             form.action = `/admin/invoices/${invoiceId}/mark-paid`;
+            
+            // Set the paid amount to the total amount by default
+            const paidAmountInput = form.querySelector('input[name="paid_amount"]');
+            if (paidAmountInput) {
+                paidAmountInput.value = totalAmount;
+            }
+            
             document.getElementById('markPaidModal').classList.remove('hidden');
         }
 
         function closeMarkPaidModal() {
             document.getElementById('markPaidModal').classList.add('hidden');
+        }
+
+        function cancelPayment(invoiceId, invoiceNumber) {
+            const form = document.getElementById('cancelPaymentForm');
+            form.action = `/admin/invoices/${invoiceId}/cancel-payment`;
+            
+            // Set the invoice number in the modal
+            document.getElementById('cancelInvoiceNumber').textContent = invoiceNumber;
+            
+            document.getElementById('cancelPaymentModal').classList.remove('hidden');
+        }
+
+        function closeCancelPaymentModal() {
+            document.getElementById('cancelPaymentModal').classList.add('hidden');
         }
 
         function showDeleteModal() {
@@ -456,10 +525,15 @@
         // Close modals when clicking outside
         document.addEventListener('click', function(event) {
             const markPaidModal = document.getElementById('markPaidModal');
+            const cancelPaymentModal = document.getElementById('cancelPaymentModal');
             const deleteModal = document.getElementById('deleteNonActiveModal');
             
             if (event.target === markPaidModal) {
                 closeMarkPaidModal();
+            }
+            
+            if (event.target === cancelPaymentModal) {
+                closeCancelPaymentModal();
             }
             
             if (event.target === deleteModal) {

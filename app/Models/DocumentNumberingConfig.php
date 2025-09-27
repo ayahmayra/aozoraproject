@@ -97,15 +97,17 @@ class DocumentNumberingConfig extends Model
             $parts[] = now()->format($this->day_format);
         }
         
-        // Add separator and number
-        $parts[] = $this->separator . $formattedNumber;
+        // Add number
+        $parts[] = $formattedNumber;
         
         // Add suffix
         if ($this->suffix) {
             $parts[] = $this->suffix;
         }
         
-        return implode('', $parts);
+        // Join parts with separator if specified
+        $separator = $this->separator ?: '';
+        return implode($separator, $parts);
     }
 
     /**

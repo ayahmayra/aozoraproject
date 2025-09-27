@@ -48,6 +48,7 @@ class DocumentNumberingConfigController extends Controller
             'enrollment' => 'Enrollment',
             'subject' => 'Subject',
             'organization' => 'Organization',
+            'invoice' => 'Invoice',
         ];
 
         return view('admin.document-numbering.create', compact('entityTypes'));
@@ -106,6 +107,7 @@ class DocumentNumberingConfigController extends Controller
             'enrollment' => 'Enrollment',
             'subject' => 'Subject',
             'organization' => 'Organization',
+            'invoice' => 'Invoice',
         ];
 
         return view('admin.document-numbering.edit', compact('documentNumberingConfig', 'entityTypes'));
