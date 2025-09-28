@@ -558,36 +558,61 @@ class InvoiceGenerationService
     private function generateSemesterInvoicesForMonthRange(StudentSubject $enrollment, int $startMonth, int $endMonth, int $year): array
     {
         $invoices = [];
-        $months = $this->getMonthRange($startMonth, $endMonth);
         
-        // Group months into semesters (6-month periods)
-        $semesterGroups = array_chunk($months, 6);
+        // For semester payments, we need to find the correct semester periods
+        // that overlap with the requested month range
         
-        foreach ($semesterGroups as $semesterMonths) {
-            if (count($semesterMonths) > 0) {
-                $firstMonth = $semesterMonths[0];
-                $lastMonth = end($semesterMonths);
+        // Calculate the period start and end dates
+        $periodStart = Carbon::createFromDate($year, $startMonth, 1)->startOfMonth();
+        $periodEnd = Carbon::createFromDate($year, $endMonth, 1)->endOfMonth();
+        
+        // Get enrollment start date
+        $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
+        $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
+        
+        // Find the first semester period that starts on or before the requested period
+        // For semester payments, we need to align to 6-month periods from enrollment start
+        $currentSemesterStart = $enrollmentStart->copy();
+        
+        // Align to semester boundaries (every 6 months from enrollment start)
+        while ($currentSemesterStart->lt($periodStart)) {
+            $currentSemesterStart->addMonths(6);
+        }
+        
+        // Go back to the previous semester if we overshot
+        if ($currentSemesterStart->gt($periodStart)) {
+            $currentSemesterStart->subMonths(6);
+        }
+        
+        // Make sure we don't start before enrollment start
+        if ($currentSemesterStart->lt($enrollmentStart)) {
+            $currentSemesterStart = $enrollmentStart->copy();
+        }
+        
+        // Generate semester invoices within the requested period
+        while ($currentSemesterStart->lte($periodEnd)) {
+            $semesterEnd = $currentSemesterStart->copy()->addMonths(6)->subDay();
+            
+            // Only generate if the semester period overlaps with the requested period
+            // and the enrollment is active during this period
+            if ($currentSemesterStart->lte($periodEnd) && 
+                $semesterEnd->gte($periodStart) &&
+                $currentSemesterStart->gte($enrollmentStart) &&
+                $currentSemesterStart->lt($enrollmentEnd)) {
                 
-                // Handle cross-year
-                $startYear = $year;
-                if ($startMonth > $endMonth && $firstMonth <= $endMonth) {
-                    $startYear = $year + 1;
-                }
-                
-                $periodStart = Carbon::createFromDate($startYear, $firstMonth, 1)->startOfMonth();
-                $periodEnd = Carbon::createFromDate($startYear, $lastMonth, 1)->endOfMonth();
-                
-                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $periodStart, $periodEnd)) {
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $currentSemesterStart, $semesterEnd)) {
                     $invoice = $this->createInvoice(
                         $enrollment,
-                        $periodStart,
-                        $periodEnd,
-                        (float)$enrollment->payment_amount * count($semesterMonths),
+                        $currentSemesterStart,
+                        $semesterEnd,
+                        (float)$enrollment->payment_amount, // Single semester amount
                         $enrollment->payment_method
                     );
                     $invoices[] = $invoice;
                 }
             }
+            
+            $currentSemesterStart->addMonths(6);
         }
         
         return $invoices;

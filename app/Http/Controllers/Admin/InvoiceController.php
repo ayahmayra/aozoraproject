@@ -392,15 +392,27 @@ class InvoiceController extends Controller
      */
     public function deleteNonActive()
     {
-        // Get count of non-active invoices before deletion
-        $nonActiveCount = Invoice::where('payment_status', '!=', 'paid')->count();
+        // Get non-active invoices (only pending and overdue, not paid or verified)
+        $nonActiveInvoices = Invoice::whereIn('payment_status', ['pending', 'overdue'])->get();
         
-        if ($nonActiveCount === 0) {
+        if ($nonActiveInvoices->count() === 0) {
             return redirect()->route('admin.invoices')->with('info', 'No non-active invoices found to delete.');
         }
         
-        // Delete all invoices that are not paid (active)
-        $deletedCount = Invoice::where('payment_status', '!=', 'paid')->delete();
+        $deletedCount = 0;
+        
+        // Use database transaction to ensure data consistency
+        DB::transaction(function () use ($nonActiveInvoices, &$deletedCount) {
+            foreach ($nonActiveInvoices as $invoice) {
+                // Delete all related records first
+                $invoice->payments()->delete();
+                $invoice->items()->delete();
+                
+                // Delete the invoice
+                $invoice->delete();
+                $deletedCount++;
+            }
+        });
         
         return redirect()->route('admin.invoices')->with('success', "Successfully deleted {$deletedCount} non-active invoices.");
     }
