@@ -108,12 +108,14 @@
 
                     <!-- Start Date -->
                     <flux:field>
-                        <flux:label>Start Date</flux:label>
+                        <flux:label>Start Date <span class="text-red-500">*</span></flux:label>
                         <flux:input
                             name="start_date"
                             type="date"
-                            value="{{ old('start_date', $enrollment->pivot->start_date ? \Carbon\Carbon::parse($enrollment->pivot->start_date)->format('Y-m-d') : '') }}"
+                            required
+                            value="{{ old('start_date', $enrollment->pivot->start_date ? \Carbon\Carbon::parse($enrollment->pivot->start_date)->format('Y-m-d') : now()->format('Y-m-d')) }}"
                         />
+                        <flux:description>Start date is required for invoice generation</flux:description>
                     </flux:field>
 
                     <!-- End Date -->
@@ -122,8 +124,9 @@
                         <flux:input
                             name="end_date"
                             type="date"
-                            value="{{ old('end_date', $enrollment->pivot->end_date ? \Carbon\Carbon::parse($enrollment->pivot->end_date)->format('Y-m-d') : '') }}"
+                            value="{{ old('end_date', $enrollment->pivot->end_date ? \Carbon\Carbon::parse($enrollment->pivot->end_date)->format('Y-m-d') : now()->addYear()->format('Y-m-d')) }}"
                         />
+                        <flux:description>End date defaults to 1 year from start date</flux:description>
                     </flux:field>
 
                     <!-- Notes -->

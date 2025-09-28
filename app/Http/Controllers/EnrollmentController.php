@@ -119,7 +119,7 @@ class EnrollmentController extends Controller
             'status' => 'required|in:pending,active,cancelled',
             'payment_method' => 'nullable|in:monthly,semester,yearly',
             'payment_amount' => 'nullable|numeric|min:0',
-            'start_date' => 'nullable|date',
+            'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'notes' => 'nullable|string|max:500',
         ]);

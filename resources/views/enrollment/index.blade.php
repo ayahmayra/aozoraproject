@@ -73,13 +73,12 @@
         
         <flux:table>
             <flux:table.columns>
-                <flux:table.column>Student</flux:table.column>
-                <flux:table.column>Student ID</flux:table.column>
+                <flux:table.column>Student & ID</flux:table.column>
                 <flux:table.column>Parent</flux:table.column>
                 <flux:table.column>Subject</flux:table.column>
-                <flux:table.column>Enrollment Number</flux:table.column>
-                <flux:table.column>Enrollment Status</flux:table.column>
-                <flux:table.column>Enrollment Date</flux:table.column>
+                <flux:table.column>Enrollment Details</flux:table.column>
+                <flux:table.column>Status & Date</flux:table.column>
+                <flux:table.column>Start-End Date</flux:table.column>
                 <flux:table.column>Actions</flux:table.column>
             </flux:table.columns>
             
@@ -87,20 +86,21 @@
                 @forelse($students as $student)
                     @foreach($student->subjects as $subject)
                         <flux:table.row>
+                            <!-- Student & ID -->
                             <flux:table.cell>
                                 <div class="flex items-center">
                                     <flux:avatar name="{{ $student->user->name }}" class="mr-3" />
                                     <div>
                                         <div class="font-medium">{{ $student->user->name }}</div>
                                         <div class="text-sm text-gray-500">{{ $student->user->email }}</div>
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            ID: {{ $student->student_id ?? 'Not assigned' }}
+                                        </div>
                                     </div>
                                 </div>
                             </flux:table.cell>
                             
-                            <flux:table.cell>
-                                {{ $student->student_id ?? 'Not assigned' }}
-                            </flux:table.cell>
-                            
+                            <!-- Parent -->
                             <flux:table.cell>
                                 @if($student->parent)
                                     <div>
@@ -112,6 +112,7 @@
                                 @endif
                             </flux:table.cell>
                             
+                            <!-- Subject -->
                             <flux:table.cell>
                                 <div>
                                     <div class="font-medium">{{ $subject->name }}</div>
@@ -119,31 +120,69 @@
                                 </div>
                             </flux:table.cell>
                             
+                            <!-- Enrollment Details (Number, Payment Method, Payment Amount) -->
                             <flux:table.cell>
-                                <flux:badge variant="blue" size="sm">
-                                    {{ $subject->pivot->enrollment_number ?? 'Not assigned' }}
-                                </flux:badge>
+                                <div class="space-y-1">
+                                    <div>
+                                        <flux:badge variant="blue" size="sm">
+                                            {{ $subject->pivot->enrollment_number ?? 'Not assigned' }}
+                                        </flux:badge>
+                                    </div>
+                                    @if($subject->pivot->payment_method)
+                                        <div class="text-sm text-gray-600">
+                                            <span class="font-medium">{{ ucfirst($subject->pivot->payment_method) }}</span>
+                                        </div>
+                                    @endif
+                                    @if($subject->pivot->payment_amount)
+                                        <div class="text-sm text-gray-600">
+                                            Rp {{ number_format($subject->pivot->payment_amount, 0, ',', '.') }}
+                                        </div>
+                                    @endif
+                                </div>
                             </flux:table.cell>
                             
+                            <!-- Status & Date -->
                             <flux:table.cell>
-                                @php
-                                    $enrollmentStatus = $subject->pivot->enrollment_status ?? 'pending';
-                                    $badgeColor = $enrollmentStatus === 'active' ? 'green' : ($enrollmentStatus === 'pending' ? 'amber' : 'red');
-                                @endphp
-                                <flux:badge size="sm" color="{{ $badgeColor }}">
-                                    {{ ucfirst($enrollmentStatus) }}
-                                </flux:badge>
+                                <div class="space-y-1">
+                                    @php
+                                        $enrollmentStatus = $subject->pivot->enrollment_status ?? 'pending';
+                                        $badgeColor = $enrollmentStatus === 'active' ? 'green' : ($enrollmentStatus === 'pending' ? 'amber' : 'red');
+                                    @endphp
+                                    <flux:badge size="sm" color="{{ $badgeColor }}">
+                                        {{ ucfirst($enrollmentStatus) }}
+                                    </flux:badge>
+                                    <div class="text-xs text-gray-500">
+                                        @php
+                                            $enrollmentDate = $subject->pivot->enrollment_date;
+                                            $formattedDate = $enrollmentDate ? \Carbon\Carbon::parse($enrollmentDate)->format('M j, Y') : '-';
+                                        @endphp
+                                        {{ $formattedDate }}
+                                    </div>
+                                </div>
                             </flux:table.cell>
                             
-                            
+                            <!-- Start-End Date -->
                             <flux:table.cell>
-                                @php
-                                    $enrollmentDate = $subject->pivot->enrollment_date;
-                                    $formattedDate = $enrollmentDate ? \Carbon\Carbon::parse($enrollmentDate)->format('M j, Y') : '-';
-                                @endphp
-                                {{ $formattedDate }}
+                                <div class="text-sm">
+                                    @if($subject->pivot->start_date)
+                                        <div class="text-gray-900">
+                                            <span class="font-medium">Start:</span> 
+                                            {{ \Carbon\Carbon::parse($subject->pivot->start_date)->format('M j, Y') }}
+                                        </div>
+                                    @endif
+                                    @if($subject->pivot->end_date)
+                                        <div class="text-gray-600">
+                                            <span class="font-medium">End:</span> 
+                                            {{ \Carbon\Carbon::parse($subject->pivot->end_date)->format('M j, Y') }}
+                                        </div>
+                                    @endif
+                                    @if(!$subject->pivot->start_date && !$subject->pivot->end_date)
+                                        <span class="text-gray-400">Not set</span>
+                                    @endif
+                                </div>
                             </flux:table.cell>
                             
+                            <!-- Actions -->
                             <flux:table.cell>
                                 <div class="flex space-x-2">
                                     <flux:button variant="ghost" size="sm" href="{{ route('enrollment.edit', [$student, $subject]) }}" title="Edit Enrollment">
@@ -158,7 +197,7 @@
                     @endforeach
                 @empty
                     <flux:table.row>
-                        <flux:table.cell colspan="8" class="text-center py-8">
+                        <flux:table.cell colspan="7" class="text-center py-8">
                             <flux:icon.academic-cap class="h-12 w-12 mx-auto mb-4 text-gray-300" />
                             <p class="text-lg font-medium text-gray-500">No enrollments found</p>
                             <p class="text-sm text-gray-400">Enrollments will appear here once students are enrolled in subjects</p>

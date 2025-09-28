@@ -61,10 +61,26 @@ class Subject extends Model
     }
 
     /**
+     * Check if subject has assigned teachers
+     */
+    public function hasAssignedTeachers(): bool
+    {
+        return $this->teachers()->exists();
+    }
+
+    /**
+     * Check if subject has any enrollments (active or not)
+     */
+    public function hasAnyEnrollments(): bool
+    {
+        return $this->students()->exists();
+    }
+
+    /**
      * Check if subject can be deleted
      */
     public function canBeDeleted(): bool
     {
-        return !$this->hasActiveEnrollments();
+        return !$this->hasActiveEnrollments() && !$this->hasAssignedTeachers() && !$this->hasAnyEnrollments();
     }
 }

@@ -347,9 +347,15 @@ class InvoiceController extends Controller
 
         $startMonthName = \DateTime::createFromFormat('!m', $startMonth)->format('F');
         $endMonthName = \DateTime::createFromFormat('!m', $endMonth)->format('F');
-        $periodText = $startMonth === $endMonth ? 
-            "{$startMonthName} {$year}" : 
-            "{$startMonthName} - {$endMonthName} {$year}";
+        
+        // Handle cross-year period text
+        if ($startYear === $endYear) {
+            $periodText = $startMonth === $endMonth ? 
+                "{$startMonthName} {$startYear}" : 
+                "{$startMonthName} - {$endMonthName} {$startYear}";
+        } else {
+            $periodText = "{$startMonthName} {$startYear} - {$endMonthName} {$endYear}";
+        }
             
         return redirect()->route('admin.invoices')->with('success', "Successfully generated {$generatedCount} invoices for period {$periodText}.");
     }
