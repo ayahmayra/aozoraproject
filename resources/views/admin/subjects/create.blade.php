@@ -1,7 +1,7 @@
 <x-layouts.app :title="__('Create Subject')">
     <div class="mb-8">
         <div class="flex items-center mb-4">
-            <flux:button variant="ghost" href="{{ route('admin.subjects') }}" class="mr-4">
+            <flux:button variant="ghost" href="{{ route('admin.subjects.index') }}" class="mr-4">
                 <flux:icon.arrow-left class="h-4 w-4 mr-2" />
                 Back to Subjects
             </flux:button>
@@ -25,23 +25,24 @@
             <form method="POST" action="{{ route('admin.subjects.store') }}" class="space-y-6">
                 @csrf
                 
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <flux:input
-                        name="name"
-                        label="Subject Name"
-                        placeholder="Enter subject name"
-                        value="{{ old('name') }}"
-                        required
-                    />
-                    
+                <flux:input
+                    name="name"
+                    label="Subject Name"
+                    placeholder="Enter subject name"
+                    value="{{ old('name') }}"
+                    required
+                />
+                
+                <flux:field>
+                    <flux:label>Subject Code</flux:label>
                     <flux:input
                         name="code"
-                        label="Subject Code"
-                        placeholder="Enter subject code (e.g., MATH101)"
+                        placeholder="Leave empty for auto-generation"
                         value="{{ old('code') }}"
-                        required
+                        readonly
                     />
-                </div>
+                    <flux:description>Subject code will be automatically generated based on document numbering configuration</flux:description>
+                </flux:field>
 
                 <flux:field>
                     <flux:label>Description</flux:label>
@@ -52,9 +53,8 @@
                     >{{ old('description') }}</flux:textarea>
                 </flux:field>
 
-
                 <div class="flex justify-end space-x-3">
-                    <flux:button variant="ghost" href="{{ route('admin.subjects') }}">
+                    <flux:button variant="ghost" href="{{ route('admin.subjects.index') }}">
                         Cancel
                     </flux:button>
                     <flux:button variant="primary" type="submit">

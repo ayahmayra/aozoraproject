@@ -44,7 +44,7 @@
                     </flux:sidebar.group>
 
                     <flux:sidebar.group expandable heading="{{ __('Academic') }}" icon="academic-cap">
-                        <flux:sidebar.item icon="book-open" :href="route('admin.subjects')" :current="request()->routeIs('admin.subjects*')" wire:navigate tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
+                        <flux:sidebar.item icon="book-open" :href="route('admin.subjects.index')" :current="request()->routeIs('admin.subjects*')" wire:navigate tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="user-plus" :href="route('enrollment.index')" :current="request()->routeIs('enrollment*')" wire:navigate tooltip="{{ __('Enrollments') }}">{{ __('Enrollments') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="clock" :href="route('admin.time-schedules.index')" :current="request()->routeIs('admin.time-schedules*')" wire:navigate tooltip="{{ __('Time Schedules') }}">{{ __('Time Schedules') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="calendar" :href="route('admin.time-schedules.calendar-fullcalendar')" :current="request()->routeIs('admin.time-schedules.calendar-fullcalendar')" tooltip="{{ __('Schedule Calendar') }}">{{ __('Schedule Calendar') }}</flux:sidebar.item>

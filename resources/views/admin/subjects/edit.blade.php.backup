@@ -1,3 +1,4 @@
+```blade
 <x-layouts.app :title="__('Edit Subject')">
     <div class="mb-8">
         <flux:heading size="xl" level="1">Edit Subject</flux:heading>
@@ -49,30 +50,25 @@
 
                 <flux:field>
                     <flux:label>Assigned Teachers</flux:label>
-                    <div class="space-y-3">
+                    <flux:select variant="listbox" multiple name="teachers[]" placeholder="Choose teachers...">
                         @foreach($teachers as $teacher)
-                            <div class="flex items-center space-x-2">
-                                <input 
-                                    type="checkbox" 
-                                    name="teachers[]" 
-                                    value="{{ $teacher->id }}"
-                                    id="teacher_{{ $teacher->id }}"
-                                    {{ $subject->teachers->contains($teacher->id) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                />
-                                <label for="teacher_{{ $teacher->id }}" class="text-sm font-medium ">
-                                    {{ $teacher->user->name }} ({{ $teacher->employee_number }})
-                                </label>
-                            </div>
+                            <flux:select.option 
+                                value="{{ $teacher->id }}"
+                                {{ $subject->teachers->contains($teacher->id) ? 'selected' : '' }}
+                            >
+                                {{ $teacher->user->name }} ({{ $teacher->employee_number }})
+                            </flux:select.option>
                         @endforeach
-                    </div>
+                    </flux:select>
                     <flux:description>Select teachers to assign to this subject</flux:description>
                 </flux:field>
 
                 <div class="flex justify-end space-x-3">
-                    <flux:button variant="ghost" href="{{ route('admin.subjects.index') }}">
-                        Cancel
-                    </flux:button>
+                    <a href="{{ route('admin.subjects.index') }}">
+                        <flux:button variant="ghost">
+                            Cancel
+                        </flux:button>
+                    </a>
                     <flux:button variant="primary" type="submit">
                         Update Subject
                     </flux:button>
@@ -81,3 +77,4 @@
         </div>
     </flux:card>
 </x-layouts.app>
+

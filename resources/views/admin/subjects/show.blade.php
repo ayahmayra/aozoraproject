@@ -1,7 +1,7 @@
 <x-layouts.app :title="__('Subject Details')">
     <div class="mb-8">
         <div class="flex items-center mb-4">
-            <flux:button variant="ghost" href="{{ route('admin.subjects') }}" class="mr-4">
+            <flux:button variant="ghost" href="{{ route('admin.subjects.index') }}" class="mr-4">
                 <flux:icon.arrow-left class="h-4 w-4 mr-2" />
                 Back to Subjects
             </flux:button>
@@ -150,7 +150,7 @@
                         <flux:icon.pencil class="h-4 w-4 mr-2" />
                         Edit Subject
                     </flux:button>
-                    <flux:button variant="ghost" href="{{ route('admin.subjects') }}" class="w-full">
+                    <flux:button variant="ghost" href="{{ route('admin.subjects.index') }}" class="w-full">
                         <flux:icon.arrow-left class="h-4 w-4 mr-2" />
                         Back to Subjects
                     </flux:button>

@@ -120,6 +120,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('two-factor.show');
 });
 
+// Test route
+Route::get('/test', [\App\Http\Controllers\TestController::class, 'test']);
+
+// Test subjects route without middleware
+Route::get('/test-subjects-create', [\App\Http\Controllers\Admin\SubjectController::class, 'create']);
+Route::get('/test-subjects-edit/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'edit']);
+Route::put('/test-subjects-update/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'update']);
+
 // Admin Routes - Data Master Management
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
@@ -167,13 +175,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/students/{student}', [\App\Http\Controllers\Admin\StudentsController::class, 'destroy'])->name('students.destroy');
     
     // Subject Management
-    Route::get('/subjects', [\App\Http\Controllers\Admin\SubjectController::class, 'index'])->name('subjects');
-    Route::get('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'show'])->name('subjects.show');
-    Route::get('/subjects/create', [\App\Http\Controllers\Admin\SubjectController::class, 'create'])->name('subjects.create');
-    Route::post('/subjects', [\App\Http\Controllers\Admin\SubjectController::class, 'store'])->name('subjects.store');
-    Route::get('/subjects/{subject}/edit', [\App\Http\Controllers\Admin\SubjectController::class, 'edit'])->name('subjects.edit');
-    Route::put('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'update'])->name('subjects.update');
-    Route::delete('/subjects/{subject}', [\App\Http\Controllers\Admin\SubjectController::class, 'destroy'])->name('subjects.destroy');
+    Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
     
     // Time Schedule Management
     Route::resource('time-schedules', \App\Http\Controllers\Admin\TimeScheduleController::class)->parameters(['time-schedules' => 'timeSchedule']);
