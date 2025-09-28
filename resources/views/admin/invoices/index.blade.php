@@ -82,7 +82,7 @@
                                         <option value="">All Months</option>
                                         @php
                                             $currentMonth = now()->month;
-                                            $selectedMonth = request('filter_month', $currentMonth);
+                                            $selectedMonth = request('filter_month');
                                         @endphp
                                         <option value="1" {{ $selectedMonth == '1' ? 'selected' : '' }}>January</option>
                                         <option value="2" {{ $selectedMonth == '2' ? 'selected' : '' }}>February</option>
@@ -101,9 +101,9 @@
                                         <option value="">All Years</option>
                                         @php
                                             $currentYear = now()->year;
-                                            $selectedYear = request('filter_year', $currentYear);
+                                            $selectedYear = request('filter_year');
                                         @endphp
-                                        @for($year = now()->year; $year >= 2020; $year--)
+                                        @for($year = now()->year + 2; $year >= 2025; $year--)
                                             <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>{{ $year }}</option>
                                         @endfor
                                     </flux:select>

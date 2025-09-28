@@ -205,16 +205,43 @@ class InvoiceController extends Controller
         if ($request->filled('filter_month') && $request->filled('filter_year')) {
             $month = $request->filter_month;
             $year = $request->filter_year;
+            // Filter by billing period - invoice must be within the specified month/year
+            $query->where(function($q) use ($month, $year) {
+                $q->where(function($subQ) use ($month, $year) {
+                    // Invoice starts and ends in the specified month/year
+                    $subQ->whereMonth('billing_period_start', $month)
+                         ->whereYear('billing_period_start', $year)
+                         ->whereMonth('billing_period_end', $month)
+                         ->whereYear('billing_period_end', $year);
+                });
+            });
+        } elseif ($request->filled('filter_year') && !$request->filled('filter_month')) {
+            // Only year filter
+            $year = $request->filter_year;
+            $query->where(function($q) use ($year) {
+                $q->whereYear('billing_period_start', $year)
+                  ->whereYear('billing_period_end', $year);
+            });
+        } elseif ($request->filled('filter_month') && !$request->filled('filter_year')) {
+            // Only month filter (use current year)
+            $month = $request->filter_month;
+            $year = now()->year;
+            $query->where(function($q) use ($month, $year) {
+                $q->whereMonth('billing_period_start', $month)
+                  ->whereYear('billing_period_start', $year)
+                  ->whereMonth('billing_period_end', $month)
+                  ->whereYear('billing_period_end', $year);
+            });
         } elseif (!$request->hasAny(['filter_month', 'filter_year']) && !$request->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to'])) {
             // Default to current month if no filters are applied
             $month = now()->month;
             $year = now()->year;
-        }
-        
-        if (isset($month) && isset($year)) {
-            // Filter by billing period start date
-            $query->whereMonth('billing_period_start', $month)
-                  ->whereYear('billing_period_start', $year);
+            $query->where(function($q) use ($month, $year) {
+                $q->whereMonth('billing_period_start', $month)
+                  ->whereYear('billing_period_start', $year)
+                  ->whereMonth('billing_period_end', $month)
+                  ->whereYear('billing_period_end', $year);
+            });
         }
 
         $invoices = $query->orderBy('invoice_date', 'desc')->paginate(15);

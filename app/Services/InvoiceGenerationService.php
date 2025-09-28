@@ -580,6 +580,93 @@ class InvoiceGenerationService
     }
 
     /**
+     * Generate monthly invoices for a cross-year range.
+     */
+    private function generateMonthlyInvoicesForCrossYearRange(StudentSubject $enrollment, int $startMonth, int $endMonth, int $startYear, int $endYear): array
+    {
+        $invoices = [];
+        
+        // Calculate the period start and end dates
+        $periodStart = Carbon::createFromDate($startYear, $startMonth, 1)->startOfMonth();
+        $periodEnd = Carbon::createFromDate($endYear, $endMonth, 1)->endOfMonth();
+        
+        // Get enrollment start date
+        $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
+        $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
+        
+        // Generate monthly invoices within the requested period
+        $currentMonth = $periodStart->copy();
+        
+        while ($currentMonth->lte($periodEnd)) {
+            $monthStart = $currentMonth->copy()->startOfMonth();
+            $monthEnd = $currentMonth->copy()->endOfMonth();
+            
+            // Only generate if the month overlaps with the enrollment period
+            if ($this->shouldGenerateInvoiceForPeriod($enrollment, $monthStart, $monthEnd)) {
+                $invoice = $this->createInvoice(
+                    $enrollment,
+                    $monthStart,
+                    $monthEnd,
+                    (float)$enrollment->payment_amount,
+                    $enrollment->payment_method
+                );
+                $invoices[] = $invoice;
+            }
+            
+            $currentMonth->addMonth();
+        }
+        
+        return $invoices;
+    }
+
+    /**
+     * Generate yearly invoices for a cross-year range.
+     */
+    private function generateYearlyInvoicesForCrossYearRange(StudentSubject $enrollment, int $startMonth, int $endMonth, int $startYear, int $endYear): array
+    {
+        $invoices = [];
+        
+        // Calculate the period start and end dates
+        $periodStart = Carbon::createFromDate($startYear, $startMonth, 1)->startOfMonth();
+        $periodEnd = Carbon::createFromDate($endYear, $endMonth, 1)->endOfMonth();
+        
+        // Get enrollment start date
+        $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
+        $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
+        
+        // For yearly payments, generate one invoice per year within the period
+        $currentYear = $periodStart->year;
+        $endYear = $periodEnd->year;
+        
+        while ($currentYear <= $endYear) {
+            $yearStart = Carbon::createFromDate($currentYear, 1, 1)->startOfYear();
+            $yearEnd = Carbon::createFromDate($currentYear, 12, 31)->endOfYear();
+            
+            // Only generate if the year overlaps with the requested period and enrollment
+            if ($yearStart->lte($periodEnd) && 
+                $yearEnd->gte($periodStart) &&
+                $yearStart->gte($enrollmentStart) &&
+                $yearStart->lt($enrollmentEnd)) {
+                
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $yearStart, $yearEnd)) {
+                    $invoice = $this->createInvoice(
+                        $enrollment,
+                        $yearStart,
+                        $yearEnd,
+                        (float)$enrollment->payment_amount,
+                        $enrollment->payment_method
+                    );
+                    $invoices[] = $invoice;
+                }
+            }
+            
+            $currentYear++;
+        }
+        
+        return $invoices;
+    }
+
+    /**
      * Generate invoices for all enrollments within a month range.
      */
     public function generateInvoicesForMonthRangeAll(
