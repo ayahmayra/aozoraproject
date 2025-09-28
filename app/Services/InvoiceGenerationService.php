@@ -480,6 +480,106 @@ class InvoiceGenerationService
     }
 
     /**
+     * Generate invoices for a specific enrollment within a cross-year month range.
+     */
+    public function generateInvoicesForCrossYearRange(
+        StudentSubject $enrollment, 
+        int $startMonth,
+        int $endMonth,
+        int $startYear,
+        int $endYear,
+        string $generationMode,
+        ?string $paymentMethodFilter = null
+    ): array {
+        // Filter by payment method if specified
+        if ($paymentMethodFilter && $enrollment->payment_method !== $paymentMethodFilter) {
+            return [];
+        }
+
+        $invoices = [];
+
+        switch ($generationMode) {
+            case 'monthly':
+                // Generate monthly invoices for cross-year range
+                $invoices = $this->generateMonthlyInvoicesForCrossYearRange($enrollment, $startMonth, $endMonth, $startYear, $endYear);
+                break;
+
+            case 'semester':
+                // Generate semester invoices for cross-year range
+                $invoices = $this->generateSemesterInvoicesForCrossYearRange($enrollment, $startMonth, $endMonth, $startYear, $endYear);
+                break;
+
+            case 'yearly':
+                // Generate yearly invoice for cross-year range
+                $invoices = $this->generateYearlyInvoicesForCrossYearRange($enrollment, $startMonth, $endMonth, $startYear, $endYear);
+                break;
+        }
+
+        return $invoices;
+    }
+
+    /**
+     * Generate semester invoices for a cross-year range.
+     */
+    private function generateSemesterInvoicesForCrossYearRange(StudentSubject $enrollment, int $startMonth, int $endMonth, int $startYear, int $endYear): array
+    {
+        $invoices = [];
+        
+        // Calculate the period start and end dates
+        $periodStart = Carbon::createFromDate($startYear, $startMonth, 1)->startOfMonth();
+        $periodEnd = Carbon::createFromDate($endYear, $endMonth, 1)->endOfMonth();
+        
+        // Get enrollment start date
+        $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
+        $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
+        
+        // Find the first semester period that starts on or before the requested period
+        $currentSemesterStart = $enrollmentStart->copy();
+        
+        // Align to semester boundaries (every 6 months from enrollment start)
+        while ($currentSemesterStart->lt($periodStart)) {
+            $currentSemesterStart->addMonths(6);
+        }
+        
+        // Go back to the previous semester if we overshot
+        if ($currentSemesterStart->gt($periodStart)) {
+            $currentSemesterStart->subMonths(6);
+        }
+        
+        // Make sure we don't start before enrollment start
+        if ($currentSemesterStart->lt($enrollmentStart)) {
+            $currentSemesterStart = $enrollmentStart->copy();
+        }
+        
+        // Generate semester invoices within the requested period
+        while ($currentSemesterStart->lte($periodEnd)) {
+            $semesterEnd = $currentSemesterStart->copy()->addMonths(6)->subDay();
+            
+            // Only generate if the semester period overlaps with the requested period
+            if ($currentSemesterStart->lte($periodEnd) && 
+                $semesterEnd->gte($periodStart) &&
+                $currentSemesterStart->gte($enrollmentStart) &&
+                $currentSemesterStart->lt($enrollmentEnd)) {
+                
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $currentSemesterStart, $semesterEnd)) {
+                    $invoice = $this->createInvoice(
+                        $enrollment,
+                        $currentSemesterStart,
+                        $semesterEnd,
+                        (float)$enrollment->payment_amount, // Single semester amount
+                        $enrollment->payment_method
+                    );
+                    $invoices[] = $invoice;
+                }
+            }
+            
+            $currentSemesterStart->addMonths(6);
+        }
+        
+        return $invoices;
+    }
+
+    /**
      * Generate invoices for all enrollments within a month range.
      */
     public function generateInvoicesForMonthRangeAll(
@@ -506,6 +606,44 @@ class InvoiceGenerationService
                 $startMonth,
                 $endMonth,
                 $year,
+                $generationMode,
+                $paymentMethodFilter
+            );
+            $allInvoices = array_merge($allInvoices, $invoices);
+        }
+
+        return $allInvoices;
+    }
+
+    /**
+     * Generate invoices for all enrollments within a cross-year month range.
+     */
+    public function generateInvoicesForCrossYearRangeAll(
+        int $startMonth,
+        int $endMonth,
+        int $startYear,
+        int $endYear,
+        string $generationMode,
+        ?string $paymentMethodFilter = null
+    ): array {
+        $allInvoices = [];
+
+        // Get all active enrollments
+        $query = StudentSubject::active()->with(['student', 'subject']);
+        
+        if ($paymentMethodFilter) {
+            $query->where('payment_method', $paymentMethodFilter);
+        }
+
+        $enrollments = $query->get();
+
+        foreach ($enrollments as $enrollment) {
+            $invoices = $this->generateInvoicesForCrossYearRange(
+                $enrollment, 
+                $startMonth,
+                $endMonth,
+                $startYear,
+                $endYear,
                 $generationMode,
                 $paymentMethodFilter
             );

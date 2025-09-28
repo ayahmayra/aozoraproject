@@ -242,7 +242,8 @@ class InvoiceController extends Controller
         $request->validate([
             'start_month' => 'required|integer|min:1|max:12',
             'end_month' => 'required|integer|min:1|max:12',
-            'year' => 'required|integer|min:2020|max:2030',
+            'start_year' => 'required|integer|min:2020|max:2030',
+            'end_year' => 'required|integer|min:2020|max:2030',
             'payment_method' => 'nullable|in:monthly,semester,yearly',
             'generation_mode' => 'required|in:monthly,semester,yearly',
             'enrollment_ids' => 'nullable|array',
@@ -251,42 +252,69 @@ class InvoiceController extends Controller
 
         $startMonth = (int)$request->start_month;
         $endMonth = (int)$request->end_month;
-        $year = (int)$request->year;
+        $startYear = (int)$request->start_year;
+        $endYear = (int)$request->end_year;
         $paymentMethod = $request->payment_method;
         $generationMode = $request->generation_mode;
         $enrollmentIds = $request->enrollment_ids;
 
         // Calculate actual period dates
-        $periodStart = \Carbon\Carbon::createFromDate($year, $startMonth, 1)->startOfMonth();
-        $periodEnd = \Carbon\Carbon::createFromDate($year, $endMonth, 1)->endOfMonth();
+        $periodStart = \Carbon\Carbon::createFromDate($startYear, $startMonth, 1)->startOfMonth();
+        $periodEnd = \Carbon\Carbon::createFromDate($endYear, $endMonth, 1)->endOfMonth();
 
         $generatedCount = 0;
 
+        // Check if it's cross-year
+        $isCrossYear = $startYear !== $endYear;
+        
         if ($enrollmentIds && count($enrollmentIds) > 0) {
             // Generate for specific enrollments
             foreach ($enrollmentIds as $enrollmentId) {
                 $enrollment = StudentSubject::with(['student', 'subject'])->find($enrollmentId);
                 if ($enrollment && $enrollment->isActive()) {
-                    $invoices = $this->invoiceService->generateInvoicesForMonthRange(
-                        $enrollment, 
-                        $startMonth,
-                        $endMonth,
-                        $year,
-                        $generationMode,
-                        $paymentMethod
-                    );
+                    if ($isCrossYear) {
+                        $invoices = $this->invoiceService->generateInvoicesForCrossYearRange(
+                            $enrollment, 
+                            $startMonth,
+                            $endMonth,
+                            $startYear,
+                            $endYear,
+                            $generationMode,
+                            $paymentMethod
+                        );
+                    } else {
+                        $invoices = $this->invoiceService->generateInvoicesForMonthRange(
+                            $enrollment, 
+                            $startMonth,
+                            $endMonth,
+                            $startYear,
+                            $generationMode,
+                            $paymentMethod
+                        );
+                    }
                     $generatedCount += count($invoices);
                 }
             }
         } else {
             // Generate for all active enrollments
-            $invoices = $this->invoiceService->generateInvoicesForMonthRangeAll(
-                $startMonth,
-                $endMonth,
-                $year,
-                $generationMode,
-                $paymentMethod
-            );
+            if ($isCrossYear) {
+                $invoices = $this->invoiceService->generateInvoicesForCrossYearRangeAll(
+                    $startMonth,
+                    $endMonth,
+                    $startYear,
+                    $endYear,
+                    $generationMode,
+                    $paymentMethod
+                );
+            } else {
+                $invoices = $this->invoiceService->generateInvoicesForMonthRangeAll(
+                    $startMonth,
+                    $endMonth,
+                    $startYear,
+                    $generationMode,
+                    $paymentMethod
+                );
+            }
             $generatedCount = count($invoices);
         }
 

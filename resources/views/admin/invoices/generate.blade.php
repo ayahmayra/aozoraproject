@@ -30,47 +30,54 @@
                     @csrf
                     
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        <!-- Period Selection -->
+                        <!-- Start Period -->
                         <flux:field>
-                            <flux:label>Start Month</flux:label>
-                            <flux:select name="start_month" required>
-                                <option value="">Select start month</option>
-                                @for($i = 1; $i <= 12; $i++)
-                                    <option value="{{ $i }}" {{ old('start_month', now()->month) == $i ? 'selected' : '' }}>
-                                        {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
-                                    </option>
-                                @endfor
-                            </flux:select>
-                            <flux:description>Starting month for billing period</flux:description>
+                            <flux:label>Start Period</flux:label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <flux:select name="start_month" required>
+                                    <option value="">Month</option>
+                                    @for($i = 1; $i <= 12; $i++)
+                                        <option value="{{ $i }}" {{ old('start_month', now()->month) == $i ? 'selected' : '' }}>
+                                            {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
+                                        </option>
+                                    @endfor
+                                </flux:select>
+                                <flux:select name="start_year" required>
+                                    @for($year = now()->year - 1; $year <= now()->year + 2; $year++)
+                                        <option value="{{ $year }}" {{ old('start_year', now()->year) == $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endfor
+                                </flux:select>
+                            </div>
+                            <flux:description>Starting month and year for billing period</flux:description>
                         </flux:field>
 
+                        <!-- End Period -->
                         <flux:field>
-                            <flux:label>End Month</flux:label>
-                            <flux:select name="end_month" required>
-                                <option value="">Select end month</option>
-                                @for($i = 1; $i <= 12; $i++)
-                                    <option value="{{ $i }}" {{ old('end_month', now()->month) == $i ? 'selected' : '' }}>
-                                        {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
-                                    </option>
-                                @endfor
-                            </flux:select>
-                            <flux:description>Ending month for billing period</flux:description>
+                            <flux:label>End Period</flux:label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <flux:select name="end_month" required>
+                                    <option value="">Month</option>
+                                    @for($i = 1; $i <= 12; $i++)
+                                        <option value="{{ $i }}" {{ old('end_month', now()->month) == $i ? 'selected' : '' }}>
+                                            {{ \DateTime::createFromFormat('!m', $i)->format('F') }}
+                                        </option>
+                                    @endfor
+                                </flux:select>
+                                <flux:select name="end_year" required>
+                                    @for($year = now()->year - 1; $year <= now()->year + 2; $year++)
+                                        <option value="{{ $year }}" {{ old('end_year', now()->year) == $year ? 'selected' : '' }}>
+                                            {{ $year }}
+                                        </option>
+                                    @endfor
+                                </flux:select>
+                            </div>
+                            <flux:description>Ending month and year for billing period</flux:description>
                         </flux:field>
                     </div>
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        <!-- Year Selection -->
-                        <flux:field>
-                            <flux:label>Year</flux:label>
-                            <flux:select name="year" required>
-                                @for($year = now()->year - 1; $year <= now()->year + 2; $year++)
-                                    <option value="{{ $year }}" {{ old('year', now()->year) == $year ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endfor
-                            </flux:select>
-                            <flux:description>Year for billing period</flux:description>
-                        </flux:field>
 
                         <!-- Generation Mode -->
                         <flux:field>
@@ -218,46 +225,38 @@
             // Period preview functionality
             const startMonthSelect = document.querySelector('select[name="start_month"]');
             const endMonthSelect = document.querySelector('select[name="end_month"]');
-            const yearSelect = document.querySelector('select[name="year"]');
+            const startYearSelect = document.querySelector('select[name="start_year"]');
+            const endYearSelect = document.querySelector('select[name="end_year"]');
             const previewDiv = document.getElementById('period-preview');
 
             function updatePreview() {
                 const startMonth = parseInt(startMonthSelect.value);
                 const endMonth = parseInt(endMonthSelect.value);
-                const year = yearSelect.value;
+                const startYear = parseInt(startYearSelect.value);
+                const endYear = parseInt(endYearSelect.value);
 
-                if (startMonth && endMonth && year) {
+                if (startMonth && endMonth && startYear && endYear) {
                     const monthNames = [
                         'January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'
                     ];
 
                     let previewText = '';
-                    if (startMonth === endMonth) {
-                        previewText = `${monthNames[startMonth - 1]} ${year}`;
+                    
+                    // Check if it's the same month and year
+                    if (startMonth === endMonth && startYear === endYear) {
+                        previewText = `${monthNames[startMonth - 1]} ${startYear}`;
                     } else {
-                        const months = [];
-                        if (startMonth <= endMonth) {
-                            // Same year
-                            for (let i = startMonth; i <= endMonth; i++) {
-                                months.push(monthNames[i - 1]);
-                            }
-                        } else {
-                            // Cross year (e.g., Nov to Feb)
-                            for (let i = startMonth; i <= 12; i++) {
-                                months.push(monthNames[i - 1]);
-                            }
-                            for (let i = 1; i <= endMonth; i++) {
-                                months.push(monthNames[i - 1]);
-                            }
-                        }
-                        previewText = `${months.join(', ')} ${year}`;
+                        // Different periods - show range
+                        const startPeriod = `${monthNames[startMonth - 1]} ${startYear}`;
+                        const endPeriod = `${monthNames[endMonth - 1]} ${endYear}`;
+                        previewText = `${startPeriod} - ${endPeriod}`;
                     }
 
                     previewDiv.innerHTML = `<strong>Billing Period:</strong> ${previewText}`;
                     previewDiv.className = 'p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-200';
                 } else {
-                    previewDiv.innerHTML = 'Select start and end months to see preview';
+                    previewDiv.innerHTML = 'Select start and end periods to see preview';
                     previewDiv.className = 'p-3 bg-gray-50 rounded-lg text-sm text-gray-600';
                 }
             }
@@ -265,7 +264,8 @@
             // Add event listeners
             startMonthSelect.addEventListener('change', updatePreview);
             endMonthSelect.addEventListener('change', updatePreview);
-            yearSelect.addEventListener('change', updatePreview);
+            startYearSelect.addEventListener('change', updatePreview);
+            endYearSelect.addEventListener('change', updatePreview);
 
             // Initial preview update
             updatePreview();
