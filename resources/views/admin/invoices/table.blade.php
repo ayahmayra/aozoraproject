@@ -178,10 +178,10 @@
                 <!-- Invoice Status Statistics -->
                 <flux:card size="sm" class="hover:bg-zinc-50 dark:hover:bg-zinc-700">
                     <flux:heading class="flex items-center gap-2">
-                        Status Invoice Tahun {{ $year }}
+                        Status Invoice Bulan {{ $months[$currentMonth] }} {{ $currentYear }}
                         <flux:icon name="chart-bar" class="ml-auto text-zinc-400" variant="micro" />
                     </flux:heading>
-                    <flux:text class="mt-2">Distribusi status invoice untuk tahun {{ $year }}.</flux:text>
+                    <flux:text class="mt-2">Distribusi status invoice untuk bulan {{ $months[$currentMonth] }} {{ $currentYear }}.</flux:text>
                     
                     <div class="mt-4 space-y-3">
                         <!-- Total Invoices -->
@@ -193,13 +193,13 @@
                             <flux:icon.document-text class="h-6 w-6 text-gray-500" />
                         </div>
                         
-                        <!-- Verified Invoices -->
-                        <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <!-- Pending Invoices -->
+                        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <div>
-                                <div class="text-sm font-medium text-green-600 dark:text-green-400">Terverifikasi</div>
-                                <div class="text-lg font-bold text-green-800 dark:text-green-200">{{ number_format($verifiedInvoices) }}</div>
+                                <div class="text-sm font-medium text-red-600 dark:text-red-400">Menunggu Pembayaran</div>
+                                <div class="text-lg font-bold text-red-800 dark:text-red-200">{{ number_format($pendingInvoices) }}</div>
                             </div>
-                            <flux:icon.shield-check class="h-6 w-6 text-green-500" />
+                            <flux:icon.clock class="h-6 w-6 text-red-500" />
                         </div>
                         
                         <!-- Paid Invoices -->
@@ -211,13 +211,13 @@
                             <flux:icon.check-circle class="h-6 w-6 text-yellow-500" />
                         </div>
                         
-                        <!-- Pending Invoices -->
-                        <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <!-- Verified Invoices -->
+                        <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                             <div>
-                                <div class="text-sm font-medium text-red-600 dark:text-red-400">Menunggu Pembayaran</div>
-                                <div class="text-lg font-bold text-red-800 dark:text-red-200">{{ number_format($pendingInvoices) }}</div>
+                                <div class="text-sm font-medium text-green-600 dark:text-green-400">Terverifikasi</div>
+                                <div class="text-lg font-bold text-green-800 dark:text-green-200">{{ number_format($verifiedInvoices) }}</div>
                             </div>
-                            <flux:icon.clock class="h-6 w-6 text-red-500" />
+                            <flux:icon.shield-check class="h-6 w-6 text-green-500" />
                         </div>
                     </div>
                 </flux:card>

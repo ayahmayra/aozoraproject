@@ -90,35 +90,48 @@ class InvoiceController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         
-        // Calculate statistics
+        // Calculate statistics for current month (static, not affected by filter)
         $currentMonth = date('n'); // Current month (1-12)
         $currentYear = date('Y');
         
-        // Total verified payments for current month
+        // Get all invoices for the selected year (not filtered by month)
+        $allInvoicesForYear = Invoice::whereYear('billing_period_start', $year);
+        if ($subjectFilter) {
+            $allInvoicesForYear->whereHas('subject', function ($q) use ($subjectFilter) {
+                $q->where('id', $subjectFilter);
+            });
+        }
+        $allInvoicesForYear = $allInvoicesForYear->get();
+        
+        // Total verified payments for current month (static)
         $currentMonthTotal = Invoice::where('payment_status', 'verified')
             ->whereYear('billing_period_start', $currentYear)
             ->whereMonth('billing_period_start', $currentMonth)
             ->sum('paid_amount');
         
-        // Total verified payments for current year
-        $currentYearTotal = Invoice::where('payment_status', 'verified')
-            ->whereYear('billing_period_start', $currentYear)
+        // Total verified payments for the filtered year
+        $currentYearTotal = $allInvoicesForYear
+            ->where('payment_status', 'verified')
             ->sum('paid_amount');
         
         // Overall total verified payments (all time)
         $overallTotal = Invoice::where('payment_status', 'verified')
             ->sum('paid_amount');
         
-        // Additional statistics
-        $totalInvoices = $invoices->count();
-        $verifiedInvoices = $invoices->where('payment_status', 'verified')->count();
-        $pendingInvoices = $invoices->where('payment_status', 'pending')->count();
-        $paidInvoices = $invoices->where('payment_status', 'paid')->count();
+        // Statistics for current month (static, not affected by filter)
+        $currentMonthInvoices = Invoice::whereYear('billing_period_start', $currentYear)
+            ->whereMonth('billing_period_start', $currentMonth)
+            ->get();
+            
+        $totalInvoices = $currentMonthInvoices->count();
+        $pendingInvoices = $currentMonthInvoices->where('payment_status', 'pending')->count();
+        $paidInvoices = $currentMonthInvoices->where('payment_status', 'paid')->count();
+        $verifiedInvoices = $currentMonthInvoices->where('payment_status', 'verified')->count();
         
-        // Calculate monthly totals for verified payments
+        // Calculate monthly totals for verified payments (based on all invoices for the year)
         $monthlyTotals = [];
         foreach ($months as $monthNum => $monthName) {
-            $monthlyTotals[$monthNum] = $invoices
+            $monthlyTotals[$monthNum] = $allInvoicesForYear
                 ->where('payment_status', 'verified')
                 ->filter(function ($invoice) use ($monthNum) {
                     return $invoice->billing_period_start->month == $monthNum;
