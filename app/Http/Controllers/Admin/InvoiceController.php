@@ -28,24 +28,58 @@ class InvoiceController extends Controller
         $year = $request->get('year', date('Y'));
         $subjectFilter = $request->get('subject');
         
+        // Get all active enrollments (students with subjects)
+        $enrollmentsQuery = StudentSubject::with(['student.user', 'subject'])
+            ->where('enrollment_status', 'active');
+            
+        // Apply subject filter if provided
+        if ($subjectFilter) {
+            $enrollmentsQuery->where('subject_id', $subjectFilter);
+        }
+        
+        $enrollments = $enrollmentsQuery->get();
+        
         // Get all invoices for the selected year
-        $query = Invoice::with(['student.user', 'subject'])
+        $invoicesQuery = Invoice::with(['student.user', 'subject'])
             ->whereYear('billing_period_start', $year);
             
         // Apply subject filter if provided
         if ($subjectFilter) {
-            $query->whereHas('subject', function ($q) use ($subjectFilter) {
+            $invoicesQuery->whereHas('subject', function ($q) use ($subjectFilter) {
                 $q->where('id', $subjectFilter);
             });
         }
         
-        $invoices = $query->get();
+        $invoices = $invoicesQuery->get();
         
-        // Group invoices by student and subject, then sort by subject name
-        $groupedInvoices = $invoices->groupBy(function ($invoice) {
+        // Create a comprehensive list of student-subject combinations
+        $studentSubjectCombinations = $enrollments->map(function ($enrollment) {
+            return [
+                'student_name' => $enrollment->student->user->name,
+                'subject_name' => $enrollment->subject->name,
+                'student_id' => $enrollment->student->id,
+                'subject_id' => $enrollment->subject->id,
+                'enrollment' => $enrollment
+            ];
+        });
+        
+        // Group invoices by student and subject
+        $invoicesByStudentSubject = $invoices->groupBy(function ($invoice) {
             return $invoice->student->user->name . '|' . $invoice->subject->name;
-        })->sortBy(function ($group, $key) {
-            // Sort by subject name (second part after |)
+        });
+        
+        // Create grouped data that includes all student-subject combinations
+        $groupedInvoices = collect();
+        
+        foreach ($studentSubjectCombinations as $combination) {
+            $key = $combination['student_name'] . '|' . $combination['subject_name'];
+            $invoices = $invoicesByStudentSubject->get($key, collect());
+            
+            $groupedInvoices->put($key, $invoices);
+        }
+        
+        // Sort by subject name
+        $groupedInvoices = $groupedInvoices->sortBy(function ($group, $key) {
             return explode('|', $key)[1];
         });
         
