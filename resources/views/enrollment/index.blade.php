@@ -129,12 +129,12 @@
                                         </flux:badge>
                                     </div>
                                     @if($subject->pivot->payment_method)
-                                        <div class="text-sm text-gray-600">
+                                        <div class="text-sm text-gray-400">
                                             <span class="font-medium">{{ ucfirst($subject->pivot->payment_method) }}</span>
                                         </div>
                                     @endif
                                     @if($subject->pivot->payment_amount)
-                                        <div class="text-sm text-gray-600">
+                                        <div class="text-sm text-gray-400">
                                             Rp {{ number_format($subject->pivot->payment_amount, 0, ',', '.') }}
                                         </div>
                                     @endif
@@ -165,19 +165,19 @@
                             <flux:table.cell>
                                 <div class="text-sm">
                                     @if($subject->pivot->start_date)
-                                        <div class="text-gray-900">
+                                        <div class="">
                                             <span class="font-medium">Start:</span> 
                                             {{ \Carbon\Carbon::parse($subject->pivot->start_date)->format('M j, Y') }}
                                         </div>
                                     @endif
                                     @if($subject->pivot->end_date)
-                                        <div class="text-gray-600">
+                                        <div class="">
                                             <span class="font-medium">End:</span> 
                                             {{ \Carbon\Carbon::parse($subject->pivot->end_date)->format('M j, Y') }}
                                         </div>
                                     @endif
                                     @if(!$subject->pivot->start_date && !$subject->pivot->end_date)
-                                        <span class="text-gray-400">Not set</span>
+                                        <span class="">Not set</span>
                                     @endif
                                 </div>
                             </flux:table.cell>
