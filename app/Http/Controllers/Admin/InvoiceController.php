@@ -239,90 +239,48 @@ class InvoiceController extends Controller
         if ($request->filled('filter_month') && $request->filled('filter_year')) {
             $month = $request->filter_month;
             $year = $request->filter_year;
-            // Filter by billing period - invoice must overlap with the specified month/year
+            // Filter by billing period - invoice must start in the specified month/year
             $query->where(function($q) use ($month, $year) {
                 $q->where(function($subQ) use ($month, $year) {
-                    // Invoice billing period overlaps with the specified month/year
-                    $subQ->where(function($periodQ) use ($month, $year) {
-                        // Billing period starts in the specified month/year
-                        $periodQ->where(function($startQ) use ($month, $year) {
-                            $startQ->whereMonth('billing_period_start', $month)
-                                   ->whereYear('billing_period_start', $year);
-                        })
-                        // OR billing period ends in the specified month/year
-                        ->orWhere(function($endQ) use ($month, $year) {
-                            $endQ->whereMonth('billing_period_end', $month)
-                                 ->whereYear('billing_period_end', $year);
-                        })
-                        // OR billing period spans across the specified month/year
-                        ->orWhere(function($spanQ) use ($month, $year) {
-                            $spanQ->where('billing_period_start', '<=', \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth())
-                                  ->where('billing_period_end', '>=', \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth());
-                        });
+                    // For monthly invoices: billing period starts in the specified month/year
+                    $subQ->where(function($monthlyQ) use ($month, $year) {
+                        $monthlyQ->where('payment_method', 'monthly')
+                                ->whereMonth('billing_period_start', $month)
+                                ->whereYear('billing_period_start', $year);
+                    })
+                    // For semester invoices: billing period starts in the specified month/year
+                    ->orWhere(function($semesterQ) use ($month, $year) {
+                        $semesterQ->where('payment_method', 'semester')
+                                 ->whereMonth('billing_period_start', $month)
+                                 ->whereYear('billing_period_start', $year);
+                    })
+                    // For yearly invoices: billing period starts in the specified month/year
+                    ->orWhere(function($yearlyQ) use ($month, $year) {
+                        $yearlyQ->where('payment_method', 'yearly')
+                               ->whereMonth('billing_period_start', $month)
+                               ->whereYear('billing_period_start', $year);
                     });
                 });
             });
         } elseif ($request->filled('filter_year') && !$request->filled('filter_month')) {
-            // Only year filter
+            // Only year filter - show invoices that start in the specified year
             $year = $request->filter_year;
-            $query->where(function($q) use ($year) {
-                $q->where(function($yearQ) use ($year) {
-                    // Billing period starts in the specified year
-                    $yearQ->whereYear('billing_period_start', $year)
-                    // OR billing period ends in the specified year
-                          ->orWhereYear('billing_period_end', $year)
-                    // OR billing period spans across the specified year
-                          ->orWhere(function($spanQ) use ($year) {
-                              $spanQ->where('billing_period_start', '<=', \Carbon\Carbon::createFromDate($year, 1, 1)->startOfYear())
-                                    ->where('billing_period_end', '>=', \Carbon\Carbon::createFromDate($year, 12, 31)->endOfYear());
-                          });
-                });
-            });
+            $query->whereYear('billing_period_start', $year);
         } elseif ($request->filled('filter_month') && !$request->filled('filter_year')) {
-            // Only month filter (use current year)
+            // Only month filter (use current year) - show invoices that start in the specified month
             $month = $request->filter_month;
             $year = now()->year;
             $query->where(function($q) use ($month, $year) {
-                $q->where(function($monthQ) use ($month, $year) {
-                    // Billing period starts in the specified month/year
-                    $monthQ->where(function($startQ) use ($month, $year) {
-                        $startQ->whereMonth('billing_period_start', $month)
-                               ->whereYear('billing_period_start', $year);
-                    })
-                    // OR billing period ends in the specified month/year
-                    ->orWhere(function($endQ) use ($month, $year) {
-                        $endQ->whereMonth('billing_period_end', $month)
-                             ->whereYear('billing_period_end', $year);
-                    })
-                    // OR billing period spans across the specified month/year
-                    ->orWhere(function($spanQ) use ($month, $year) {
-                        $spanQ->where('billing_period_start', '<=', \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth())
-                              ->where('billing_period_end', '>=', \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth());
-                    });
-                });
+                $q->whereMonth('billing_period_start', $month)
+                  ->whereYear('billing_period_start', $year);
             });
         } elseif (!$request->hasAny(['filter_month', 'filter_year']) && !$request->hasAny(['search', 'payment_status', 'payment_method', 'date_from', 'date_to'])) {
-            // Default to current month if no filters are applied
+            // Default to current month if no filters are applied - show invoices that start in current month
             $month = now()->month;
             $year = now()->year;
             $query->where(function($q) use ($month, $year) {
-                $q->where(function($monthQ) use ($month, $year) {
-                    // Billing period starts in the current month/year
-                    $monthQ->where(function($startQ) use ($month, $year) {
-                        $startQ->whereMonth('billing_period_start', $month)
-                               ->whereYear('billing_period_start', $year);
-                    })
-                    // OR billing period ends in the current month/year
-                    ->orWhere(function($endQ) use ($month, $year) {
-                        $endQ->whereMonth('billing_period_end', $month)
-                             ->whereYear('billing_period_end', $year);
-                    })
-                    // OR billing period spans across the current month/year
-                    ->orWhere(function($spanQ) use ($month, $year) {
-                        $spanQ->where('billing_period_start', '<=', \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth())
-                              ->where('billing_period_end', '>=', \Carbon\Carbon::createFromDate($year, $month, 1)->endOfMonth());
-                    });
-                });
+                $q->whereMonth('billing_period_start', $month)
+                  ->whereYear('billing_period_start', $year);
             });
         }
 
