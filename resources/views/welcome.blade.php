@@ -37,6 +37,7 @@
     <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
+                <!-- Logo and Brand -->
                 <div class="flex items-center">
                     @php
                         $organization = \App\Models\Organization::first();
@@ -50,7 +51,7 @@
                             </svg>
                         </div>
                     @endif
-                    <div>
+                    <div class="hidden sm:block">
                         <h1 class="text-xl font-bold text-gray-900 dark:text-white">
                             {{ $organization->name ?? 'Aozora Education' }}
                         </h1>
@@ -58,9 +59,15 @@
                             {{ $organization->short_name ?? 'School Management System' }}
                         </p>
                     </div>
+                    <div class="sm:hidden">
+                        <h1 class="text-lg font-bold text-gray-900 dark:text-white">
+                            {{ $organization->short_name ?? 'Aozora' }}
+                        </h1>
+                    </div>
                 </div>
                 
-                <div class="flex items-center space-x-4">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
                     @if (Route::has('login'))
                         @auth
                             @if(auth()->user()->hasRole('admin'))
@@ -96,27 +103,85 @@
                         @endauth
                     @endif
                 </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuButton" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:text-blue-600 dark:focus:text-blue-400">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                @if (Route::has('login'))
+                    @auth
+                        @if(auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Admin Dashboard
+                            </a>
+                        @elseif(auth()->user()->hasRole('parent'))
+                            <a href="{{ route('parent.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Parent Dashboard
+                            </a>
+                        @elseif(auth()->user()->hasRole('teacher'))
+                            <a href="{{ route('teacher.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Teacher Dashboard
+                            </a>
+                        @elseif(auth()->user()->hasRole('student'))
+                            <a href="{{ route('student.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Student Dashboard
+                            </a>
+                        @else
+                            <a href="{{ url('/dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Dashboard
+                            </a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                            Log in
+                        </a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                                Register as Parent
+                            </a>
+                        @endif
+                    @endauth
+                @endif
+                <a href="#about" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                    About Us
+                </a>
+                <a href="#teachers" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                    Our Teachers
+                </a>
+                <a href="#contact" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
+                    Contact
+                </a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 py-20">
+    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 py-12 md:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6 leading-tight">
                     Welcome to {{ $organization->name ?? 'Aozora Education' }}
                 </h1>
-                <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+                <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
                     {{ $organization->description ?? 'Empowering students through innovative education and comprehensive learning experiences. Our school management system provides seamless communication between teachers, parents, and students.' }}
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                     @if (Route::has('login') && !auth()->check())
-                        <a href="{{ route('login') }}" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        <a href="{{ route('login') }}" class="bg-blue-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center">
                             Get Started
                         </a>
                     @endif
-                    <a href="#about" class="border border-blue-600 text-blue-600 dark:text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-semibold">
+                    <a href="#about" class="border border-blue-600 text-blue-600 dark:text-blue-400 px-6 sm:px-8 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-semibold text-center">
                         Learn More
                     </a>
                 </div>
@@ -125,65 +190,65 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-20 bg-white dark:bg-gray-800">
+    <section id="about" class="py-12 md:py-20 bg-white dark:bg-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     About Our Institution
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                     We are committed to providing quality education and fostering academic excellence in a supportive learning environment.
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center p-6">
-                    <div class="bg-blue-100 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <div class="text-center p-4 md:p-6">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Academic Excellence</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Comprehensive curriculum designed to challenge and inspire students to reach their full potential.</p>
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Academic Excellence</h3>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">Comprehensive curriculum designed to challenge and inspire students to reach their full potential.</p>
                 </div>
                 
-                <div class="text-center p-6">
-                    <div class="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <div class="text-center p-4 md:p-6">
+                    <div class="bg-green-100 dark:bg-green-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Experienced Teachers</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Our dedicated faculty brings years of experience and passion for teaching to every classroom.</p>
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Experienced Teachers</h3>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">Our dedicated faculty brings years of experience and passion for teaching to every classroom.</p>
                 </div>
                 
-                <div class="text-center p-6">
-                    <div class="bg-purple-100 dark:bg-purple-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                <div class="text-center p-4 md:p-6 sm:col-span-2 lg:col-span-1">
+                    <div class="bg-purple-100 dark:bg-purple-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 md:w-8 md:h-8 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Modern Technology</h3>
-                    <p class="text-gray-600 dark:text-gray-300">State-of-the-art facilities and digital tools to enhance the learning experience.</p>
+                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Modern Technology</h3>
+                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">State-of-the-art facilities and digital tools to enhance the learning experience.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Teachers Section -->
-    <section id="teachers" class="py-20 bg-gray-50 dark:bg-gray-900">
+    <section id="teachers" class="py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Meet Our Teachers
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                     Our dedicated educators are committed to nurturing young minds and fostering a love for learning.
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 @php
                     $teachers = \App\Models\Teacher::with('user')->take(6)->get();
                 @endphp
@@ -265,18 +330,18 @@
     </section>
 
     <!-- Blog Section -->
-    <section class="py-20 bg-white dark:bg-gray-800">
+    <section class="py-12 md:py-20 bg-white dark:bg-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Latest News & Articles
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                     Stay updated with our latest news, educational insights, and school announcements.
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 <!-- Blog Post 1 -->
                 <article class="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                     <div class="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
@@ -338,18 +403,18 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-gray-50 dark:bg-gray-900">
+    <section id="contact" class="py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                     Get in Touch
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                     We'd love to hear from you. Contact us for more information about our programs and enrollment.
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                 <div>
                     <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Contact Information</h3>
                     @if($organization)
@@ -429,9 +494,9 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-12">
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-8 md:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 <div>
                     <h3 class="text-xl font-semibold mb-4">{{ $organization->name ?? 'Aozora Education' }}</h3>
                     <p class="text-gray-400 mb-4">
@@ -472,6 +537,28 @@
     </button>
 
     <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
         // Dark mode toggle
         const darkModeToggle = document.getElementById('darkModeToggle');
         const sunIcon = document.getElementById('sunIcon');
@@ -501,6 +588,13 @@
                     });
                 }
             });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+            }
         });
     </script>
 </body>
