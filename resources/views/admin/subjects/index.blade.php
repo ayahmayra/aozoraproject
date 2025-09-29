@@ -33,8 +33,10 @@
                 <flux:table.column>Subject</flux:table.column>
                 <flux:table.column>Code</flux:table.column>
                 <flux:table.column>Teachers</flux:table.column>
-                <flux:table.column>Students</flux:table.column>
-                <flux:table.column>Actions</flux:table.column>
+                @if(auth()->user()->hasRole('admin'))
+                    <flux:table.column>Students</flux:table.column>
+                    <flux:table.column>Actions</flux:table.column>
+                @endif
             </flux:table.columns>
             
             <flux:table.rows>
@@ -67,32 +69,34 @@
                             </div>
                         </flux:table.cell>
                         
-                        <flux:table.cell>
-                            <div class="text-sm">
-                                <span class="font-medium">{{ $subject->students_count }}</span>
-                                <span class="text-gray-500">active students</span>
-                            </div>
-                        </flux:table.cell>
-                        
-                        <flux:table.cell>
-                            <div class="flex space-x-2">
-                                <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.show', $subject) }}" title="View Subject">
-                                    <flux:icon.eye class="h-4 w-4" />
-                                </flux:button>
-                                <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.edit', $subject) }}" title="Edit Subject">
-                                    <flux:icon.pencil class="h-4 w-4" />
-                                </flux:button>
-                                <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.destroy', $subject) }}" 
-                                    onclick="return confirm('Are you sure you want to delete this subject?')" 
-                                    title="Delete Subject">
-                                    <flux:icon.trash class="h-4 w-4" />
-                                </flux:button>
-                            </div>
-                        </flux:table.cell>
+                        @if(auth()->user()->hasRole('admin'))
+                            <flux:table.cell>
+                                <div class="text-sm">
+                                    <span class="font-medium">{{ $subject->students_count }}</span>
+                                    <span class="text-gray-500">active students</span>
+                                </div>
+                            </flux:table.cell>
+                            
+                            <flux:table.cell>
+                                <div class="flex space-x-2">
+                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.show', $subject) }}" title="View Subject">
+                                        <flux:icon.eye class="h-4 w-4" />
+                                    </flux:button>
+                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.edit', $subject) }}" title="Edit Subject">
+                                        <flux:icon.pencil class="h-4 w-4" />
+                                    </flux:button>
+                                    <flux:button variant="ghost" size="sm" href="{{ route('admin.subjects.destroy', $subject) }}" 
+                                        onclick="return confirm('Are you sure you want to delete this subject?')" 
+                                        title="Delete Subject">
+                                        <flux:icon.trash class="h-4 w-4" />
+                                    </flux:button>
+                                </div>
+                            </flux:table.cell>
+                        @endif
                     </flux:table.row>
                 @empty
                     <flux:table.row>
-                        <flux:table.cell colspan="5" class="text-center py-8">
+                        <flux:table.cell colspan="{{ auth()->user()->hasRole('admin') ? '5' : '3' }}" class="text-center py-8">
                             <flux:icon.academic-cap class="h-12 w-12 mx-auto mb-4 text-gray-300" />
                             <p class="text-lg font-medium text-gray-500">No subjects found</p>
                             <p class="text-sm text-gray-400">Subjects will appear here once they are created</p>
