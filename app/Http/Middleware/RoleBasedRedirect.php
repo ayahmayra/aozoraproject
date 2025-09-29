@@ -20,7 +20,7 @@ class RoleBasedRedirect
             
             // Skip verification check for admin users
             if ($user->hasRole('admin')) {
-                return redirect()->secure(route('admin.dashboard'));
+                return redirect()->route('admin.dashboard');
             }
             
             // Check if user is pending verification
@@ -30,11 +30,11 @@ class RoleBasedRedirect
             
             // Redirect based on user role for verified users
             if ($user->hasRole('parent')) {
-                return redirect()->secure(route('parent.dashboard'));
+                return redirect()->route('parent.dashboard');
             } elseif ($user->hasRole('teacher')) {
-                return redirect()->secure(route('teacher.dashboard'));
+                return redirect()->route('teacher.dashboard');
             } elseif ($user->hasRole('student')) {
-                return redirect()->secure(route('student.dashboard'));
+                return redirect()->route('student.dashboard');
             }
         }
 
