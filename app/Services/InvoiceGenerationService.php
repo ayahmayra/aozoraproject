@@ -419,23 +419,36 @@ class InvoiceGenerationService
     private function generateYearlyInvoicesForPeriod(StudentSubject $enrollment, Carbon $periodStart, Carbon $periodEnd): array
     {
         $invoices = [];
-        $currentDate = $periodStart->copy()->startOfYear();
         
-        while ($currentDate->lte($periodEnd)) {
-            $yearEnd = $currentDate->copy()->endOfYear();
+        // Get enrollment start date
+        $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
+        $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
+        
+        // For yearly payments, generate invoices based on enrollment start date (not calendar year)
+        $currentInvoiceDate = $enrollmentStart->copy();
+        
+        while ($currentInvoiceDate->lt($enrollmentEnd)) {
+            $nextInvoiceDate = $currentInvoiceDate->copy()->addYear();
             
-            if ($this->shouldGenerateInvoiceForPeriod($enrollment, $currentDate, $yearEnd)) {
-                $invoice = $this->createInvoice(
-                    $enrollment,
-                    $currentDate,
-                    $yearEnd,
-                    (float)$enrollment->payment_amount * 12, // 12 months worth
-                    $enrollment->payment_method
-                );
-                $invoices[] = $invoice;
+            // Only generate if this yearly period overlaps with the requested period
+            if ($currentInvoiceDate->lte($periodEnd) && $nextInvoiceDate->gte($periodStart)) {
+                // Calculate the actual billing period (1 year from current invoice date)
+                $billingPeriodStart = $currentInvoiceDate->copy();
+                $billingPeriodEnd = $currentInvoiceDate->copy()->addYear()->subDay();
+                
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $billingPeriodStart, $billingPeriodEnd)) {
+                    $invoice = $this->createInvoice(
+                        $enrollment,
+                        $billingPeriodStart,
+                        $billingPeriodEnd,
+                        (float)$enrollment->payment_amount,
+                        $enrollment->payment_method
+                    );
+                    $invoices[] = $invoice;
+                }
             }
             
-            $currentDate->addYear();
+            $currentInvoiceDate->addYear();
         }
         
         return $invoices;
@@ -644,25 +657,23 @@ class InvoiceGenerationService
         $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
         $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
         
-        // For yearly payments, generate one invoice per year within the period
-        $currentYear = $periodStart->year;
-        $endYear = $periodEnd->year;
+        // For yearly payments, generate invoices based on enrollment start date (not calendar year)
+        $currentInvoiceDate = $enrollmentStart->copy();
         
-        while ($currentYear <= $endYear) {
-            $yearStart = Carbon::createFromDate($currentYear, 1, 1)->startOfYear();
-            $yearEnd = Carbon::createFromDate($currentYear, 12, 31)->endOfYear();
+        while ($currentInvoiceDate->lt($enrollmentEnd)) {
+            $nextInvoiceDate = $currentInvoiceDate->copy()->addYear();
             
-            // Only generate if the year overlaps with the requested period and enrollment
-            if ($yearStart->lte($periodEnd) && 
-                $yearEnd->gte($periodStart) &&
-                $yearStart->gte($enrollmentStart) &&
-                $yearStart->lt($enrollmentEnd)) {
+            // Only generate if this yearly period overlaps with the requested period
+            if ($currentInvoiceDate->lte($periodEnd) && $nextInvoiceDate->gte($periodStart)) {
+                // Calculate the actual billing period (1 year from current invoice date)
+                $billingPeriodStart = $currentInvoiceDate->copy();
+                $billingPeriodEnd = $currentInvoiceDate->copy()->addYear()->subDay();
                 
-                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $yearStart, $yearEnd)) {
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $billingPeriodStart, $billingPeriodEnd)) {
                     $invoice = $this->createInvoice(
                         $enrollment,
-                        $yearStart,
-                        $yearEnd,
+                        $billingPeriodStart,
+                        $billingPeriodEnd,
                         (float)$enrollment->payment_amount,
                         $enrollment->payment_method
                     );
@@ -670,7 +681,7 @@ class InvoiceGenerationService
                 }
             }
             
-            $currentYear++;
+            $currentInvoiceDate->addYear();
         }
         
         return $invoices;
@@ -868,33 +879,31 @@ class InvoiceGenerationService
         $enrollmentStart = Carbon::parse($enrollment->start_date ?? now());
         $enrollmentEnd = $enrollment->end_date ? Carbon::parse($enrollment->end_date) : now()->addYear();
         
-        // For yearly payments, generate one invoice per year within the period
-        $currentYear = $periodStart->year;
-        $endYear = $periodEnd->year;
+        // For yearly payments, generate invoices based on enrollment start date (not calendar year)
+        $currentInvoiceDate = $enrollmentStart->copy();
         
-        while ($currentYear <= $endYear) {
-            $yearStart = Carbon::createFromDate($currentYear, 1, 1)->startOfYear();
-            $yearEnd = Carbon::createFromDate($currentYear, 12, 31)->endOfYear();
+        while ($currentInvoiceDate->lt($enrollmentEnd)) {
+            $nextInvoiceDate = $currentInvoiceDate->copy()->addYear();
             
-            // Only generate if the year overlaps with the requested period and enrollment
-            if ($yearStart->lte($periodEnd) && 
-                $yearEnd->gte($periodStart) &&
-                $yearStart->gte($enrollmentStart) &&
-                $yearStart->lt($enrollmentEnd)) {
+            // Only generate if this yearly period overlaps with the requested period
+            if ($currentInvoiceDate->lte($periodEnd) && $nextInvoiceDate->gte($periodStart)) {
+                // Calculate the actual billing period (1 year from current invoice date)
+                $billingPeriodStart = $currentInvoiceDate->copy();
+                $billingPeriodEnd = $currentInvoiceDate->copy()->addYear()->subDay();
                 
-                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $yearStart, $yearEnd)) {
+                if ($this->shouldGenerateInvoiceForPeriod($enrollment, $billingPeriodStart, $billingPeriodEnd)) {
                     $invoice = $this->createInvoice(
                         $enrollment,
-                        $yearStart,
-                        $yearEnd,
-                        (float)$enrollment->payment_amount, // Single year amount
+                        $billingPeriodStart,
+                        $billingPeriodEnd,
+                        (float)$enrollment->payment_amount,
                         $enrollment->payment_method
                     );
                     $invoices[] = $invoice;
                 }
             }
             
-            $currentYear++;
+            $currentInvoiceDate->addYear();
         }
         
         return $invoices;
