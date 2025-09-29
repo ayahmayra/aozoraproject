@@ -9,6 +9,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Re-assign Flux's gray of choice... */
+/* Re-assign Flux's gray of choice... */
 @theme {
     --color-zinc-50: var(--color-gray-50);
     --color-zinc-100: var(--color-gray-100);
@@ -24,16 +25,16 @@
 }
 
 @theme {
-    --color-accent: var(--color-lime-400);
-    --color-accent-content: var(--color-lime-600);
-    --color-accent-foreground: var(--color-lime-900);
+    --color-accent: var(--color-teal-600);
+    --color-accent-content: var(--color-teal-600);
+    --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-lime-400);
-        --color-accent-content: var(--color-lime-400);
-        --color-accent-foreground: var(--color-lime-950);
+        --color-accent: var(--color-teal-600);
+        --color-accent-content: var(--color-teal-400);
+        --color-accent-foreground: var(--color-white);
     }
 }
 
