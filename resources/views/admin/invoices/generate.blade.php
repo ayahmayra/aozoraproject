@@ -77,19 +77,15 @@
                         </flux:field>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-                        <!-- Generation Mode -->
-                        <flux:field>
-                            <flux:label>Generation Mode</flux:label>
-                            <flux:select name="generation_mode">
-                                <option value="monthly">Generate monthly invoices</option>
-                                <option value="semester">Generate semester invoices</option>
-                                <option value="yearly">Generate yearly invoices</option>
-                            </flux:select>
-                            <flux:description>How to generate invoices within the period</flux:description>
-                        </flux:field>
-                    </div>
+                    <!-- Auto Generation Info -->
+                    <flux:callout variant="info" icon="information-circle" heading="Automatic Invoice Generation">
+                        <p>Invoices will be generated automatically based on each enrollment's payment method:</p>
+                        <ul class="mt-2 space-y-1 text-sm">
+                            <li>• <strong>Monthly:</strong> One invoice per month</li>
+                            <li>• <strong>Semester:</strong> One invoice every 6 months</li>
+                            <li>• <strong>Yearly:</strong> One invoice per year</li>
+                        </ul>
+                    </flux:callout>
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         <!-- Payment Method Filter -->

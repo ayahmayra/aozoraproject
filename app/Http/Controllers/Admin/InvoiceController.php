@@ -272,7 +272,6 @@ class InvoiceController extends Controller
             'start_year' => 'required|integer|min:2020|max:2030',
             'end_year' => 'required|integer|min:2020|max:2030',
             'payment_method' => 'nullable|in:monthly,semester,yearly',
-            'generation_mode' => 'required|in:monthly,semester,yearly',
             'enrollment_ids' => 'nullable|array',
             'enrollment_ids.*' => 'exists:student_subject,id',
         ]);
@@ -282,7 +281,6 @@ class InvoiceController extends Controller
         $startYear = (int)$request->start_year;
         $endYear = (int)$request->end_year;
         $paymentMethod = $request->payment_method;
-        $generationMode = $request->generation_mode;
         $enrollmentIds = $request->enrollment_ids;
 
         // Calculate actual period dates
@@ -299,6 +297,9 @@ class InvoiceController extends Controller
             foreach ($enrollmentIds as $enrollmentId) {
                 $enrollment = StudentSubject::with(['student', 'subject'])->find($enrollmentId);
                 if ($enrollment && $enrollment->isActive()) {
+                    // Use enrollment's payment method for automatic generation
+                    $enrollmentPaymentMethod = $enrollment->payment_method;
+                    
                     if ($isCrossYear) {
                         $invoices = $this->invoiceService->generateInvoicesForCrossYearRange(
                             $enrollment, 
@@ -306,7 +307,7 @@ class InvoiceController extends Controller
                             $endMonth,
                             $startYear,
                             $endYear,
-                            $generationMode,
+                            $enrollmentPaymentMethod,
                             $paymentMethod
                         );
                     } else {
@@ -315,7 +316,7 @@ class InvoiceController extends Controller
                             $startMonth,
                             $endMonth,
                             $startYear,
-                            $generationMode,
+                            $enrollmentPaymentMethod,
                             $paymentMethod
                         );
                     }
@@ -330,7 +331,7 @@ class InvoiceController extends Controller
                     $endMonth,
                     $startYear,
                     $endYear,
-                    $generationMode,
+                    null, // No specific generation mode - will use each enrollment's payment method
                     $paymentMethod
                 );
             } else {
@@ -338,7 +339,7 @@ class InvoiceController extends Controller
                     $startMonth,
                     $endMonth,
                     $startYear,
-                    $generationMode,
+                    null, // No specific generation mode - will use each enrollment's payment method
                     $paymentMethod
                 );
             }

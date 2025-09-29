@@ -449,12 +449,17 @@ class InvoiceGenerationService
         int $startMonth,
         int $endMonth,
         int $year,
-        string $generationMode,
+        ?string $generationMode = null,
         ?string $paymentMethodFilter = null
     ): array {
         // Filter by payment method if specified
         if ($paymentMethodFilter && $enrollment->payment_method !== $paymentMethodFilter) {
             return [];
+        }
+        
+        // Use enrollment's payment method if no generation mode specified
+        if (!$generationMode) {
+            $generationMode = $enrollment->payment_method;
         }
 
         $invoices = [];
@@ -488,12 +493,17 @@ class InvoiceGenerationService
         int $endMonth,
         int $startYear,
         int $endYear,
-        string $generationMode,
+        ?string $generationMode = null,
         ?string $paymentMethodFilter = null
     ): array {
         // Filter by payment method if specified
         if ($paymentMethodFilter && $enrollment->payment_method !== $paymentMethodFilter) {
             return [];
+        }
+        
+        // Use enrollment's payment method if no generation mode specified
+        if (!$generationMode) {
+            $generationMode = $enrollment->payment_method;
         }
 
         $invoices = [];
@@ -673,7 +683,7 @@ class InvoiceGenerationService
         int $startMonth,
         int $endMonth,
         int $year,
-        string $generationMode,
+        ?string $generationMode = null,
         ?string $paymentMethodFilter = null
     ): array {
         $allInvoices = [];
@@ -710,7 +720,7 @@ class InvoiceGenerationService
         int $endMonth,
         int $startYear,
         int $endYear,
-        string $generationMode,
+        ?string $generationMode = null,
         ?string $paymentMethodFilter = null
     ): array {
         $allInvoices = [];
