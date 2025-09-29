@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Parent;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Organization;
+use App\Models\Invoice;
 
 class DashboardController extends Controller
 {
@@ -22,10 +23,19 @@ class DashboardController extends Controller
         // Get parent's profile
         $parentProfile = $parent->parentProfile;
 
+        // Get pending invoices for parent's children (only pending status)
+        $childrenIds = $children->pluck('id');
+        $pendingInvoices = Invoice::whereIn('student_id', $childrenIds)
+            ->where('payment_status', 'pending')
+            ->where('billing_period_start', '<=', now()->endOfMonth())
+            ->with(['student.user', 'subject'])
+            ->get();
+
         return view('parent.dashboard', compact(
             'organization',
             'children',
-            'parentProfile'
+            'parentProfile',
+            'pendingInvoices'
         ));
     }
 }

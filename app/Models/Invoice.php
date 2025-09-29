@@ -26,6 +26,9 @@ class Invoice extends Model
         'payment_status',
         'paid_at',
         'paid_amount',
+        'payment_reference',
+        'payment_proof',
+        'payment_date',
         'notes',
         'created_by',
     ];
@@ -36,6 +39,7 @@ class Invoice extends Model
         'billing_period_start' => 'date',
         'billing_period_end' => 'date',
         'paid_at' => 'datetime',
+        'payment_date' => 'datetime',
         'amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',

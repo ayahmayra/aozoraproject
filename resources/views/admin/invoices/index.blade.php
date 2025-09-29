@@ -316,7 +316,7 @@
                                                 <flux:icon.check class="h-4 w-4" />
                                             </flux:button>
                                         @elseif($invoice->payment_status === 'paid')
-                                            <flux:button variant="ghost" size="sm" onclick="verifyPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
+                                            <flux:button variant="ghost" size="sm" onclick="verifyPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}', '{{ $invoice->payment_reference ?? '' }}', '{{ $invoice->payment_date ? $invoice->payment_date->format('d M Y H:i') : '' }}', '{{ $invoice->payment_proof ?? '' }}')">
                                                 <flux:icon.shield-check class="h-4 w-4" />
                                             </flux:button>
                                             <flux:button variant="ghost" size="sm" onclick="cancelPayment({{ $invoice->id }}, '{{ $invoice->invoice_number }}')">
@@ -359,9 +359,9 @@
     </div>
 
     <!-- Mark as Paid Modal -->
-    <div id="markPaidModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div id="markPaidModal" class="fixed inset-0 bg-gray-600 bg-opacity-500 hidden">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class=" rounded-lg shadow-xl max-w-md w-full p-6">
                 <h3 class="text-lg font-medium mb-4">Mark Invoice as Paid</h3>
                 <form id="markPaidForm" method="POST">
                     @csrf
@@ -415,6 +415,34 @@
                     <p class="text-sm text-gray-600 mb-4">
                         Are you sure you want to verify the payment for invoice <strong id="verifyInvoiceNumber"></strong>?
                     </p>
+                    
+                    <!-- Payment Information -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <flux:icon.banknotes class="h-5 w-5 text-blue-500 mt-0.5 mr-2" />
+                            <div class="text-sm text-blue-700">
+                                <p class="font-medium mb-2">Payment Information:</p>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Payment Reference:</span>
+                                        <span id="verifyPaymentReference" class="font-mono text-xs">-</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">Payment Date:</span>
+                                        <span id="verifyPaymentDate">-</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Payment Proof:</span>
+                                        <a id="verifyPaymentProofLink" href="#" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs hidden">
+                                            <flux:icon.document-text class="h-4 w-4 inline mr-1" />
+                                            View Proof
+                                        </a>
+                                        <span id="verifyNoProof" class="text-gray-500 text-xs">No proof available</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                         <div class="flex items-start">
@@ -553,12 +581,29 @@
             document.getElementById('markPaidModal').classList.add('hidden');
         }
 
-        function verifyPayment(invoiceId, invoiceNumber) {
+        function verifyPayment(invoiceId, invoiceNumber, paymentReference, paymentDate, paymentProof) {
             const form = document.getElementById('verifyPaymentForm');
             form.action = `/admin/invoices/${invoiceId}/verify-payment`;
             
             // Set the invoice number in the modal
             document.getElementById('verifyInvoiceNumber').textContent = invoiceNumber;
+            
+            // Set payment information
+            document.getElementById('verifyPaymentReference').textContent = paymentReference || '-';
+            document.getElementById('verifyPaymentDate').textContent = paymentDate || '-';
+            
+            // Handle payment proof
+            const proofLink = document.getElementById('verifyPaymentProofLink');
+            const noProof = document.getElementById('verifyNoProof');
+            
+            if (paymentProof) {
+                proofLink.href = `/storage/${paymentProof}`;
+                proofLink.classList.remove('hidden');
+                noProof.classList.add('hidden');
+            } else {
+                proofLink.classList.add('hidden');
+                noProof.classList.remove('hidden');
+            }
             
             document.getElementById('verifyPaymentModal').classList.remove('hidden');
         }

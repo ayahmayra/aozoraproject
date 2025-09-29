@@ -45,6 +45,11 @@ Route::middleware(['auth', 'verified', 'role:parent', 'user.verified'])->prefix(
     Route::put('/enrollment/{student}/{subject}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'update'])->name('enrollment.update');
     Route::delete('/enrollment/{student}/{subject}', [\App\Http\Controllers\Parent\EnrollmentController::class, 'destroy'])->name('enrollment.destroy');
     
+    // Parent Invoice Management
+    Route::get('/invoice', [\App\Http\Controllers\Parent\InvoiceController::class, 'index'])->name('invoice');
+    Route::get('/invoice/{invoice}', [\App\Http\Controllers\Parent\InvoiceController::class, 'show'])->name('invoice.show');
+    Route::post('/invoice/{invoice}/payment', [\App\Http\Controllers\Parent\InvoiceController::class, 'updatePayment'])->name('invoice.payment.update');
+    
     Route::get('/schedule', function () {
         return view('parent.schedule');
     })->name('schedule');

@@ -57,6 +57,22 @@
             </flux:callout>
         @endif
 
+        <!-- Paid Invoices Alert -->
+        @if($paidInvoicesForVerification->count() > 0)
+            <flux:callout color="yellow" variant="info" icon="information-circle" class="mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <flux:heading size="md" class="mb-1">Payment Verification Required</flux:heading>
+                        <flux:text class="text-sm">There are {{ $paidInvoicesForVerification->count() }} payment(s) waiting for verification.</flux:text>
+                    </div>
+                    <flux:button variant="primary" href="{{ route('admin.invoices') }}" class="ml-4">
+                        <flux:icon.shield-check class="h-4 w-4 mr-2" />
+                        Verify Payments
+                    </flux:button>
+                </div>
+            </flux:callout>
+        @endif
+
         <!-- 1. STATISTIK UTAMA (Key Metrics) -->
         <div>
             

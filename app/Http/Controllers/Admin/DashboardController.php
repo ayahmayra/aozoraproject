@@ -61,6 +61,12 @@ class DashboardController extends Controller
         $pendingInvoices = Invoice::where('payment_status', 'pending')
             ->whereYear('billing_period_start', $currentYear)->count();
 
+        // Get paid invoices that need verification
+        $paidInvoicesForVerification = Invoice::where('payment_status', 'paid')
+            ->with(['student.user', 'subject'])
+            ->orderBy('payment_date', 'desc')
+            ->get();
+
         // Month names for display
         $months = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -83,7 +89,8 @@ class DashboardController extends Controller
             'pendingInvoices',
             'currentMonth',
             'currentYear',
-            'months'
+            'months',
+            'paidInvoicesForVerification'
         ));
     }
 }

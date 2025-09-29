@@ -66,8 +66,8 @@
                         <flux:icon.bell class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Notifications</p>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Unpaid Invoices</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $pendingInvoices->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -85,6 +85,50 @@
                 </div>
             </div>
         </div>
+
+        <!-- INVOICE NOTIFICATION -->
+        @if($pendingInvoices->count() > 0)
+            <flux:callout variant="warning" icon="exclamation-triangle" class="mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <flux:heading size="md" class="mb-2">Unpaid Invoices</flux:heading>
+                        <flux:text class="mb-2">
+                            You have <strong>{{ $pendingInvoices->count() }}</strong> pending invoice(s) that need payment:
+                        </flux:text>
+                        <div class="space-y-2">
+                            @foreach($pendingInvoices->take(3) as $invoice)
+                                <div class=" rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="font-medium text-sm">
+                                            <strong>{{ $invoice->student->user->name }}</strong> - {{ $invoice->subject->name }}
+                                        </span>
+                                        <flux:badge size="sm" color="red">Pending</flux:badge>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-gray-600 dark:text-gray-500">
+                                            Due: {{ $invoice->due_date ? $invoice->due_date->format('d M Y') : 'No due date' }}
+                                        </span>
+                                        <span class="font-bold text-red-600">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                            @if($pendingInvoices->count() > 3)
+                                <div class="text-sm text-gray-600">
+                                    +{{ $pendingInvoices->count() - 3 }} more invoice(s)
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <flux:button variant="primary" href="{{ route('parent.invoice') }}">
+                            <flux:icon.document-text class="h-4 w-4 mr-2" />
+                            View All Invoices
+                        </flux:button>
+                    </div>
+                </div>
+            </flux:callout>
+        @endif
+
 
         <!-- 2. MY CHILDREN TABLE -->
         <flux:card>
