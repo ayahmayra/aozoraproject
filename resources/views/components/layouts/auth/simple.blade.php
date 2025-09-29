@@ -7,9 +7,26 @@
         <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-sm flex-col gap-2">
                 <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
+                    @php
+                        $organization = \App\Models\Organization::first();
+                    @endphp
+                    
+                    @if($organization && $organization->logo)
+                        <span class="flex h-40 w-40 mb-1 items-center justify-center rounded-md overflow-hidden">
+                            <img src="{{ Storage::url($organization->logo) }}" 
+                                 alt="{{ $organization->name }}" 
+                                 class="h-full w-full object-contain" />
+                        </span>
+                    @else
+                        <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md bg-blue-600">
+                            <x-app-logo-icon class="size-9 fill-current text-white" />
+                        </span>
+                    @endif
+                    
+                    <span class="text-lg font-semibold text-zinc-900 dark:text-white">
+                        {{ $organization->name ?? 'Aozora Education' }}
                     </span>
+                   
                     <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
                 </a>
                 <div class="flex flex-col gap-6">
