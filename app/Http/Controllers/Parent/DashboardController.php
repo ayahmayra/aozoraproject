@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Organization;
 use App\Models\Invoice;
+use App\Models\TimeSchedule;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -31,11 +33,52 @@ class DashboardController extends Controller
             ->with(['student.user', 'subject'])
             ->get();
 
+        // Get recent invoices (current month and previous months only, not future months)
+        $recentInvoices = Invoice::whereIn('student_id', $childrenIds)
+            ->whereIn('payment_status', ['pending', 'paid', 'verified'])
+            ->where('billing_period_start', '<=', now()->endOfMonth()) // Only current month or earlier
+            ->where('billing_period_start', '>=', now()->subMonths(3)->startOfMonth()) // Last 3 months
+            ->with(['student.user', 'subject'])
+            ->orderBy('billing_period_start', 'desc')
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+        // Get today's schedules for all children's enrolled subjects
+        $today = Carbon::now()->format('l'); // Get day name (Monday, Tuesday, etc.)
+        
+        // Map children to their enrolled subjects
+        $childSubjectMap = [];
+        foreach ($children as $child) {
+            $activeSubjects = $child->subjects()->wherePivot('enrollment_status', 'active')->get();
+            foreach ($activeSubjects as $subject) {
+                if (!isset($childSubjectMap[$subject->id])) {
+                    $childSubjectMap[$subject->id] = [];
+                }
+                $childSubjectMap[$subject->id][] = $child;
+            }
+        }
+
+        $subjectIds = array_keys($childSubjectMap);
+
+        $todaySchedules = TimeSchedule::whereIn('subject_id', $subjectIds)
+            ->where('day_of_week', $today)
+            ->with(['subject', 'teacher.user'])
+            ->orderBy('start_time')
+            ->get();
+
+        // Attach enrolled children to each schedule
+        foreach ($todaySchedules as $schedule) {
+            $schedule->enrolledChildren = $childSubjectMap[$schedule->subject_id] ?? [];
+        }
+
         return view('parent.dashboard', compact(
             'organization',
             'children',
             'parentProfile',
-            'pendingInvoices'
+            'pendingInvoices',
+            'recentInvoices',
+            'todaySchedules',
+            'today'
         ));
     }
 }
