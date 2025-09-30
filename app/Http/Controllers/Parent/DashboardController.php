@@ -71,6 +71,62 @@ class DashboardController extends Controller
             $schedule->enrolledChildren = $childSubjectMap[$schedule->subject_id] ?? [];
         }
 
+        // Get next schedule for each child
+        $nextSchedules = [];
+        $now = Carbon::now();
+        $currentTime = $now->format('H:i:s');
+        $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $currentDayIndex = array_search($today, $daysOfWeek);
+
+        foreach ($children as $child) {
+            $activeSubjects = $child->subjects()->wherePivot('enrollment_status', 'active')->get();
+            $childSubjectIds = $activeSubjects->pluck('id')->toArray();
+            
+            if (empty($childSubjectIds)) {
+                continue;
+            }
+
+            $nextSchedule = null;
+
+            // First, try to find remaining schedules today
+            $upcomingToday = TimeSchedule::whereIn('subject_id', $childSubjectIds)
+                ->where('day_of_week', $today)
+                ->where('start_time', '>', $currentTime)
+                ->with(['subject', 'teacher.user'])
+                ->orderBy('start_time')
+                ->first();
+
+            if ($upcomingToday) {
+                $nextSchedule = $upcomingToday;
+                $nextSchedule->scheduleDate = $now->copy();
+            } else {
+                // If no more schedules today, find the next day with a schedule
+                for ($i = 1; $i <= 7; $i++) {
+                    $nextDayIndex = ($currentDayIndex + $i) % 7;
+                    $nextDay = $daysOfWeek[$nextDayIndex];
+                    
+                    $nextDaySchedule = TimeSchedule::whereIn('subject_id', $childSubjectIds)
+                        ->where('day_of_week', $nextDay)
+                        ->with(['subject', 'teacher.user'])
+                        ->orderBy('start_time')
+                        ->first();
+                    
+                    if ($nextDaySchedule) {
+                        $nextSchedule = $nextDaySchedule;
+                        $nextSchedule->scheduleDate = $now->copy()->addDays($i);
+                        break;
+                    }
+                }
+            }
+
+            if ($nextSchedule) {
+                $nextSchedules[] = [
+                    'child' => $child,
+                    'schedule' => $nextSchedule
+                ];
+            }
+        }
+
         return view('parent.dashboard', compact(
             'organization',
             'children',
@@ -78,7 +134,8 @@ class DashboardController extends Controller
             'pendingInvoices',
             'recentInvoices',
             'todaySchedules',
-            'today'
+            'today',
+            'nextSchedules'
         ));
     }
 }

@@ -486,6 +486,142 @@
                 </div>
             </div>
 
+            <!-- 6. NEXT SCHEDULE -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <flux:heading size="lg" class="text-gray-900 dark:text-white">
+                        ⏭️ Next Schedule
+                    </flux:heading>
+                    <flux:badge color="indigo" size="sm">{{ count($nextSchedules) }} upcoming</flux:badge>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Upcoming classes for your children</p>
+            </div>
+            <div class="p-6">
+                @if(count($nextSchedules) > 0)
+                    <!-- Mobile View: Card Layout -->
+                    <div class="block lg:hidden space-y-3">
+                        @foreach($nextSchedules as $item)
+                            @php
+                                $schedule = $item['schedule'];
+                                $child = $item['child'];
+                                $startTime = \Carbon\Carbon::parse($schedule->start_time);
+                                $endTime = \Carbon\Carbon::parse($schedule->end_time);
+                                $scheduleDate = $schedule->scheduleDate;
+                            @endphp
+                            <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 dark:from-indigo-900 dark:to-indigo-800 border-l-4 border-indigo-300 dark:border-indigo-600 rounded-lg p-4 shadow-sm">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <flux:badge color="indigo" size="sm">
+                                                @if($scheduleDate->isToday())
+                                                    Today
+                                                @elseif($scheduleDate->isTomorrow())
+                                                    Tomorrow
+                                                @else
+                                                    {{ $scheduleDate->format('D, M d') }}
+                                                @endif
+                                            </flux:badge>
+                                            <span class="text-xs font-mono text-gray-600 dark:text-gray-300">
+                                                {{ $startTime->format('H:i') }} - {{ $endTime->format('H:i') }}
+                                            </span>
+                                        </div>
+                                        <h4 class="font-bold text-base text-gray-900 dark:text-white mb-1">
+                                            {{ $schedule->subject->name }}
+                                        </h4>
+                                        <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 space-x-2 mb-2">
+                                            <flux:icon.user class="h-4 w-4" />
+                                            <span>{{ $schedule->teacher->user->name }}</span>
+                                        </div>
+                                        @if($schedule->location)
+                                            <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-1 mb-2">
+                                                <flux:icon.map-pin class="h-3 w-3" />
+                                                <span>{{ $schedule->location }}</span>
+                                            </div>
+                                        @endif
+                                        <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 space-x-1">
+                                            <flux:icon.academic-cap class="h-3 w-3" />
+                                            <span class="font-medium">Student: {{ $child->user->name }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Desktop View: Timeline Layout -->
+                    <div class="hidden lg:block space-y-4">
+                        @foreach($nextSchedules as $item)
+                            @php
+                                $schedule = $item['schedule'];
+                                $child = $item['child'];
+                                $startTime = \Carbon\Carbon::parse($schedule->start_time);
+                                $endTime = \Carbon\Carbon::parse($schedule->end_time);
+                                $scheduleDate = $schedule->scheduleDate;
+                            @endphp
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-24 pt-1">
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                                            @if($scheduleDate->isToday())
+                                                Today
+                                            @elseif($scheduleDate->isTomorrow())
+                                                Tomorrow
+                                            @else
+                                                {{ $scheduleDate->format('D, M d') }}
+                                            @endif
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $startTime->format('H:i') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0 pt-1.5">
+                                    <div class="w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-indigo-200 dark:ring-indigo-800"></div>
+                                </div>
+                                <div class="flex-1 pb-4 border-b border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <h4 class="font-bold text-base text-gray-900 dark:text-white">
+                                                    {{ $schedule->subject->name }}
+                                                </h4>
+                                                <flux:badge color="indigo" size="sm">Upcoming</flux:badge>
+                                            </div>
+                                            <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 space-x-4 mb-2">
+                                                <div class="flex items-center space-x-1">
+                                                    <flux:icon.user class="h-4 w-4" />
+                                                    <span>{{ $schedule->teacher->user->name }}</span>
+                                                </div>
+                                                @if($schedule->location)
+                                                    <div class="flex items-center space-x-1">
+                                                        <flux:icon.map-pin class="h-4 w-4" />
+                                                        <span>{{ $schedule->location }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 space-x-1">
+                                                <flux:icon.academic-cap class="h-4 w-4" />
+                                                <span class="font-medium">
+                                                    Student: {{ $child->user->name }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-12">
+                        <flux:icon.clock class="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                        <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No upcoming schedules</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Your children don't have any upcoming classes scheduled</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
             
             
             <!-- 4. QUICK ACTIONS (Quick Actions) -->
@@ -569,7 +705,9 @@
                 </div>
             </div>
 
-           
+        </div>
+
+        
 
            
         <!-- 7. RECENT INVOICES -->
@@ -769,11 +907,24 @@
         </div>
     </div>
 
+    <!-- Back to Top Button -->
+    <button 
+        id="backToTop" 
+        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="fixed bottom-24 right-4 p-3 rounded-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 cursor-pointer"
+        style="z-index: 9999; opacity: 1;"
+        aria-label="Back to top"
+        type="button"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 pointer-events-none">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+        </svg>
+    </button>
+
     @push('scripts')
     <script>
-        // Smooth scroll to anchor links
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle all anchor links with smooth scrolling
+        // Smooth scroll to anchor links with enhanced effect
+        function setupSmoothScroll() {
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -781,20 +932,52 @@
                     const targetElement = document.querySelector(targetId);
                     
                     if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
+                        // Calculate offset for sticky header (if any)
+                        const offset = 80; // Adjust this value based on your header height
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - offset;
+                        
+                        // Smooth scroll
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
                         });
                         
-                        // Add highlight effect based on target
-                        const ringColor = targetId === '#schedule-section' ? 'ring-green-500' : 'ring-purple-500';
-                        targetElement.classList.add('ring-4', ringColor, 'ring-opacity-50');
+                        // Add highlight effect with animation
+                        const ringColor = targetId === '#schedule-section' ? 'ring-green-500' : 
+                                        targetId === '#invoices-section' ? 'ring-purple-500' : 
+                                        'ring-blue-500';
+                        
+                        // Add pulsing effect
+                        targetElement.classList.add('ring-4', ringColor, 'ring-opacity-50', 'transition-all', 'duration-300');
+                        
+                        // Remove after animation
                         setTimeout(() => {
                             targetElement.classList.remove('ring-4', ringColor, 'ring-opacity-50');
                         }, 2000);
                     }
                 });
             });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', setupSmoothScroll);
+        
+        // Re-initialize after Livewire updates (if using Livewire)
+        document.addEventListener('livewire:navigated', setupSmoothScroll);
+
+        // Back to Top Button - Show/Hide on Scroll
+        window.addEventListener('scroll', function() {
+            const backToTopButton = document.getElementById('backToTop');
+            if (backToTopButton) {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.style.opacity = '1';
+                    backToTopButton.style.pointerEvents = 'auto';
+                } else {
+                    backToTopButton.style.opacity = '0';
+                    backToTopButton.style.pointerEvents = 'none';
+                }
+            }
         });
     </script>
     @endpush

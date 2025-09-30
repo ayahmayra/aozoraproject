@@ -62,16 +62,10 @@
                     </flux:sidebar.group>
                 @endif
 
-                @if(auth()->user()->hasRole(['teacher', 'parent', 'student']))
+                @if(auth()->user()->hasRole(['teacher', 'student']))
                     <flux:sidebar.group expandable heading="{{ __('Academic') }}" icon="academic-cap">
                         <flux:sidebar.item icon="book-open" :href="route('academic.subjects')" :current="request()->routeIs('academic.subjects*')" tooltip="{{ __('Subjects') }}">{{ __('Subjects') }}</flux:sidebar.item>
                         <flux:sidebar.item icon="calendar" :href="route('academic.schedule-calendar')" :current="request()->routeIs('academic.schedule-calendar')" tooltip="{{ __('Schedule Calendar') }}">{{ __('Schedule Calendar') }}</flux:sidebar.item>
-                    </flux:sidebar.group>
-                @endif
-
-                @if(auth()->user()->hasRole('parent'))
-                    <flux:sidebar.group expandable heading="{{ __('Finance') }}" icon="banknotes">
-                        <flux:sidebar.item icon="document-text" :href="route('parent.invoice')" :current="request()->routeIs('parent.invoice*')" tooltip="{{ __('Invoices') }}">{{ __('Invoices') }}</flux:sidebar.item>
                     </flux:sidebar.group>
                 @endif
             </flux:sidebar.nav>
