@@ -1,601 +1,290 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<!doctype html>
+<html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ \App\Models\Organization::first()->name ?? 'Aozora Education' }} - School Management System</title>
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ \App\Models\Organization::first()->name ?? 'Aozora Education' }} - School Management System</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <style>
+    /* --- Reset & base --- */
+    :root{
+      --bg:#0f1724; /* deep navy */
+      --card:#0b1220;
+      --muted:#94a3b8;
+      --accent:#5eead4;
+      --glass: rgba(255,255,255,0.03);
+      --radius:16px;
+      --maxw:1100px;
+      --gap:24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, #071025 0%, #071226 45%, #071024 100%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding:32px 16px;
+      display:flex;
+      justify-content:center;
+    }
+    .wrap{width:100%;max-width:var(--maxw);}
+
+    /* --- Header --- */
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:36px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      text-decoration:none;
+      color:inherit;
+    }
+    .logo {
+      width:44px;height:44px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),#60a5fa);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#013;box-shadow:0 6px 18px rgba(0,0,0,0.45);
+    }
+    nav{display:flex;gap:14px;align-items:center}
+    nav a{color:var(--muted);text-decoration:none;font-size:14px;padding:8px 10px;border-radius:8px}
+    nav a.cta{
+      background:linear-gradient(90deg,#06b6d4,var(--accent));
+      color:#013;font-weight:600;
+      padding:8px 12px;
+      box-shadow:0 6px 14px rgba(5,150,136,0.12);
+    }
+
+    /* --- Hero --- */
+    .hero{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      padding:40px;
+      border-radius:var(--radius);
+      display:grid;
+      grid-template-columns:1fr 360px;
+      gap:var(--gap);
+      align-items:start;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      margin-bottom:28px;
+    }
+    .eyebrow{font-size:13px;color:var(--accent);font-weight:700;margin-bottom:10px}
+    h1{font-size:34px;margin:0 0 12px 0;line-height:1.05}
+    p.lead{color:var(--muted);margin:0 0 22px 0;max-width:70%}
+    .hero .actions{display:flex;gap:12px}
+    .btn{
+      padding:12px 18px;border-radius:12px;border:0;font-weight:700;cursor:pointer;
+      background:transparent;color:var(--accent);border:1px solid rgba(94,234,212,0.16);
+      backdrop-filter: blur(4px);
+    }
+    .btn.primary{
+      background:linear-gradient(90deg,#06b6d4,#60a5fa);
+      color:#013;border:0;
+      box-shadow:0 10px 28px rgba(6,182,212,0.12);
+    }
+    .hero-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.02));
+      padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    }
+    .stat{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+    .stat strong{font-size:20px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* --- Features grid --- */
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px}
+    .feature{
+      background:var(--glass);
+      padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+      min-height:120px;
+    }
+    .feature h3{margin:0 0 8px 0;font-size:16px}
+    .feature p{margin:0;color:var(--muted);font-size:14px}
+
+    /* --- Partners --- */
+    .partners{
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+      margin-bottom:28px;
+    }
+    .partner-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:center}
+    .partner{
+      height:44px;border-radius:8px;background:rgba(255,255,255,0.03);
+      display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    /* --- CTA / Form --- */
+    .subscribe{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .input{
+      background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:10px;color:inherit;
+    }
+
+    /* --- Footer --- */
+    footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin-top:20px}
+    footer a{color:var(--muted);text-decoration:none}
+
+    /* --- Responsiveness --- */
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr; padding:24px}
+      .features{grid-template-columns:repeat(2,1fr)}
+      .partner-grid{grid-template-columns:repeat(4,1fr)}
+      p.lead{max-width:100%}
+    }
+    @media (max-width:520px){
+      .features{grid-template-columns:1fr}
+      .partner-grid{grid-template-columns:repeat(2,1fr)}
+      header{flex-direction:column;align-items:flex-start;gap:16px}
+      .hero{padding:18px}
+      h1{font-size:24px}
+    }
+  </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-    <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo and Brand -->
-                <div class="flex items-center">
-                    @php
-                        $organization = \App\Models\Organization::first();
-                    @endphp
-                    @if($organization && $organization->logo)
-                        <img src="{{ Storage::url($organization->logo) }}" alt="{{ $organization->name }}" class="h-10 w-10 rounded-lg mr-3">
-                    @else
-                        <div class="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 1 1 0 00-.2-.38 1 1 0 00-.59-.29H9a1 1 0 100-2H4.72a1 1 0 00-.38.08l-1.04.317zM9 11a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"/>
-                            </svg>
-                        </div>
-                    @endif
-                    <div class="hidden sm:block">
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ $organization->name ?? 'Aozora Education' }}
-                        </h1>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            {{ $organization->short_name ?? 'School Management System' }}
-                        </p>
-                    </div>
-                    <div class="sm:hidden">
-                        <h1 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{ $organization->short_name ?? 'Aozora' }}
-                        </h1>
-                    </div>
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-4">
-                    @if (Route::has('login'))
-                        @auth
-                            @if(auth()->user()->hasRole('admin'))
-                                <a href="{{ route('admin.dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Admin Dashboard
-                                </a>
-                            @elseif(auth()->user()->hasRole('parent'))
-                                <a href="{{ route('parent.dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Parent Dashboard
-                                </a>
-                            @elseif(auth()->user()->hasRole('teacher'))
-                                <a href="{{ route('teacher.dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Teacher Dashboard
-                                </a>
-                            @elseif(auth()->user()->hasRole('student'))
-                                <a href="{{ route('student.dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Student Dashboard
-                                </a>
-                            @else
-                                <a href="{{ url('/dashboard') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Dashboard
-                                </a>
-                            @endif
-                        @else
-                            <a href="{{ route('login') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                Log in
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                    Register as Parent
-                                </a>
-                            @endif
-                        @endauth
-                    @endif
-                </div>
-                
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button id="mobileMenuButton" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:text-blue-600 dark:focus:text-blue-400">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#">
+        <div class="logo">
+          @php
+            $organization = \App\Models\Organization::first();
+          @endphp
+          {{ substr($organization->name ?? 'A', 0, 1) }}
         </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="md:hidden hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                @if (Route::has('login'))
-                    @auth
-                        @if(auth()->user()->hasRole('admin'))
-                            <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Admin Dashboard
-                            </a>
-                        @elseif(auth()->user()->hasRole('parent'))
-                            <a href="{{ route('parent.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Parent Dashboard
-                            </a>
-                        @elseif(auth()->user()->hasRole('teacher'))
-                            <a href="{{ route('teacher.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Teacher Dashboard
-                            </a>
-                        @elseif(auth()->user()->hasRole('student'))
-                            <a href="{{ route('student.dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Student Dashboard
-                            </a>
-                        @else
-                            <a href="{{ url('/dashboard') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Dashboard
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('login') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                            Log in
-                        </a>
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                                Register as Parent
-                            </a>
-                        @endif
-                    @endauth
-                @endif
-                <a href="#about" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                    About Us
-                </a>
-                <a href="#teachers" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                    Our Teachers
-                </a>
-                <a href="#contact" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md">
-                    Contact
-                </a>
-            </div>
+        <div>
+          <div style="font-weight:700">{{ $organization->name ?? 'Aozora Education' }}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">{{ $organization->short_name ?? 'School Management System' }}</div>
         </div>
-    </nav>
+      </a>
 
-    <!-- Hero Section -->
-    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 py-12 md:py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6 leading-tight">
-                    Welcome to {{ $organization->name ?? 'Aozora Education' }}
-                </h1>
-                <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
-                    {{ $organization->description ?? 'Empowering students through innovative education and comprehensive learning experiences. Our school management system provides seamless communication between teachers, parents, and students.' }}
-                </p>
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                    @if (Route::has('login') && !auth()->check())
-                        <a href="{{ route('login') }}" class="bg-blue-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center">
-                            Get Started
-                        </a>
-                    @endif
-                    <a href="#about" class="border border-blue-600 text-blue-600 dark:text-blue-400 px-6 sm:px-8 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-semibold text-center">
-                        Learn More
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+      <nav>
+        @if (Route::has('login'))
+          @auth
+            @if(auth()->user()->hasRole('admin'))
+              <a href="{{ route('admin.dashboard') }}">Admin Dashboard</a>
+            @elseif(auth()->user()->hasRole('parent'))
+              <a href="{{ route('parent.dashboard') }}">Parent Dashboard</a>
+            @elseif(auth()->user()->hasRole('teacher'))
+              <a href="{{ route('teacher.dashboard') }}">Teacher Dashboard</a>
+            @elseif(auth()->user()->hasRole('student'))
+              <a href="{{ route('student.dashboard') }}">Student Dashboard</a>
+            @else
+              <a href="{{ url('/dashboard') }}">Dashboard</a>
+            @endif
+          @else
+            <a href="{{ route('login') }}">Login</a>
+            @if (Route::has('register'))
+              <a class="cta" href="{{ route('register') }}">Register as Parent</a>
+            @endif
+          @endauth
+        @endif
+      </nav>
+    </header>
 
-    <!-- About Section -->
-    <section id="about" class="py-12 md:py-20 bg-white dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    About Our Institution
-                </h2>
-                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                    We are committed to providing quality education and fostering academic excellence in a supportive learning environment.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                <div class="text-center p-4 md:p-6">
-                    <div class="bg-blue-100 dark:bg-blue-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Academic Excellence</h3>
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">Comprehensive curriculum designed to challenge and inspire students to reach their full potential.</p>
-                </div>
-                
-                <div class="text-center p-4 md:p-6">
-                    <div class="bg-green-100 dark:bg-green-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 md:w-8 md:h-8 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Experienced Teachers</h3>
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">Our dedicated faculty brings years of experience and passion for teaching to every classroom.</p>
-                </div>
-                
-                <div class="text-center p-4 md:p-6 sm:col-span-2 lg:col-span-1">
-                    <div class="bg-purple-100 dark:bg-purple-900/30 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 md:w-8 md:h-8 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-white mb-2">Modern Technology</h3>
-                    <p class="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">State-of-the-art facilities and digital tools to enhance the learning experience.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <main>
+      <!-- HERO -->
+      <section class="hero" aria-label="hero">
+        <div>
+          <div class="eyebrow">School Management</div>
+          <h1>Sistem manajemen sekolah terintegrasi untuk pengalaman belajar yang lebih baik.</h1>
+          <p class="lead">Platform komprehensif untuk mengelola siswa, guru, jadwal, absensi, dan komunikasi antara sekolah, orang tua, dan siswa — fokuskan pada pendidikan, bukan administrasi.</p>
+          <div class="actions">
+            @if (Route::has('login') && !auth()->check())
+              <a href="{{ route('login') }}" class="btn primary">Masuk ke Sistem</a>
+            @endif
+            <a href="#features" class="btn">Pelajari Fitur</a>
+          </div>
 
-    <!-- Teachers Section -->
-    <section id="teachers" class="py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Meet Our Teachers
-                </h2>
-                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                    Our dedicated educators are committed to nurturing young minds and fostering a love for learning.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                @php
-                    $teachers = \App\Models\Teacher::with('user')->take(6)->get();
-                @endphp
-                
-                @forelse($teachers as $teacher)
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                        <div class="p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-4">
-                                    <span class="text-xl font-bold text-blue-600 dark:text-blue-400">
-                                        {{ substr($teacher->user->name, 0, 1) }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $teacher->user->name }}</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ $teacher->specialization ?? 'Teacher' }}</p>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                {{ $teacher->bio ?? 'Experienced educator dedicated to student success and academic excellence.' }}
-                            </p>
-                        </div>
-                    </div>
-                @empty
-                    <!-- Placeholder teachers -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-4">
-                                    <span class="text-xl font-bold text-blue-600 dark:text-blue-400">JD</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">John Doe</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Mathematics Teacher</p>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                Experienced mathematics teacher with 10+ years of experience in helping students excel in mathematics.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-4">
-                                    <span class="text-xl font-bold text-green-600 dark:text-green-400">JS</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Jane Smith</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Science Teacher</p>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                Passionate science educator dedicated to making complex scientific concepts accessible and engaging.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-4">
-                                    <span class="text-xl font-bold text-purple-600 dark:text-purple-400">MJ</span>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Mike Johnson</h3>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">English Teacher</p>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                Literature enthusiast and English teacher focused on developing strong communication skills in students.
-                            </p>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
+          <div style="margin-top:18px;color:var(--muted);font-size:13px">
+            <strong style="color:var(--accent)">Keunggulan:</strong>
+            <span style="margin-left:8px">Real-time — Terintegrasi — Mudah digunakan — Aman</span>
+          </div>
         </div>
-    </section>
 
-    <!-- Blog Section -->
-    <section class="py-12 md:py-20 bg-white dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Latest News & Articles
-                </h2>
-                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                    Stay updated with our latest news, educational insights, and school announcements.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                <!-- Blog Post 1 -->
-                <article class="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <div class="text-sm text-blue-600 dark:text-blue-400 font-semibold mb-2">Academic Excellence</div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                            New Academic Year Begins with Exciting Programs
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">
-                            We're thrilled to announce the start of our new academic year with enhanced programs and innovative teaching methods.
-                        </p>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">September 15, 2024</div>
-                    </div>
-                </article>
-                
-                <!-- Blog Post 2 -->
-                <article class="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="h-48 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <div class="text-sm text-green-600 dark:text-green-400 font-semibold mb-2">Student Life</div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                            Student Achievements and Recognition
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">
-                            Celebrating our students' outstanding achievements in academics, sports, and extracurricular activities.
-                        </p>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">September 10, 2024</div>
-                    </div>
-                </article>
-                
-                <!-- Blog Post 3 -->
-                <article class="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="h-48 bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <div class="text-sm text-purple-600 dark:text-purple-400 font-semibold mb-2">Technology</div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                            Digital Learning Platform Updates
-                        </h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">
-                            Our school management system has been updated with new features to enhance communication and learning.
-                        </p>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">September 5, 2024</div>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
+        <aside class="hero-card" aria-hidden="false">
+          <div class="stat"><div style="width:8px;height:8px;background:var(--accent);border-radius:50%"></div><div><strong>Data Terlindungi</strong><div class="muted">Keamanan tingkat enterprise</div></div></div>
+          <div class="stat"><div style="width:8px;height:8px;background:#60a5fa;border-radius:50%"></div><div><strong>Pengguna Aktif</strong><div class="muted">Guru, siswa, dan orang tua</div></div></div>
+          <div style="height:10px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-size:13px">Absensi: real-time tracking</div>
+            <div style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-size:13px">Komunikasi: instant messaging</div>
+          </div>
+        </aside>
+      </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Get in Touch
-                </h2>
-                <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                    We'd love to hear from you. Contact us for more information about our programs and enrollment.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-                <div>
-                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Contact Information</h3>
-                    @if($organization)
-                        <div class="space-y-4">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">{{ $organization->address ?? '123 Education Street, Learning City' }}</span>
-                            </div>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">{{ $organization->email ?? 'info@school.edu' }}</span>
-                            </div>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">{{ $organization->phone ?? '+1 (555) 123-4567' }}</span>
-                            </div>
-                        </div>
-                    @else
-                        <div class="space-y-4">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">123 Education Street, Learning City</span>
-                            </div>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">info@school.edu</span>
-                            </div>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                </svg>
-                                <span class="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</span>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-                
-                <div>
-                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Quick Links</h3>
-                    <div class="space-y-3">
-                        @if (Route::has('login'))
-                            @auth
-                                <a href="{{ url('/dashboard') }}" class="block text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                                    → Access Your Dashboard
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" class="block text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                                    → Login to Your Account
-                                </a>
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="block text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                                        → Register as Parent
-                                    </a>
-                                @endif
-                            @endauth
-                        @endif
-                        <a href="#about" class="block text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                            → Learn About Our Programs
-                        </a>
-                        <a href="#teachers" class="block text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
-                            → Meet Our Teachers
-                        </a>
-                    </div>
-                </div>
-            </div>
+      <!-- FEATURES -->
+      <section id="features" class="features" aria-label="features">
+        <div class="feature">
+          <h3>Manajemen Siswa</h3>
+          <p>Sistem terintegrasi untuk mengelola data siswa, enrollment, dan progress akademik dengan mudah dan efisien.</p>
         </div>
-    </section>
+        <div class="feature">
+          <h3>Absensi Digital</h3>
+          <p>Tracking kehadiran real-time dengan notifikasi otomatis ke orang tua dan laporan yang dapat diakses kapan saja.</p>
+        </div>
+        <div class="feature">
+          <h3>Komunikasi Terpadu</h3>
+          <p>Platform komunikasi antara guru, siswa, dan orang tua dengan fitur messaging, announcement, dan notifikasi.</p>
+        </div>
+      </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 dark:bg-gray-900 text-white py-8 md:py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">{{ $organization->name ?? 'Aozora Education' }}</h3>
-                    <p class="text-gray-400 mb-4">
-                        {{ $organization->description ?? 'Empowering students through innovative education and comprehensive learning experiences.' }}
-                    </p>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="#teachers" class="text-gray-400 hover:text-white transition-colors">Our Teachers</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
-                    <div class="space-y-2 text-gray-400">
-                        <p>{{ $organization->address ?? '123 Education Street' }}</p>
-                        <p>{{ $organization->email ?? 'info@school.edu' }}</p>
-                        <p>{{ $organization->phone ?? '+1 (555) 123-4567' }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; {{ date('Y') }} {{ $organization->name ?? 'Aozora Education' }}. All rights reserved.</p>
-            </div>
+      <!-- FEATURES -->
+      <section class="partners" aria-label="features">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700">Fitur Utama Sistem</div>
+          <div class="muted" style="font-size:13px">Semua yang dibutuhkan untuk manajemen sekolah</div>
         </div>
+
+        <div class="partner-grid">
+          <div class="partner">Manajemen User</div>
+          <div class="partner">Data Siswa</div>
+          <div class="partner">Data Guru</div>
+          <div class="partner">Data Orang Tua</div>
+          <div class="partner">Manajemen Mata Pelajaran</div>
+          <div class="partner">Jadwal Kelas</div>
+          <div class="partner">Absensi Digital</div>
+          <div class="partner">Invoice & Pembayaran</div>
+          <div class="partner">Enrollment Siswa</div>
+          <div class="partner">Role & Permission</div>
+          <div class="partner">Organisasi</div>
+          <div class="partner">Notifikasi</div>
+        </div>
+      </section>
+
+      <!-- SUBSCRIBE -->
+      <section style="display:flex;flex-direction:column;background:var(--glass);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);margin-bottom:18px">
+        <div style="font-weight:700">Tetap terupdate</div>
+        <div class="muted" style="margin-top:6px">Dapatkan informasi terbaru tentang sistem dan fitur baru.</div>
+        <div class="subscribe" role="form" aria-label="subscribe form">
+          <input class="input" placeholder="Email untuk notifikasi" aria-label="email" />
+          <button class="btn primary">Notify Me</button>
+        </div>
+      </section>
+    </main>
+
+    <footer style="margin-top: 40px; padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.1);">
+      <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; text-align: center;">
+        <div style="font-size: 14px; color: var(--muted);">
+          © {{ date('Y') }} {{ $organization->name ?? 'Aozora Education' }}. All rights reserved.
+        </div>
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center;">
+          <span style="font-size: 14px; color: var(--muted);">
+            Developed by <span style="font-weight: 600; color: var(--accent);">hermanspace.id</span>
+          </span>
+          <div style="display: flex; align-items: center; font-size: 14px; color: var(--muted);">
+            <span style="color: #ef4444; margin-right: 4px;">♥</span>
+            Made with love
+          </div>
+        </div>
+      </div>
     </footer>
-
-    <!-- Dark Mode Toggle -->
-    <button id="darkModeToggle" class="fixed bottom-4 right-4 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors">
-        <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-        </svg>
-        <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-        </svg>
-    </button>
-
-    <script>
-        // Mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobileMenuButton');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('#mobileMenu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
-                mobileMenu.classList.add('hidden');
-            }
-        });
-
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const sunIcon = document.getElementById('sunIcon');
-        const moonIcon = document.getElementById('moonIcon');
-
-        // Check for saved theme preference or default to light mode
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        if (currentTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
-
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                mobileMenu.classList.add('hidden');
-            }
-        });
-    </script>
+  </div>
 </body>
 </html>
