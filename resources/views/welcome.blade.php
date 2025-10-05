@@ -132,6 +132,12 @@
     footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin-top:20px}
     footer a{color:var(--muted);text-decoration:none}
 
+    /* --- Animations --- */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
     /* --- Responsiveness --- */
     @media (max-width:900px){
       .hero{grid-template-columns:1fr; padding:24px}
@@ -219,6 +225,101 @@
         </aside>
       </section>
 
+      <!-- SHOWCASE -->
+      <section style="background: var(--glass); padding: 40px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.03); margin-bottom: 28px; text-align: center;">
+        <div style="margin-bottom: 24px;">
+          <div class="eyebrow" style="margin-bottom: 12px;">Live Demo</div>
+          <h2 style="font-size: 28px; margin: 0 0 12px 0; line-height: 1.2;">Lihat Dashboard dalam Aksi</h2>
+          <p style="color: var(--muted); margin: 0; max-width: 600px; margin: 0 auto;">Antarmuka yang intuitif dan modern untuk orang tua, guru, dan admin. Kelola semua aspek sekolah dengan mudah dan efisien.</p>
+        </div>
+        
+        <div style="position: relative; max-width: 800px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, rgba(94,234,212,0.1), rgba(96,165,250,0.1)); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="background: #1a1a1a; border-radius: 12px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="width: 12px; height: 12px; background: #ff5f57; border-radius: 50%;"></div>
+                <div style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%;"></div>
+                <div style="width: 12px; height: 12px; background: #28ca42; border-radius: 50%;"></div>
+                <div style="flex: 1; text-align: center; color: var(--muted); font-size: 14px;">Parent Dashboard</div>
+              </div>
+              
+              <!-- Screenshot placeholder - replace with actual image -->
+              <div style="background: linear-gradient(135deg, #0f1724, #1e293b); border-radius: 8px; padding: 24px; min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                
+                <!-- Dashboard Preview Content -->
+                <div style="position: relative; z-index: 1; width: 100%; max-width: 600px;">
+                  <!-- Header -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 8px; height: 8px; background: var(--accent); border-radius: 50%;"></div>
+                      <div>
+                        <div style="font-size: 18px; font-weight: 700; color: #e6eef6;">Welcome Parent Test 01!</div>
+                        <div style="font-size: 12px; color: var(--muted);">Parent Dashboard • Sunday, 05 October 2025</div>
+                      </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 20px; font-size: 12px; color: var(--muted);">PT</div>
+                  </div>
+                  
+                  <!-- Stats Cards -->
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 16px; border-radius: 8px; text-align: center;">
+                      <div style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 4px;">2</div>
+                      <div style="font-size: 12px; color: rgba(255,255,255,0.8);">My Children</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 16px; border-radius: 8px; text-align: center;">
+                      <div style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 4px;">0</div>
+                      <div style="font-size: 12px; color: rgba(255,255,255,0.8);">Today's Classes</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); padding: 16px; border-radius: 8px; text-align: center;">
+                      <div style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 4px;">1</div>
+                      <div style="font-size: 12px; color: rgba(255,255,255,0.8);">Unpaid Invoices</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 16px; border-radius: 8px; text-align: center;">
+                      <div style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 4px;">0</div>
+                      <div style="font-size: 12px; color: rgba(255,255,255,0.8);">Messages</div>
+                    </div>
+                  </div>
+                  
+                  <!-- Student Card -->
+                  <div style="background: linear-gradient(135deg, rgba(94,234,212,0.1), rgba(96,165,250,0.1)); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                      <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--accent);">ST</div>
+                      <div>
+                        <div style="font-size: 16px; font-weight: 700; color: #e6eef6;">Student Test 01</div>
+                        <div style="font-size: 12px; color: var(--muted);">student2@test.com</div>
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px;">
+                      <div style="color: var(--muted);">Student ID: <span style="color: #e6eef6;">Not assigned</span></div>
+                      <div style="color: var(--muted);">Date of Birth: <span style="color: #e6eef6;">Feb 01, 2002</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Floating elements -->
+          <div style="position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite;"></div>
+          <div style="position: absolute; bottom: -10px; left: -10px; width: 16px; height: 16px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite 1s;"></div>
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted);">
+            <div style="width: 8px; height: 8px; background: var(--accent); border-radius: 50%;"></div>
+            <span>Real-time Dashboard</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted);">
+            <div style="width: 8px; height: 8px; background: #60a5fa; border-radius: 50%;"></div>
+            <span>Mobile Responsive</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted);">
+            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+            <span>Dark Mode Support</span>
+          </div>
+        </div>
+      </section>
+
       <!-- FEATURES -->
       <section id="features" class="features" aria-label="features">
         <div class="feature">
@@ -250,7 +351,7 @@
           <div class="partner">Manajemen Mata Pelajaran</div>
           <div class="partner">Jadwal Kelas</div>
           <div class="partner">Absensi Digital</div>
-          <div class="partner">Invoice & Pembayaran</div>
+          <div class="partner">Invoice & Pembayaran</fdiv>
           <div class="partner">Enrollment Siswa</div>
           <div class="partner">Role & Permission</div>
           <div class="partner">Organisasi</div>
