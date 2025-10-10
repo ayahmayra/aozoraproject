@@ -34,8 +34,8 @@
     }
     
     # Laravel specific - block sensitive paths
+    # Note: /storage/* is NOT blocked - it's for uploaded files
     @disallowed {
-        path /storage/*
         path /.env*
         path /.git/*
         path /vendor/*
