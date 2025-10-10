@@ -119,10 +119,12 @@ FRANKENPHP_NUM_WORKERS=2
 ENVEOF
     fi
     
-    # Ensure .env has correct permissions
-    chmod 644 .env 2>/dev/null || sudo chmod 644 .env || {
-        print_warning "Could not set .env permissions, but continuing..."
-    }
+    # Ensure .env has correct permissions and ownership
+    if ! chmod 644 .env 2>/dev/null; then
+        print_warning "Setting permissions with sudo..."
+        sudo chmod 644 .env 2>/dev/null || true
+        sudo chown $(whoami):$(id -gn) .env 2>/dev/null || true
+    fi
     
     print_success ".env file created"
 }
@@ -249,17 +251,33 @@ start_services() {
 
 # Generate APP_KEY in container if needed
 generate_app_key_container() {
-    if ! grep -q "APP_KEY=base64:" .env; then
+    if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
         print_info "Generating APP_KEY..."
         
-        # Generate key locally if PHP available
+        # Try to generate with openssl locally
         if command -v openssl &> /dev/null; then
             APP_KEY="base64:$(openssl rand -base64 32)"
-            sed -i.bak "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" .env
-            rm -f .env.bak
-            print_success "APP_KEY generated: $APP_KEY"
+            
+            # Try to update .env with proper permission handling
+            if sed -i.bak "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" .env 2>/dev/null; then
+                rm -f .env.bak
+                print_success "APP_KEY generated locally: $APP_KEY"
+                return
+            elif sudo sed -i.bak "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" .env 2>/dev/null; then
+                sudo rm -f .env.bak
+                sudo chmod 644 .env
+                print_success "APP_KEY generated locally (with sudo): $APP_KEY"
+                return
+            fi
+        fi
+        
+        # Fallback: Generate in container
+        print_info "Generating APP_KEY in container..."
+        if docker compose exec -T app php artisan key:generate --force; then
+            print_success "APP_KEY generated in container"
         else
-            print_warning "openssl not found, will need manual key generation"
+            print_warning "Could not generate APP_KEY automatically"
+            print_warning "Please run manually: docker compose exec app php artisan key:generate"
         fi
     else
         print_info "APP_KEY already exists"
