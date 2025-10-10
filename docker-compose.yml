@@ -11,7 +11,7 @@ services:
       # - "${APP_PORT_SSL:-443}:443"
     volumes:
       - ./storage:/app/storage
-      - ./.env:/app/.env:ro
+      - ./.env:/app/.env
       # public/storage akan dibuat sebagai symlink oleh artisan storage:link
     environment:
       - APP_NAME=${APP_NAME}

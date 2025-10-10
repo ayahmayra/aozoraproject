@@ -156,6 +156,25 @@ generate_app_key() {
     print_warning "Will generate APP_KEY after containers start"
 }
 
+# Prepare storage directories
+prepare_storage() {
+    print_header "Preparing Storage Directories"
+    
+    print_info "Creating storage directories..."
+    mkdir -p storage/app/public \
+             storage/framework/cache \
+             storage/framework/sessions \
+             storage/framework/views \
+             storage/logs \
+             bootstrap/cache \
+             public/storage
+    
+    print_info "Setting permissions..."
+    chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+    
+    print_success "Storage directories prepared"
+}
+
 # Build Docker images
 build_images() {
     print_header "Building Docker Images"
@@ -200,9 +219,19 @@ start_services() {
 # Generate APP_KEY in container if needed
 generate_app_key_container() {
     if ! grep -q "APP_KEY=base64:" .env; then
-        print_info "Generating APP_KEY in container..."
-        docker compose exec -T app php artisan key:generate
-        print_success "APP_KEY generated"
+        print_info "Generating APP_KEY..."
+        
+        # Generate key locally if PHP available
+        if command -v openssl &> /dev/null; then
+            APP_KEY="base64:$(openssl rand -base64 32)"
+            sed -i.bak "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" .env
+            rm -f .env.bak
+            print_success "APP_KEY generated: $APP_KEY"
+        else
+            print_warning "openssl not found, will need manual key generation"
+        fi
+    else
+        print_info "APP_KEY already exists"
     fi
 }
 
@@ -329,6 +358,7 @@ main() {
     setup_env
     check_flux_credentials
     generate_app_key
+    prepare_storage
     build_images
     start_services
     generate_app_key_container
