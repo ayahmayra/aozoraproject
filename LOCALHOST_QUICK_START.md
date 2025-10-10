@@ -48,6 +48,16 @@ Test Accounts:
 
 ## 🔧 If You Encounter Errors
 
+### **Missing APP_KEY Error?**
+```bash
+# Complete fix
+docker compose down
+docker compose up -d
+sleep 15
+docker compose exec app php artisan key:generate --force
+docker compose exec app php artisan optimize:clear
+```
+
 ### **Permission Denied?**
 ```bash
 ./fix-permissions.sh
@@ -63,7 +73,7 @@ APP_URL=http://localhost:9000
 Then: `docker compose restart`
 
 ### **Other Issues?**
-See: `LOCALHOST_TROUBLESHOOTING.md`
+See: `LOCALHOST_TROUBLESHOOTING.md` or `QUICK_FIX.md`
 
 ---
 

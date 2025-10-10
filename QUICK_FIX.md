@@ -6,8 +6,32 @@ Common issues dan one-liner solutions.
 
 ## 🔑 Missing APP_KEY
 
+### Quick Fix (if .env already exists):
 ```bash
-docker compose exec app php artisan key:generate --force && docker compose exec app php artisan config:clear
+docker compose down && docker compose up -d && sleep 15 && docker compose exec app php artisan key:generate --force && docker compose exec app php artisan optimize:clear
+```
+
+### Complete Fix (if .env not mounted):
+```bash
+# 1. Ensure .env exists
+ls -la .env || cp .env.example .env
+
+# 2. Fix permissions
+chmod 644 .env
+
+# 3. Restart to re-mount
+docker compose down && docker compose up -d && sleep 15
+
+# 4. Generate key
+docker compose exec app php artisan key:generate --force
+
+# 5. Clear cache
+docker compose exec app php artisan config:clear && docker compose exec app php artisan cache:clear
+```
+
+### Verify:
+```bash
+grep "APP_KEY=" .env && curl -I http://localhost:8080
 ```
 
 ---

@@ -67,38 +67,144 @@ Note: `public/storage` akan dibuat otomatis sebagai symlink oleh `artisan storag
 ## ❌ Error: Missing App Key
 
 ### **Problem: `MissingAppKeyException - No application encryption key`**
-
-**Solution 1 - Generate in Container:**
 ```bash
+file_get_contents(/app/.env): Failed to open stream: No such file or directory
+```
+
+**Root Cause:** `.env` file tidak ter-mount ke container atau APP_KEY kosong.
+
+---
+
+### **Complete Solution (Recommended):**
+
+**Step 1: Verify & Create .env**
+```bash
+# Check if .env exists
+ls -la .env
+
+# If NOT exist, create it from example
+cp .env.example .env
+
+# OR create manually if .env.example doesn't exist:
+cat > .env << 'EOF'
+APP_NAME="Aozora Education"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=aozora_local
+DB_USERNAME=aozora_user
+DB_PASSWORD=aozora_password123
+DB_ROOT_PASSWORD=root_password123
+
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+REDIS_HOST=redis
+REDIS_PASSWORD=redis_password123
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_FROM_ADDRESS=noreply@localhost
+MAIL_FROM_NAME="${APP_NAME}"
+
+FRANKENPHP_NUM_THREADS=4
+FRANKENPHP_NUM_WORKERS=2
+EOF
+```
+
+**Step 2: Fix Permissions**
+```bash
+chmod 644 .env
+```
+
+**Step 3: Restart Containers (Re-mount .env)**
+```bash
+docker compose down
+docker compose up -d
+sleep 15
+```
+
+**Step 4: Verify & Generate Key**
+```bash
+# Verify .env is mounted
+docker compose exec app ls -la /app/.env
+
+# Generate APP_KEY
 docker compose exec app php artisan key:generate --force
+
+# Clear all caches
 docker compose exec app php artisan config:clear
 docker compose exec app php artisan cache:clear
 ```
 
-**Solution 2 - Restart Containers:**
+**Step 5: Test Application**
 ```bash
-# Sometimes .env mount fails
+curl -I http://localhost:8080
+# Should return: HTTP/1.1 200 OK
+```
+
+---
+
+### **Quick One-Liner Solution:**
+```bash
+docker compose down && docker compose up -d && sleep 15 && docker compose exec app php artisan key:generate --force && docker compose exec app php artisan optimize:clear && echo "✅ Done! Test: curl http://localhost:8080"
+```
+
+---
+
+### **Alternative Solutions:**
+
+**Solution A - If .env Already Exists:**
+```bash
 docker compose down
 docker compose up -d
 sleep 15
 docker compose exec app php artisan key:generate --force
+docker compose exec app php artisan config:clear
 ```
 
-**Solution 3 - Manual Generation:**
+**Solution B - Manual APP_KEY Generation:**
 ```bash
-# Generate locally with openssl
+# Generate key with openssl
 APP_KEY="base64:$(openssl rand -base64 32)"
 echo "APP_KEY=$APP_KEY"
 
-# Update .env manually, then:
+# Edit .env and add the key
+nano .env
+# or
+echo "APP_KEY=$APP_KEY" >> .env
+
+# Restart
 docker compose restart app
 ```
 
-**Verification:**
+**Solution C - Using Helper Script:**
 ```bash
-grep "APP_KEY=" .env  # Should show base64:...
-docker compose exec app php artisan config:clear
-curl http://localhost:8080  # Should work now
+./fix-permissions.sh
+docker compose down
+docker compose up -d
+sleep 20
+docker compose exec app php artisan key:generate --force
+```
+
+---
+
+### **Verification:**
+```bash
+# Check APP_KEY in .env
+grep "APP_KEY=" .env  # Should show: APP_KEY=base64:...
+
+# Check in container
+docker compose exec app php artisan tinker --execute="echo config('app.key');"
+
+# Test application
+curl http://localhost:8080  # Should return HTML
 ```
 
 ---
