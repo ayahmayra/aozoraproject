@@ -93,13 +93,16 @@ generate_app_key() {
         return
     fi
     
-    if command -v php &> /dev/null && [ -f "artisan" ]; then
+    # Check if vendor exists
+    if [ -d "vendor" ] && command -v php &> /dev/null; then
         print_info "Generating APP_KEY with PHP..."
-        php artisan key:generate
-        print_success "APP_KEY generated"
-    else
-        print_warning "PHP not found locally, will generate after containers start"
+        if php artisan key:generate 2>/dev/null; then
+            print_success "APP_KEY generated"
+            return
+        fi
     fi
+    
+    print_warning "Will generate APP_KEY after containers start"
 }
 
 # Build Docker images
