@@ -61,25 +61,50 @@ setup_env() {
     fi
     
     print_info "Creating .env file from .env.example..."
-    cp .env.example .env
     
-    # Set localhost defaults
-    sed -i.bak 's/APP_ENV=production/APP_ENV=local/' .env
-    sed -i.bak 's/APP_DEBUG=false/APP_DEBUG=true/' .env
-    sed -i.bak 's|APP_URL=.*|APP_URL=http://localhost|' .env
-    sed -i.bak 's/DB_DATABASE=.*/DB_DATABASE=aozora_local/' .env
-    sed -i.bak 's/FRANKENPHP_NUM_THREADS=4/FRANKENPHP_NUM_THREADS=2/' .env
-    sed -i.bak 's/FRANKENPHP_NUM_WORKERS=2/FRANKENPHP_NUM_WORKERS=2/' .env
-    
-    # Add FrankenPHP settings if not exist
-    if ! grep -q "FRANKENPHP_NUM_THREADS" .env; then
-        echo "" >> .env
-        echo "# FrankenPHP Worker Mode" >> .env
-        echo "FRANKENPHP_NUM_THREADS=2" >> .env
-        echo "FRANKENPHP_NUM_WORKERS=2" >> .env
+    # Create .env directly to avoid permission issues
+    if [ -f .env.example ]; then
+        cat .env.example > .env || {
+            print_error "Failed to create .env file"
+            exit 1
+        }
+    else
+        # If .env.example doesn't exist, create minimal .env
+        cat > .env << 'ENVEOF'
+APP_NAME="Aozora Education"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=aozora_local
+DB_USERNAME=aozora_user
+DB_PASSWORD=aozora_password123
+DB_ROOT_PASSWORD=root_password123
+
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+REDIS_HOST=redis
+REDIS_PASSWORD=redis_password123
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=noreply@localhost
+MAIL_FROM_NAME="${APP_NAME}"
+
+FRANKENPHP_NUM_THREADS=4
+FRANKENPHP_NUM_WORKERS=2
+ENVEOF
     fi
-    
-    rm -f .env.bak
     
     print_success ".env file created"
 }
