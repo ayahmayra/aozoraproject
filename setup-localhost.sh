@@ -77,13 +77,23 @@ setup_env() {
     
     # Create .env directly to avoid permission issues
     if [ -f .env.example ]; then
-        cp .env.example .env || {
-            print_error "Failed to create .env file"
-            exit 1
-        }
+        # Try normal copy first
+        if ! cp .env.example .env 2>/dev/null; then
+            print_warning "Need elevated permissions to create .env..."
+            # Try with sudo, then fix ownership
+            if sudo cp .env.example .env; then
+                sudo chown $(whoami):$(id -gn) .env
+                print_info "Created .env with sudo and fixed ownership"
+            else
+                print_error "Failed to create .env file"
+                exit 1
+            fi
+        fi
     else
         # If .env.example doesn't exist, create minimal .env
-        cat > .env << 'ENVEOF'
+        print_info ".env.example not found, creating default .env..."
+        
+        if cat > .env << 'ENVEOF' 2>/dev/null
 APP_NAME="Aozora Education"
 APP_ENV=local
 APP_KEY=
@@ -117,6 +127,48 @@ MAIL_FROM_NAME="${APP_NAME}"
 FRANKENPHP_NUM_THREADS=4
 FRANKENPHP_NUM_WORKERS=2
 ENVEOF
+        then
+            print_info "Default .env created successfully"
+        else
+            # Try with sudo
+            print_warning "Need elevated permissions to create .env..."
+            sudo tee .env > /dev/null << 'ENVEOF'
+APP_NAME="Aozora Education"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=aozora_local
+DB_USERNAME=aozora_user
+DB_PASSWORD=aozora_password123
+DB_ROOT_PASSWORD=root_password123
+
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+REDIS_HOST=redis
+REDIS_PASSWORD=redis_password123
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=noreply@localhost
+MAIL_FROM_NAME="${APP_NAME}"
+
+FRANKENPHP_NUM_THREADS=4
+FRANKENPHP_NUM_WORKERS=2
+ENVEOF
+            sudo chown $(whoami):$(id -gn) .env
+            print_info "Created .env with sudo and fixed ownership"
+        fi
     fi
     
     # Ensure .env has correct permissions and ownership

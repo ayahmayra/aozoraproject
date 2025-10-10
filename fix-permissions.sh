@@ -23,12 +23,25 @@ CURRENT_GROUP=$(id -gn)
 echo -e "${YELLOW}ℹ️  Current user: $CURRENT_USER:$CURRENT_GROUP${NC}"
 echo ""
 
+# Fix current directory ownership
+echo -e "${YELLOW}ℹ️  Fixing current directory ownership...${NC}"
+sudo chown $CURRENT_USER:$CURRENT_GROUP . 2>/dev/null || true
+echo -e "${GREEN}✅ Current directory ownership fixed${NC}"
+
 # Fix .env permissions
 if [ -f .env ]; then
     echo -e "${YELLOW}ℹ️  Fixing .env permissions...${NC}"
     sudo chown $CURRENT_USER:$CURRENT_GROUP .env 2>/dev/null || true
     sudo chmod 644 .env 2>/dev/null || chmod 644 .env
     echo -e "${GREEN}✅ .env permissions fixed${NC}"
+fi
+
+# Fix .env.example permissions
+if [ -f .env.example ]; then
+    echo -e "${YELLOW}ℹ️  Fixing .env.example permissions...${NC}"
+    sudo chown $CURRENT_USER:$CURRENT_GROUP .env.example 2>/dev/null || true
+    sudo chmod 644 .env.example 2>/dev/null || chmod 644 .env.example
+    echo -e "${GREEN}✅ .env.example permissions fixed${NC}"
 fi
 
 # Fix storage permissions
