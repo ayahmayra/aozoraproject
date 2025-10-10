@@ -84,6 +84,29 @@ setup_env() {
     print_success ".env file created"
 }
 
+# Check Flux Pro credentials
+check_flux_credentials() {
+    print_header "Checking Flux Pro Credentials"
+    
+    if [ ! -f "auth.json" ]; then
+        print_warning "auth.json not found!"
+        echo ""
+        print_info "Flux Pro requires authentication credentials."
+        echo ""
+        read -p "Do you want to setup Flux Pro credentials now? (y/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            ./setup-flux-credentials.sh
+        else
+            print_warning "Skipping Flux Pro setup. Build may fail."
+            print_info "You can setup later with: ./setup-flux-credentials.sh"
+        fi
+    else
+        print_success "auth.json found"
+        print_info "Email: $(grep username auth.json | cut -d'"' -f4)"
+    fi
+}
+
 # Generate APP_KEY
 generate_app_key() {
     print_header "Generating Application Key"
@@ -276,6 +299,7 @@ main() {
     
     check_docker
     setup_env
+    check_flux_credentials
     generate_app_key
     build_images
     start_services

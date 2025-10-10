@@ -32,14 +32,28 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy existing application directory
+# Copy composer files first
+COPY composer.json composer.lock /app/
+
+# Copy auth.json for Flux Pro authentication
+COPY auth.json /app/auth.json
+
+# Setup Composer authentication for Flux Pro
+RUN mkdir -p /root/.composer && \
+    cp /app/auth.json /root/.composer/auth.json && \
+    echo "✅ Auth.json copied to Composer home" && \
+    cat /root/.composer/auth.json
+
+# Install PHP dependencies with detailed error output
+RUN composer diagnose && \
+    composer install --no-dev --optimize-autoloader --no-interaction -vvv 2>&1 | tee /tmp/composer-install.log || \
+    (echo "❌ Composer install failed. Last 50 lines of log:" && tail -50 /tmp/composer-install.log && exit 1)
+
+# Copy rest of application
 COPY . /app
 
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /app
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Install Node dependencies and build assets
 RUN npm ci && npm run build
