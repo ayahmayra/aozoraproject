@@ -60,11 +60,14 @@ setup_env() {
         fi
     fi
     
-    print_info "Creating .env file from .env.example..."
+    print_info "Creating .env file..."
+    
+    # Remove any existing .env file first
+    rm -f .env 2>/dev/null || sudo rm -f .env 2>/dev/null || true
     
     # Create .env directly to avoid permission issues
     if [ -f .env.example ]; then
-        cat .env.example > .env || {
+        cat .env.example | tee .env > /dev/null || {
             print_error "Failed to create .env file"
             exit 1
         }
