@@ -4,6 +4,17 @@
 
 ---
 
+## 🔍 Choose Your Setup Path
+
+**📌 Already have Nginx Proxy Manager?**  
+→ Quick path: [`NPM_QUICK_SETUP.md`](NPM_QUICK_SETUP.md) (5 minutes)  
+→ Detailed: Continue below and follow **Option B** at each step
+
+**📌 Fresh server without existing web server?**  
+→ Continue below and follow **Option A** at each step
+
+---
+
 ## 📋 Prerequisites Checklist
 
 Sebelum mulai, pastikan Anda memiliki:
@@ -13,7 +24,19 @@ Sebelum mulai, pastikan Anda memiliki:
 - ✅ **DNS Access** - Akses untuk mengubah DNS records
 - ✅ **Server Access** - SSH access ke server (root atau sudo user)
 - ✅ **Flux Pro License** - Email dan license key dari https://fluxui.dev
-- ✅ **Email untuk SSL** - Email untuk Let's Encrypt certificate notifications
+
+### **Setup Options:**
+
+**Option A: Direct Setup (Ports 80/443)**
+- Server tidak ada web server/proxy lain
+- FrankenPHP langsung handle SSL
+- Email untuk Let's Encrypt SSL
+
+**Option B: With Nginx Proxy Manager (Recommended if NPM already installed) ⭐**
+- Server sudah ada Nginx Proxy Manager
+- NPM handle SSL (ports 80/443)
+- Aozora runs on custom port (8080)
+- Follow: [`NGINX_PROXY_MANAGER_SETUP.md`](NGINX_PROXY_MANAGER_SETUP.md)
 
 ---
 
@@ -214,7 +237,11 @@ cp .env.example .env
 nano .env
 ```
 
-**Configure these REQUIRED values:**
+**Choose configuration based on your setup:**
+
+---
+
+#### **Option A: Direct Setup (No Proxy)**
 
 ```env
 # ============================================
@@ -234,8 +261,8 @@ DB_HOST=db
 DB_PORT=3306
 DB_DATABASE=aozora_production
 DB_USERNAME=aozora_prod_user
-DB_PASSWORD=CHANGE_THIS_STRONG_DB_PASSWORD_123!
-DB_ROOT_PASSWORD=CHANGE_THIS_STRONG_ROOT_PASSWORD_456!
+DB_PASSWORD=AOZORADBPASS2025
+DB_ROOT_PASSWORD=AZORADBROOTPASS2025!
 
 # ============================================
 # CACHE & SESSION
@@ -248,7 +275,7 @@ QUEUE_CONNECTION=redis
 # REDIS
 # ============================================
 REDIS_HOST=redis
-REDIS_PASSWORD=CHANGE_THIS_STRONG_REDIS_PASSWORD_789!
+REDIS_PASSWORD=AOZORAREDISPASS2025!
 REDIS_PORT=6379
 
 # ============================================
@@ -278,6 +305,80 @@ APP_PORT=80
 APP_PORT_SSL=443
 ```
 
+---
+
+#### **Option B: With Nginx Proxy Manager ⭐**
+
+```env
+# ============================================
+# APPLICATION
+# ============================================
+APP_NAME="Your School Name"
+APP_ENV=production
+APP_KEY=                      # Leave empty, will be generated
+APP_DEBUG=false               # IMPORTANT: Set to false!
+APP_URL=https://your-domain.com    # Public URL (NO PORT!)
+
+# ============================================
+# DATABASE
+# ============================================
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=aozora_production
+DB_USERNAME=aozora_prod_user
+DB_PASSWORD=AOZORADBPASS2025
+DB_ROOT_PASSWORD=AZORADBROOTPASS2025!
+
+# ============================================
+# CACHE & SESSION
+# ============================================
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+# ============================================
+# REDIS
+# ============================================
+REDIS_HOST=redis
+REDIS_PASSWORD=AOZORAREDISPASS2025!
+REDIS_PORT=6379
+
+# ============================================
+# MAIL (Configure your mail service)
+# ============================================
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_username
+MAIL_ENCRYPTION=tls
+MAIL_PASSWORD=your_password
+MAIL_FROM_ADDRESS=noreply@your-domain.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# ============================================
+# FRANKENPHP (Worker Mode)
+# ============================================
+FRANKENPHP_NUM_THREADS=8      # Adjust based on CPU cores
+FRANKENPHP_NUM_WORKERS=4      # Usually: cores / 2
+
+# ============================================
+# SERVER (NPM Setup)
+# ============================================
+SERVER_NAME=:80                    # Internal container port
+LETS_ENCRYPT_EMAIL=                # Leave empty (NPM handles SSL)
+APP_PORT=8080                      # External port mapping
+APP_PORT_SSL=8443                  # Not used with NPM
+```
+
+**⚠️ Key Differences for NPM:**
+- `APP_URL` = Public URL without port (https://your-domain.com)
+- `SERVER_NAME` = `:80` (container listens on 80 internally)
+- `APP_PORT` = `8080` (Docker maps to this external port)
+- `LETS_ENCRYPT_EMAIL` = Empty (NPM handles SSL)
+
+---
+
 **⚠️ SECURITY: Change all passwords!**
 - DB_PASSWORD
 - DB_ROOT_PASSWORD  
@@ -288,6 +389,12 @@ APP_PORT_SSL=443
 ---
 
 ### **4.3 Update Caddyfile for Production**
+
+**Choose based on your setup:**
+
+---
+
+#### **Option A: Direct Setup (No Proxy)**
 
 ```bash
 # Backup original
@@ -312,6 +419,37 @@ nano Caddyfile
 ```
 
 Make sure `email` matches your `.env` `LETS_ENCRYPT_EMAIL`.
+
+---
+
+#### **Option B: With Nginx Proxy Manager ⭐**
+
+```bash
+# Backup original
+cp Caddyfile Caddyfile.backup
+
+# Use NPM-specific Caddyfile
+cp Caddyfile.npm Caddyfile
+
+# Or run automated script
+chmod +x setup-npm.sh
+./setup-npm.sh
+# Script will guide you through NPM setup
+```
+
+**Verify Caddyfile content:**
+```caddyfile
+{
+    # No email - NPM handles SSL
+    auto_https off
+}
+
+:80 {
+    # Container listens on :80 internally
+    # Docker maps to 8080 externally
+    # ... rest of config
+}
+```
 
 **✅ Checkpoint:** Environment configured.
 
@@ -469,11 +607,16 @@ docker compose logs redis --tail=50
 
 ### **6.2 Test HTTP/HTTPS Access**
 
+#### **Option A: Direct Setup**
+
 ```bash
 # From server
 curl -I http://localhost
 
 # Should return: HTTP/1.1 200 OK
+
+# Test HTTPS
+curl -I https://your-domain.com
 ```
 
 **From browser:**
@@ -481,7 +624,28 @@ curl -I http://localhost
 https://your-domain.com
 ```
 
-**Expected:**
+---
+
+#### **Option B: With NPM**
+
+```bash
+# Test internal access
+curl -I http://localhost:8080
+
+# Should return: HTTP/1.1 200 OK
+```
+
+**From browser (via NPM):**
+```
+https://your-domain.com
+```
+
+**⚠️ If using NPM, you need to configure NPM first!**  
+See: [Step 6.5: Configure Nginx Proxy Manager](#65-configure-nginx-proxy-manager-npm-users-only)
+
+---
+
+**Expected (both options):**
 - ✅ HTTPS (SSL) working (green padlock)
 - ✅ Login page loads
 - ✅ No certificate errors
@@ -518,6 +682,105 @@ docker compose exec app curl -I https://your-domain.com
 - Expires in ~90 days
 
 **✅ Checkpoint:** Application accessible via HTTPS!
+
+---
+
+### **6.5 Configure Nginx Proxy Manager (NPM Users Only)**
+
+**Skip this if using Direct Setup (Option A).**
+
+If you're using Nginx Proxy Manager, follow these steps:
+
+---
+
+#### **Step 1: Login to NPM**
+
+```
+http://your-server-ip:81
+```
+
+**Default credentials:**
+```
+Email: admin@example.com
+Password: changeme
+```
+
+**⚠️ Change password after first login!**
+
+---
+
+#### **Step 2: Add Proxy Host**
+
+1. Go to: `Hosts` → `Proxy Hosts` → `Add Proxy Host`
+
+2. **Details Tab:**
+   ```
+   Domain Names: your-domain.com
+   
+   Scheme: http
+   Forward Hostname/IP: aozora-app
+                        (or: 172.17.0.1 or your server IP)
+   
+   Forward Port: 8080
+   
+   ☑ Cache Assets
+   ☑ Block Common Exploits
+   ☑ Websockets Support
+   ```
+
+3. **SSL Tab:**
+   ```
+   ☑ Request a new SSL Certificate
+   ☑ Force SSL
+   ☑ HTTP/2 Support
+   ☑ HSTS Enabled
+   
+   Email: your-email@example.com
+   
+   ☑ I Agree to Let's Encrypt ToS
+   ```
+
+4. **Advanced Tab (Optional):**
+   ```nginx
+   proxy_read_timeout 300;
+   proxy_connect_timeout 300;
+   proxy_send_timeout 300;
+   
+   proxy_set_header X-Real-IP $remote_addr;
+   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+   proxy_set_header X-Forwarded-Proto $scheme;
+   proxy_set_header X-Forwarded-Host $host;
+   
+   client_max_body_size 100M;
+   ```
+
+5. Click: `Save`
+
+---
+
+#### **Step 3: Verify NPM Setup**
+
+```bash
+# Test from browser
+# https://your-domain.com
+
+# Should show:
+# - Green padlock (SSL)
+# - Login page
+```
+
+**Troubleshooting:**
+- **502 Bad Gateway?** Try different Forward Hostname:
+  - `aozora-app` (container name)
+  - `172.17.0.1` (Docker bridge IP)
+  - Your server IP (e.g., `192.168.1.100`)
+
+- **SSL Failed?** Check DNS propagation:
+  ```bash
+  nslookup your-domain.com
+  ```
+
+**For detailed NPM setup:** [`NGINX_PROXY_MANAGER_SETUP.md`](NGINX_PROXY_MANAGER_SETUP.md)
 
 ---
 
@@ -685,7 +948,25 @@ Your production system is now running at:
 
 ## 🆘 Troubleshooting
 
-### **Issue: SSL Certificate Not Generated**
+### **Issue: Port 80 Already in Use**
+
+```bash
+# Check what's using port 80
+sudo netstat -tulpn | grep :80
+
+# If Apache/Nginx is running
+sudo systemctl stop apache2 nginx
+sudo systemctl disable apache2 nginx
+
+# Or if using NPM
+# Use custom port configuration (Option B)
+```
+
+**Solution:** See [`PRODUCTION_PORT_FIX.md`](PRODUCTION_PORT_FIX.md) or [`NPM_QUICK_SETUP.md`](NPM_QUICK_SETUP.md)
+
+---
+
+### **Issue: SSL Certificate Not Generated (Direct Setup)**
 
 ```bash
 # Check Caddy logs
@@ -700,6 +981,30 @@ docker compose restart app
 
 ---
 
+### **Issue: 502 Bad Gateway (NPM Users)**
+
+**Cause:** NPM can't reach container
+
+**Solutions:**
+
+```bash
+# Check container is running
+docker compose ps
+
+# Test internal access
+curl -I http://localhost:8080
+
+# Check container IP
+docker inspect aozora-app | grep IPAddress
+```
+
+**In NPM, try different Forward Hostname:**
+- `aozora-app` (container name)
+- `172.17.0.1` (Docker bridge IP)
+- Server IP (e.g., `192.168.1.100`)
+
+---
+
 ### **Issue: Container Keeps Restarting**
 
 ```bash
@@ -710,6 +1015,19 @@ docker compose logs app --tail=100
 # - APP_KEY not set
 # - Database connection failed
 # - Permission issues
+# - Port conflict
+```
+
+**Fix:**
+```bash
+# Generate APP_KEY if missing
+docker compose exec app php artisan key:generate --force
+
+# Check database connection
+docker compose ps db
+
+# Fix permissions
+docker compose exec app chmod -R 775 /app/storage /app/bootstrap/cache
 ```
 
 ---
@@ -718,13 +1036,16 @@ docker compose logs app --tail=100
 
 ```bash
 # Check if ports are open
-sudo netstat -tulpn | grep -E '80|443'
+sudo netstat -tulpn | grep -E '80|443|8080'
 
 # Check firewall
 sudo ufw status
 
 # Check DNS
 nslookup your-domain.com
+
+# For NPM users, check NPM is running
+docker ps | grep nginxproxymanager
 ```
 
 ---
@@ -740,6 +1061,10 @@ docker compose logs db --tail=50
 
 # Verify credentials in .env
 cat .env | grep DB_
+
+# Test connection from app container
+docker compose exec app php artisan tinker
+# DB::connection()->getPdo();
 ```
 
 ---
@@ -771,10 +1096,17 @@ cat .env | grep DB_
 
 ## 🔗 Related Documentation
 
+### **Nginx Proxy Manager Setup:**
+- **Quick Setup:** [`NPM_QUICK_SETUP.md`](NPM_QUICK_SETUP.md) ⚡
+- **Full NPM Guide:** [`NGINX_PROXY_MANAGER_SETUP.md`](NGINX_PROXY_MANAGER_SETUP.md)
+- **Port Conflict Fix:** [`PRODUCTION_PORT_FIX.md`](PRODUCTION_PORT_FIX.md)
+
+### **General Deployment:**
 - **Update Guide:** [`UPDATE_GUIDE.md`](UPDATE_GUIDE.md)
 - **Domain Setup Details:** [`DOMAIN_SETUP.md`](DOMAIN_SETUP.md)
 - **Full Deployment Guide:** [`DEPLOYMENT.md`](DEPLOYMENT.md)
 - **Performance Tuning:** [`PERFORMANCE.md`](PERFORMANCE.md)
+- **Troubleshooting:** [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md)
 
 ---
 

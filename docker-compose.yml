@@ -55,7 +55,7 @@ services:
       start_period: 40s
 
   db:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: aozora-db
     restart: unless-stopped
     ports:
