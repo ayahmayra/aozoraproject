@@ -31,12 +31,16 @@ Modern school management system built with Laravel, Livewire, and FrankenPHP.
 
 ## 📚 Documentation
 
-### **Deployment Guides:**
+### **Localhost Deployment:**
 - ⭐ [`QUICK_START.md`](QUICK_START.md) - **Start here!** Tested installation in 3 steps
 - 🚀 [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md) - Alternative localhost guide
 - 🔧 [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md) - Solutions untuk common issues
 - ⚡ [`QUICK_FIX.md`](QUICK_FIX.md) - One-liner quick fixes
-- 📦 [`DEPLOYMENT.md`](DEPLOYMENT.md) - Full production deployment guide
+
+### **Production Deployment:**
+- 🚀 [`PRODUCTION_INSTALLATION.md`](PRODUCTION_INSTALLATION.md) - **Complete production guide**
+- ✅ [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md) - Deployment checklist
+- 📦 [`DEPLOYMENT.md`](DEPLOYMENT.md) - Full deployment reference
 - 🌐 [`DOMAIN_SETUP.md`](DOMAIN_SETUP.md) - Domain & DNS configuration
 - 🚀 [`QUICK_START_PRODUCTION.md`](QUICK_START_PRODUCTION.md) - Quick production setup
 
@@ -238,10 +242,11 @@ Proprietary - All rights reserved.
 
 | Document | Purpose |
 |----------|---------|
-| [`QUICK_START.md`](QUICK_START.md) | ⭐ **START HERE** - Tested installation |
+| [`QUICK_START.md`](QUICK_START.md) | ⭐ **Localhost** - Start here |
+| [`PRODUCTION_INSTALLATION.md`](PRODUCTION_INSTALLATION.md) | 🚀 **Production** - Step-by-step |
+| [`PRODUCTION_QUICKREF.md`](PRODUCTION_QUICKREF.md) | 📄 Production quick reference |
 | [`QUICK_FIX.md`](QUICK_FIX.md) | 🔧 Quick solutions |
 | [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md) | 🐛 Detailed troubleshooting |
-| [`DEPLOYMENT.md`](DEPLOYMENT.md) | 🌐 Production deployment |
 | [`PERFORMANCE.md`](PERFORMANCE.md) | ⚡ Performance tuning |
 | [`UPDATE_GUIDE.md`](UPDATE_GUIDE.md) | 🔄 How to update |
 | [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md) | 📚 All documentation |

@@ -31,7 +31,10 @@ Complete guide to all documentation files in this project.
 │   └── fix-permissions.sh ................... Permission fix utility
 │
 ├── 🚀 Production Deployment
-│   ├── DEPLOYMENT.md ........................ Full deployment guide
+│   ├── PRODUCTION_INSTALLATION.md ........... ⭐ Complete step-by-step guide
+│   ├── PRODUCTION_CHECKLIST.md .............. Deployment checklist
+│   ├── PRODUCTION_QUICKREF.md ............... One-page quick reference
+│   ├── DEPLOYMENT.md ........................ Full deployment reference
 │   ├── DOMAIN_SETUP.md ...................... Domain & DNS configuration
 │   ├── QUICK_START_PRODUCTION.md ............ Quick production setup
 │   └── README_DEPLOYMENT.md ................. Deployment overview
@@ -75,6 +78,8 @@ Complete guide to all documentation files in this project.
 - Permission problems → Run `./fix-permissions.sh`
 
 #### **🚀 Deploy to Production**
+- **Step-by-step production guide** → [`PRODUCTION_INSTALLATION.md`](PRODUCTION_INSTALLATION.md) ⭐ **Start here!**
+- Quick checklist → [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md)
 - Complete deployment guide → [`DEPLOYMENT.md`](DEPLOYMENT.md)
 - Setup domain & SSL → [`DOMAIN_SETUP.md`](DOMAIN_SETUP.md)
 - Quick production start → [`QUICK_START_PRODUCTION.md`](QUICK_START_PRODUCTION.md)
@@ -149,10 +154,11 @@ Complete guide to all documentation files in this project.
 4. **Optimize:** [`PERFORMANCE.md`](PERFORMANCE.md)
 
 ### **For DevOps:**
-1. Overview: [`README_DEPLOYMENT.md`](README_DEPLOYMENT.md)
-2. Deploy: [`DEPLOYMENT.md`](DEPLOYMENT.md)
-3. Configure: [`DOMAIN_SETUP.md`](DOMAIN_SETUP.md)
-4. Maintain: [`UPDATE_GUIDE.md`](UPDATE_GUIDE.md)
+1. **Production Setup:** [`PRODUCTION_INSTALLATION.md`](PRODUCTION_INSTALLATION.md) ⭐ **Start here!**
+2. **Checklist:** [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md)
+3. **Configure Domain:** [`DOMAIN_SETUP.md`](DOMAIN_SETUP.md)
+4. **Maintain & Update:** [`UPDATE_GUIDE.md`](UPDATE_GUIDE.md)
+5. **Reference:** [`DEPLOYMENT.md`](DEPLOYMENT.md)
 
 ### **For Quick Fixes:**
 1. Common issues: [`QUICK_FIX.md`](QUICK_FIX.md)
