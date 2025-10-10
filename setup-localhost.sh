@@ -62,12 +62,22 @@ setup_env() {
     
     print_info "Creating .env file..."
     
-    # Remove any existing .env file first
-    rm -f .env 2>/dev/null || sudo rm -f .env 2>/dev/null || true
+    # Remove any existing .env file first (dengan permission handling)
+    if [ -f .env ]; then
+        if rm -f .env 2>/dev/null; then
+            print_info "Removed existing .env"
+        else
+            print_warning "Need sudo to remove existing .env..."
+            sudo rm -f .env || {
+                print_error "Cannot remove existing .env file"
+                exit 1
+            }
+        fi
+    fi
     
     # Create .env directly to avoid permission issues
     if [ -f .env.example ]; then
-        cat .env.example | tee .env > /dev/null || {
+        cp .env.example .env || {
             print_error "Failed to create .env file"
             exit 1
         }
@@ -108,6 +118,11 @@ FRANKENPHP_NUM_THREADS=4
 FRANKENPHP_NUM_WORKERS=2
 ENVEOF
     fi
+    
+    # Ensure .env has correct permissions
+    chmod 644 .env 2>/dev/null || sudo chmod 644 .env || {
+        print_warning "Could not set .env permissions, but continuing..."
+    }
     
     print_success ".env file created"
 }
