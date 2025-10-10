@@ -59,9 +59,12 @@ RUN mkdir -p /app/storage/logs \
     /app/storage/framework/views \
     /app/bootstrap/cache
 
+# Remove any existing public/storage (akan dibuat ulang sebagai symlink)
+RUN rm -rf /app/public/storage 2>/dev/null || true
+
 # Set permissions
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-RUN chmod -R 775 /app/storage /app/bootstrap/cache
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/public
+RUN chmod -R 775 /app/storage /app/bootstrap/cache /app/public
 
 # Expose port
 EXPOSE 80 443

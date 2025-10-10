@@ -176,16 +176,32 @@ prepare_storage() {
     print_header "Preparing Storage Directories"
     
     print_info "Creating storage directories..."
+    
+    # Create storage directories (skip public/storage, akan dibuat oleh artisan storage:link)
     mkdir -p storage/app/public \
              storage/framework/cache \
              storage/framework/sessions \
              storage/framework/views \
              storage/logs \
-             bootstrap/cache \
-             public/storage
+             bootstrap/cache 2>/dev/null || {
+        print_warning "Some directories exist, checking permissions..."
+    }
+    
+    # Remove existing public/storage jika ada (symlink lama)
+    if [ -e public/storage ]; then
+        print_info "Removing existing public/storage..."
+        rm -rf public/storage 2>/dev/null || sudo rm -rf public/storage 2>/dev/null || {
+            print_warning "Could not remove public/storage, will try in container"
+        }
+    fi
     
     print_info "Setting permissions..."
-    chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+    chmod -R 777 storage bootstrap/cache 2>/dev/null || {
+        print_warning "Could not set all permissions, trying with sudo..."
+        sudo chmod -R 777 storage bootstrap/cache 2>/dev/null || {
+            print_warning "Some permission issues, will be fixed in container"
+        }
+    }
     
     print_success "Storage directories prepared"
 }
@@ -275,11 +291,19 @@ init_database() {
 create_storage_link() {
     print_header "Creating Storage Link"
     
+    # Force remove existing link first (di container)
+    docker compose exec -T app rm -rf /app/public/storage 2>/dev/null || true
+    
+    # Create fresh symlink
     if docker compose exec -T app php artisan storage:link; then
         print_success "Storage link created"
     else
-        print_warning "Storage link already exists"
+        print_warning "Storage link creation failed, but continuing..."
     fi
+    
+    # Set proper permissions in container
+    print_info "Setting storage permissions in container..."
+    docker compose exec -T app chmod -R 777 /app/storage /app/bootstrap/cache 2>/dev/null || true
 }
 
 # Optimize application
