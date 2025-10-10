@@ -32,23 +32,19 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy composer files first
-COPY composer.json composer.lock /app/
-
 # Copy auth.json for Flux Pro authentication
 COPY auth.json /app/auth.json
 
 # Setup Composer authentication for Flux Pro
 RUN mkdir -p /root/.composer && \
     cp /app/auth.json /root/.composer/auth.json && \
-    echo "✅ Auth.json copied to Composer home" && \
-    cat /root/.composer/auth.json
+    echo "✅ Auth.json copied to Composer home"
 
-# Install PHP dependencies (simplified for debugging)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --verbose
-
-# Copy rest of application
+# Copy entire application first (needed for artisan commands)
 COPY . /app
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy existing application directory permissions
 RUN chown -R www-data:www-data /app
