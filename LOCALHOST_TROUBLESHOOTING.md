@@ -64,6 +64,45 @@ Note: `public/storage` akan dibuat otomatis sebagai symlink oleh `artisan storag
 
 ---
 
+## ❌ Error: Missing App Key
+
+### **Problem: `MissingAppKeyException - No application encryption key`**
+
+**Solution 1 - Generate in Container:**
+```bash
+docker compose exec app php artisan key:generate --force
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan cache:clear
+```
+
+**Solution 2 - Restart Containers:**
+```bash
+# Sometimes .env mount fails
+docker compose down
+docker compose up -d
+sleep 15
+docker compose exec app php artisan key:generate --force
+```
+
+**Solution 3 - Manual Generation:**
+```bash
+# Generate locally with openssl
+APP_KEY="base64:$(openssl rand -base64 32)"
+echo "APP_KEY=$APP_KEY"
+
+# Update .env manually, then:
+docker compose restart app
+```
+
+**Verification:**
+```bash
+grep "APP_KEY=" .env  # Should show base64:...
+docker compose exec app php artisan config:clear
+curl http://localhost:8080  # Should work now
+```
+
+---
+
 ## ❌ Error: Docker Build Failed (Composer)
 
 ### **Problem: `livewire/flux-pro` authentication**

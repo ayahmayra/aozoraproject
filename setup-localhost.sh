@@ -279,6 +279,12 @@ build_images() {
 start_services() {
     print_header "Starting Services"
     
+    # Ensure .env exists before starting
+    if [ ! -f .env ]; then
+        print_error ".env file not found! Run setup_env first."
+        exit 1
+    fi
+    
     print_info "Starting containers..."
     
     if docker compose up -d; then
@@ -298,6 +304,15 @@ start_services() {
         print_error "Some services failed to start"
         docker compose ps
         exit 1
+    fi
+    
+    # Verify .env is mounted in container
+    if docker compose exec -T app test -f /app/.env 2>/dev/null; then
+        print_success ".env successfully mounted in container"
+    else
+        print_warning ".env not found in container, restarting..."
+        docker compose restart app
+        sleep 10
     fi
 }
 
@@ -327,6 +342,10 @@ generate_app_key_container() {
         print_info "Generating APP_KEY in container..."
         if docker compose exec -T app php artisan key:generate --force; then
             print_success "APP_KEY generated in container"
+            
+            # Clear config cache to reload new key
+            docker compose exec -T app php artisan config:clear 2>/dev/null || true
+            docker compose exec -T app php artisan cache:clear 2>/dev/null || true
         else
             print_warning "Could not generate APP_KEY automatically"
             print_warning "Please run manually: docker compose exec app php artisan key:generate"
