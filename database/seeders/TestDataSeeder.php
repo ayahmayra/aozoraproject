@@ -101,7 +101,6 @@ class TestDataSeeder extends Seeder
                 'gender' => 'male',
                 'phone' => '+6281234567893',
                 'address' => 'Jl. Teacher No. 456, Jakarta',
-                'subject_specialization' => 'Mathematics',
                 'education_level' => 'Bachelor',
                 'institution' => 'University of Example',
                 'graduation_year' => 2008,
