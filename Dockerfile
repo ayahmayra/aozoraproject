@@ -44,10 +44,8 @@ RUN mkdir -p /root/.composer && \
     echo "✅ Auth.json copied to Composer home" && \
     cat /root/.composer/auth.json
 
-# Install PHP dependencies with detailed error output
-RUN composer diagnose && \
-    composer install --no-dev --optimize-autoloader --no-interaction -vvv 2>&1 | tee /tmp/composer-install.log || \
-    (echo "❌ Composer install failed. Last 50 lines of log:" && tail -50 /tmp/composer-install.log && exit 1)
+# Install PHP dependencies (simplified for debugging)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --verbose
 
 # Copy rest of application
 COPY . /app
