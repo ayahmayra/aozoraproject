@@ -52,14 +52,12 @@ class TestDataSeeder extends Seeder
         // Create student profile
         Student::create([
             'user_id' => $studentUser->id,
-            'student_number' => 'STU001',
+            'parent_id' => $parentUser->id,
+            'student_id' => 'STU001',
             'date_of_birth' => '2010-03-20',
             'gender' => 'female',
             'phone' => '+6281234567892',
             'address' => 'Jl. Contoh No. 123, Jakarta',
-            'parent_name' => 'John Parent',
-            'parent_phone' => '+6281234567890',
-            'parent_address' => 'Jl. Contoh No. 123, Jakarta',
             'school_origin' => 'SD Example',
             'medical_notes' => 'No allergies',
             'notes' => 'Good student',

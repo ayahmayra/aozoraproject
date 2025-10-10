@@ -351,7 +351,7 @@
           <div class="partner">Manajemen Mata Pelajaran</div>
           <div class="partner">Jadwal Kelas</div>
           <div class="partner">Absensi Digital</div>
-          <div class="partner">Invoice & Pembayaran</fdiv>
+          <div class="partner">Invoice & Pembayaran</div>
           <div class="partner">Enrollment Siswa</div>
           <div class="partner">Role & Permission</div>
           <div class="partner">Organisasi</div>
