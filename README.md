@@ -8,9 +8,10 @@ Modern school management system built with Laravel, Livewire, and FrankenPHP.
 
 ### **3 Simple Steps:**
 
-1. **Setup Flux Pro Credentials**
+1. **Clone Repository**
    ```bash
-   ./setup-flux-credentials.sh
+   git clone https://github.com/ayahmayra/aozoraproject.git
+   cd aozoraproject
    ```
 
 2. **Run Setup Script**
@@ -24,14 +25,15 @@ Modern school management system built with Laravel, Livewire, and FrankenPHP.
    Admin: admin@school.com / password
    ```
 
-**Full guide:** [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md)
+**Full guide:** [`QUICK_START.md`](QUICK_START.md) ⭐ **Start here!**
 
 ---
 
 ## 📚 Documentation
 
 ### **Deployment Guides:**
-- 🚀 [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md) - Deploy di localhost dalam 3 langkah
+- ⭐ [`QUICK_START.md`](QUICK_START.md) - **Start here!** Tested installation in 3 steps
+- 🚀 [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md) - Alternative localhost guide
 - 🔧 [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md) - Solutions untuk common issues
 - ⚡ [`QUICK_FIX.md`](QUICK_FIX.md) - One-liner quick fixes
 - 📦 [`DEPLOYMENT.md`](DEPLOYMENT.md) - Full production deployment guide
@@ -236,16 +238,17 @@ Proprietary - All rights reserved.
 
 | Document | Purpose |
 |----------|---------|
-| [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md) | ⚡ Start here for localhost |
+| [`QUICK_START.md`](QUICK_START.md) | ⭐ **START HERE** - Tested installation |
 | [`QUICK_FIX.md`](QUICK_FIX.md) | 🔧 Quick solutions |
 | [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md) | 🐛 Detailed troubleshooting |
 | [`DEPLOYMENT.md`](DEPLOYMENT.md) | 🌐 Production deployment |
 | [`PERFORMANCE.md`](PERFORMANCE.md) | ⚡ Performance tuning |
 | [`UPDATE_GUIDE.md`](UPDATE_GUIDE.md) | 🔄 How to update |
+| [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md) | 📚 All documentation |
 
 ---
 
 **Built with ❤️ for Modern Education Management**
 
-🌟 **Ready to start?** → [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md)
+🌟 **Ready to start?** → [`QUICK_START.md`](QUICK_START.md)
 

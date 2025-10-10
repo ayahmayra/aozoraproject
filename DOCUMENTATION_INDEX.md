@@ -8,8 +8,9 @@ Complete guide to all documentation files in this project.
 
 **New to the project?** Start with these:
 
-1. 📖 **[README.md](README.md)** - Project overview & quick links
-2. 🚀 **[LOCALHOST_QUICK_START.md](LOCALHOST_QUICK_START.md)** - Deploy in 3 steps
+1. ⭐ **[QUICK_START.md](QUICK_START.md)** - **Tested installation in 3 steps** (Start here!)
+2. 📖 **[README.md](README.md)** - Project overview & quick links
+3. 🚀 **[LOCALHOST_QUICK_START.md](LOCALHOST_QUICK_START.md)** - Alternative guide
 
 ---
 
@@ -19,8 +20,9 @@ Complete guide to all documentation files in this project.
 📁 Aozora Education System
 │
 ├── 🏠 Getting Started
+│   ├── QUICK_START.md ....................... ⭐ START HERE - Tested installation
 │   ├── README.md ............................ Project overview & quick links
-│   ├── LOCALHOST_QUICK_START.md ............. 3-step localhost deployment
+│   ├── LOCALHOST_QUICK_START.md ............. Alternative localhost guide
 │   └── QUICK_FIX.md ......................... One-liner solutions
 │
 ├── 🐛 Troubleshooting
@@ -62,7 +64,8 @@ Complete guide to all documentation files in this project.
 ### **I want to...**
 
 #### **🏁 Get Started**
-- Deploy on localhost → [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md)
+- **Install for the first time** → [`QUICK_START.md`](QUICK_START.md) ⭐ **Start here!**
+- Deploy on localhost (alternative) → [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md)
 - Deploy to production → [`QUICK_START_PRODUCTION.md`](QUICK_START_PRODUCTION.md)
 - Understand the project → [`README.md`](README.md)
 
@@ -140,10 +143,10 @@ Complete guide to all documentation files in this project.
 ## 🎓 Learning Path
 
 ### **For Developers:**
-1. Start: [`README.md`](README.md)
-2. Setup: [`LOCALHOST_QUICK_START.md`](LOCALHOST_QUICK_START.md)
-3. Troubleshoot: [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md)
-4. Optimize: [`PERFORMANCE.md`](PERFORMANCE.md)
+1. **Start:** [`QUICK_START.md`](QUICK_START.md) ⭐ **Begin here!**
+2. **Troubleshoot:** [`LOCALHOST_TROUBLESHOOTING.md`](LOCALHOST_TROUBLESHOOTING.md)
+3. **Quick Fixes:** [`QUICK_FIX.md`](QUICK_FIX.md)
+4. **Optimize:** [`PERFORMANCE.md`](PERFORMANCE.md)
 
 ### **For DevOps:**
 1. Overview: [`README_DEPLOYMENT.md`](README_DEPLOYMENT.md)
