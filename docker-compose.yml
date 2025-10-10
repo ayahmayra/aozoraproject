@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -9,7 +7,8 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-80}:80"
-      - "${APP_PORT_SSL:-443}:443"
+      # Port 443 disabled untuk localhost (uncomment untuk production)
+      # - "${APP_PORT_SSL:-443}:443"
     volumes:
       - ./storage:/app/storage
       - ./public/storage:/app/public/storage
