@@ -1,7 +1,7 @@
 {
     frankenphp {
         # Worker mode for maximum performance (10x+ faster!)
-        # Disable for development/debugging by using Caddyfile.standard
+        # Threads MUST be > Workers (e.g., threads=4, workers=2)
         num_threads {$FRANKENPHP_NUM_THREADS:4}
         worker {
             file /app/public/frankenphp-worker.php
