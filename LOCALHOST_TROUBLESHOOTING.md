@@ -64,6 +64,89 @@ Note: `public/storage` akan dibuat otomatis sebagai symlink oleh `artisan storag
 
 ---
 
+## ❌ Error: Flux Pro Credentials Permission Denied
+
+### **Problem: `auth.json: Permission denied` when running setup-flux-credentials.sh**
+```bash
+./setup-flux-credentials.sh: line 55: auth.json: Permission denied
+```
+
+**Root Cause:** File `auth.json` sudah ada dan dimiliki oleh user lain (biasanya root) dari run sebelumnya dengan `sudo`.
+
+---
+
+### **Complete Solution:**
+
+**Step 1: Remove existing auth.json**
+```bash
+sudo rm -f auth.json
+```
+
+**Step 2: Run setup script again**
+```bash
+./setup-flux-credentials.sh
+```
+
+**Step 3: Enter credentials**
+- Email: Your Flux Pro email
+- License Key: Your Flux Pro license key
+
+**Note:** Script sudah diupdate untuk otomatis handle permission issues dengan sudo fallback.
+
+---
+
+### **Manual Solution (if script still fails):**
+
+**Create auth.json manually:**
+```bash
+# Create file with sudo
+sudo tee auth.json > /dev/null << 'EOF'
+{
+    "http-basic": {
+        "composer.fluxui.dev": {
+            "username": "your-email@example.com",
+            "password": "your-license-key"
+        }
+    }
+}
+EOF
+
+# Fix ownership
+sudo chown $(whoami):$(id -gn) auth.json
+chmod 644 auth.json
+
+# Verify
+cat auth.json
+```
+
+**Replace placeholders:**
+- `your-email@example.com` → Your Flux Pro email
+- `your-license-key` → Your Flux Pro license key
+
+---
+
+### **Get Your Flux Pro Credentials:**
+
+1. Go to: https://fluxui.dev
+2. Login to your account
+3. Navigate to: **Account → Licenses**
+4. Copy your license key
+
+---
+
+### **Verification:**
+
+```bash
+# Check file exists and readable
+ls -la auth.json
+cat auth.json
+
+# Test with Docker build
+docker compose build app
+```
+
+---
+
 ## ❌ Error: Missing App Key
 
 ### **Problem: `MissingAppKeyException - No application encryption key`**

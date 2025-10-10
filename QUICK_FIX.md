@@ -38,8 +38,24 @@ grep "APP_KEY=" .env && curl -I http://localhost:8080
 
 ## 📁 Permission Denied
 
+### General fix:
 ```bash
 ./fix-permissions.sh
+```
+
+### For auth.json (Flux Pro credentials):
+```bash
+sudo rm -f auth.json && ./setup-flux-credentials.sh
+```
+
+### For .env file:
+```bash
+sudo chown $(whoami):$(id -gn) .env && chmod 644 .env
+```
+
+### For storage:
+```bash
+sudo chmod -R 775 storage bootstrap/cache
 ```
 
 ---

@@ -51,8 +51,8 @@ if [ -z "$FLUX_EMAIL" ] || [ -z "$FLUX_KEY" ]; then
     exit 1
 fi
 
-# Create auth.json
-cat > auth.json << EOF
+# Create auth.json with permission handling
+AUTH_JSON_CONTENT=$(cat << EOF
 {
     "http-basic": {
         "composer.fluxui.dev": {
@@ -62,8 +62,29 @@ cat > auth.json << EOF
     }
 }
 EOF
+)
 
-print_success "auth.json created successfully!"
+# Try to write auth.json
+if ! echo "$AUTH_JSON_CONTENT" > auth.json 2>/dev/null; then
+    print_warning "Permission denied, trying with sudo..."
+    
+    # Remove existing file if owned by root
+    if [ -f "auth.json" ]; then
+        sudo rm -f auth.json
+    fi
+    
+    # Write with sudo
+    echo "$AUTH_JSON_CONTENT" | sudo tee auth.json > /dev/null
+    
+    # Fix ownership
+    sudo chown $(whoami):$(id -gn) auth.json
+    sudo chmod 644 auth.json
+    
+    print_success "auth.json created successfully (with sudo)!"
+else
+    chmod 644 auth.json
+    print_success "auth.json created successfully!"
+fi
 echo ""
 cat auth.json
 echo ""
