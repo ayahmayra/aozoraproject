@@ -26,3 +26,12 @@ yarn-error.log
 /backups
 *.sql
 *.sql.gz
+
+# Environment templates (KEEP IN REPO - these are templates!)
+# .env.local
+# .env.docker
+# .env.production
+
+# Active environment and backups (DO NOT commit - user specific!)
+.env.backup
+.env.*.backup
