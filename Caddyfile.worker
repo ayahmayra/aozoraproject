@@ -1,0 +1,92 @@
+{
+    frankenphp {
+        # Worker mode untuk performa maksimal
+        num_threads 4
+        worker {
+            file /app/public/frankenphp-worker.php
+            num 2
+            env APP_ENV production
+        }
+    }
+    order php_server before file_server
+}
+
+:80 {
+    root * /app/public
+    encode gzip zstd
+    
+    # PHP Server dengan worker mode
+    php_server
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+        -X-Powered-By
+    }
+    
+    # Laravel specific
+    @disallowed {
+        path /storage/*
+        path /.env*
+        path /.git/*
+        path /vendor/*
+        path /node_modules/*
+        path /*.md
+    }
+    respond @disallowed 404
+    
+    # Static files caching
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.webp
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    
+    file_server
+}
+
+:443 {
+    root * /app/public
+    encode gzip zstd
+    
+    # PHP Server dengan worker mode
+    php_server
+    
+    tls internal
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        -Server
+        -X-Powered-By
+    }
+    
+    # Laravel specific
+    @disallowed {
+        path /storage/*
+        path /.env*
+        path /.git/*
+        path /vendor/*
+        path /node_modules/*
+    }
+    respond @disallowed 404
+    
+    # Static files caching
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot *.webp
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    
+    file_server
+}
+

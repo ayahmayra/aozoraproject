@@ -1,0 +1,65 @@
+{
+    frankenphp
+    order php_server before file_server
+}
+
+:80 {
+    root * /app/public
+    encode gzip
+    
+    # Standard PHP server (no worker mode)
+    php_server
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+        -X-Powered-By
+    }
+    
+    # Laravel specific
+    @disallowed {
+        path /storage/*
+        path /.env*
+        path /.git/*
+        path /vendor/*
+    }
+    respond @disallowed 404
+    
+    file_server
+}
+
+:443 {
+    root * /app/public
+    encode gzip
+    
+    # Standard PHP server (no worker mode)
+    php_server
+    
+    tls internal
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+        -X-Powered-By
+    }
+    
+    # Laravel specific
+    @disallowed {
+        path /storage/*
+        path /.env*
+        path /.git/*
+    }
+    respond @disallowed 404
+    
+    file_server
+}
+

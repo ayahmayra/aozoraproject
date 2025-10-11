@@ -1,0 +1,62 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/testing/.gitignore
+!/storage/framework/views/.gitignore
+.env
+.env.backup
+.env.production
+.env.*.example
+.phpunit.result.cache
+
+# IMPORTANT: Include auth.json for Flux Pro authentication
+!auth.json
+
+# Build artifacts
+/public/hot
+/public/build
+/public/storage
+/vendor
+
+# Tests
+tests/
+.phpunit.cache
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+

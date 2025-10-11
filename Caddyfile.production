@@ -1,0 +1,80 @@
+{
+    frankenphp {
+        # Worker mode - keeps Laravel in memory for 10x+ performance boost
+        num_threads {$FRANKENPHP_NUM_THREADS:4}
+        worker {
+            file /app/public/frankenphp-worker.php
+            num {$FRANKENPHP_NUM_WORKERS:2}
+            env APP_ENV {$APP_ENV:production}
+        }
+    }
+    order php_server before file_server
+    
+    # Email untuk Let's Encrypt
+    email admin@yourdomain.com
+}
+
+# HTTP (akan auto-redirect ke HTTPS)
+http://yourdomain.com, http://www.yourdomain.com {
+    redir https://yourdomain.com{uri} permanent
+}
+
+# HTTPS - Domain utama
+https://yourdomain.com, https://www.yourdomain.com {
+    root * /app/public
+    encode gzip zstd
+    
+    # PHP Server
+    php_server
+    
+    # Security Headers
+    header {
+        # Security
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        
+        # Remove server info
+        -Server
+        -X-Powered-By
+    }
+    
+    # Laravel specific - block sensitive paths
+    # Note: /storage/* is NOT blocked - it's for uploaded files
+    @disallowed {
+        path /.env*
+        path /.git/*
+        path /vendor/*
+        path /node_modules/*
+        path /*.md
+        path /composer.*
+        path /package.*
+    }
+    respond @disallowed 404
+    
+    # Handle static files
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    
+    # Logging
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+    
+    file_server
+}
+
+# Subdomain example (jika butuh)
+# https://admin.yourdomain.com {
+#     root * /app/public
+#     encode gzip zstd
+#     php_server
+# }
+

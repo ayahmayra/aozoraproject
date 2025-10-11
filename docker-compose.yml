@@ -1,0 +1,164 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aozora-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+      # Port 443 disabled untuk localhost (uncomment untuk production)
+      # - "${APP_PORT_SSL:-443}:443"
+    volumes:
+      - ./storage:/app/storage
+      - ./.env:/app/.env
+      # public/storage akan dibuat sebagai symlink oleh artisan storage:link
+    environment:
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_URL=${APP_URL}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=6379
+      - MAIL_MAILER=${MAIL_MAILER}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+      - MAIL_FROM_NAME="${MAIL_FROM_NAME}"
+      # FrankenPHP Worker Mode
+      - FRANKENPHP_NUM_THREADS=${FRANKENPHP_NUM_THREADS:-4}
+      - FRANKENPHP_NUM_WORKERS=${FRANKENPHP_NUM_WORKERS:-2}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - aozora-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: mysql:5.7
+    container_name: aozora-db
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - aozora-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aozora-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - aozora-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aozora-queue
+    restart: unless-stopped
+    command: php artisan queue:work --tries=3 --timeout=60
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - db
+      - redis
+    networks:
+      - aozora-network
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aozora-scheduler
+    restart: unless-stopped
+    command: >
+      sh -c "while true; do
+        php artisan schedule:run >> /dev/null 2>&1
+        sleep 60
+      done"
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      - APP_NAME=${APP_NAME}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - aozora-network
+
+volumes:
+  db-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  aozora-network:
+    driver: bridge
+
