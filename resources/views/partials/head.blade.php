@@ -3,9 +3,20 @@
 
 <title>{{ $title ?? config('app.name') }}</title>
 
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+@php
+    $organization = \App\Models\Organization::first();
+    $favicon = $organization && $organization->favicon 
+        ? \Illuminate\Support\Facades\Storage::url($organization->favicon)
+        : '/favicon.ico';
+    
+    // For apple-touch-icon, use organization logo or default
+    $appleTouchIcon = $organization && $organization->logo
+        ? \Illuminate\Support\Facades\Storage::url($organization->logo)
+        : '/apple-touch-icon.png';
+@endphp
+
+<link rel="icon" href="{{ $favicon }}" sizes="any">
+<link rel="apple-touch-icon" href="{{ $appleTouchIcon }}">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

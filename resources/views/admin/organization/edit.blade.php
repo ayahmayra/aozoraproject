@@ -121,14 +121,24 @@
                                     <flux:label>Logo</flux:label>
                                     <flux:input type="file" name="logo" accept="image/*" />
                                     @if($organization->logo)
-                                        <p class="text-sm text-gray-500 mt-1">Current: {{ $organization->logo }}</p>
+                                        <div class="mt-2">
+                                            <p class="text-sm text-gray-500 mb-1">Current logo:</p>
+                                            <img src="{{ Storage::url($organization->logo) }}" 
+                                                 alt="Organization Logo" 
+                                                 class="h-20 w-20 object-contain border border-gray-200 rounded p-2">
+                                        </div>
                                     @endif
                                 </div>
                                 <div>
-                                    <flux:label>Favicon</flux:label>
+                                    <flux:label>Favicon (recommended: 32x32px or 64x64px)</flux:label>
                                     <flux:input type="file" name="favicon" accept="image/*" />
                                     @if($organization->favicon)
-                                        <p class="text-sm text-gray-500 mt-1">Current: {{ $organization->favicon }}</p>
+                                        <div class="mt-2">
+                                            <p class="text-sm text-gray-500 mb-1">Current favicon:</p>
+                                            <img src="{{ Storage::url($organization->favicon) }}" 
+                                                 alt="Organization Favicon" 
+                                                 class="h-8 w-8 object-contain border border-gray-200 rounded p-1">
+                                        </div>
                                     @endif
                                 </div>
                             </div>
